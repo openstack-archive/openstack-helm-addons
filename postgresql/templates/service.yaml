@@ -12,26 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-HELM = helm
-TASK = build
-
-CHARTS = postgresql
-
-all: $(CHARTS)
-
-$(CHARTS):
-	@make $(TASK)-$@
-
-init-%:
-	@echo
-	@echo "===== Initializing $*"
-	if [ -f $*/Makefile ]; then make -C $*; fi
-	if [ -f $*/requirements.yaml ]; then helm dep up $*; fi
-
-lint-%: init-%
-	$(HELM) lint $*
-
-build-%: lint-%
-	$(HELM) package $*
-
-.PHONY: $(CHARTS)
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.service_name }}
+spec:
+  ports:
+    - name: db
+      port: {{ .Values.network.port.postgresql }}
+  selector:
+    app: {{ .Values.service_name }}
