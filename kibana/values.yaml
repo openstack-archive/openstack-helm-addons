@@ -1,0 +1,113 @@
+
+# Copyright 2017 The Openstack-Helm Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+labels:
+  node_selector_key:
+  node_selector_value:
+
+images:
+  kibana: 'docker.io/kolla/ubuntu-source-kibana:3.0.3'
+  pull_policy: IfNotPresent
+
+conf:
+  elasticsearch:
+    auth:
+      enabled: false
+      password: null
+      username: null
+    custom_headers: '{}'
+    ping_timeout: 1500
+    preserve_host: true
+    request_headers_whitelist: '[]'
+    request_timeout: 30000
+    shard_timeout: 0
+    ssl:
+      certificate: null
+      certificate_authorities: null
+      enabled: null
+      key: null
+    startup_timeout: 5000
+  il8n:
+    default_locale: en
+  kibana:
+    default_app_id: discover
+    index: .kibana
+  logging:
+    quiet: false
+    silent: false
+    verbose: false
+  ops:
+    interval: 5000
+  server:
+    host: 0.0.0.0
+    ssl:
+      certificate: null
+      enabled: false
+      key: null
+  override:
+  prefix:
+  append:
+
+endpoints:
+  log_database:
+    hosts:
+      default: elasticsearch-logging
+      public: elasticsearch
+    name: elasticsearch
+    path:
+      default: null
+    port:
+      client:
+        default: 9200
+    scheme:
+      default: http
+  log_dashboard:
+    hosts:
+      default: kibana-dash
+      public: kibana
+    name: kibana
+    path:
+      default: null
+    port:
+      dashboard:
+        default: 5601
+
+network:
+  kibana:
+    node_port:
+      enabled: false
+      port: 30905
+    port: 5601
+
+pod:
+  lifecycle:
+    upgrades:
+      deployments:
+        pod_replacement_strategy: RollingUpdate
+        revision_history: 3
+        rolling_update:
+          max_surge: 3
+          max_unavailable: 1
+  replicas:
+    kibana: 3
+  resources:
+    kibana:
+      enabled: false
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
