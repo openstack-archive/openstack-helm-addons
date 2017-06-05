@@ -34,6 +34,9 @@ kube_wait_for_pods kube-system 600
 helm install --name=elasticsearch local/elasticsearch --namespace=kube-system \
   --set conf.elasticsearch.bootstrap.memory_lock=false
 
+helm install --name=fluentd local/fluentd --namespace=kube-system
+
 kube_wait_for_pods kube-system 600
 
 helm_test_deployment elasticsearch kube-system
+helm_test_deployment fluentd kube-system
