@@ -1,3 +1,4 @@
+#!/bin/bash
 # Copyright 2017 The Openstack-Helm Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,26 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-HELM = helm
-TASK = build
+set -ex
+COMMAND="${@:-start}"
 
-CHARTS = elasticsearch helm-toolkit postgresql
+function start () {
+  exec /usr/share/elasticsearch/bin/elasticsearch
+}
 
-all: $(CHARTS)
+function stop () {
+  kill -TERM 1
+}
 
-$(CHARTS):
-	@make $(TASK)-$@
-
-init-%:
-	@echo
-	@echo "===== Initializing $*"
-	if [ -f $*/Makefile ]; then make -C $*; fi
-	if [ -f $*/requirements.yaml ]; then helm dep up $*; fi
-
-lint-%: init-%
-	$(HELM) lint $*
-
-build-%: lint-%
-	$(HELM) package $*
-
-.PHONY: $(CHARTS)
+$COMMAND
