@@ -12,26 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-HELM = helm
-TASK = build
+EXCLUDE := templates/* charts/* Chart.yaml requirement* values.yaml Makefile utils/* helm-toolkit/Chart.yaml
+SECRETS := $(shell find secrets -type f $(foreach e,$(EXCLUDE), -not -path "$(e)") )
 
-CHARTS = helm-toolkit postgresql
-
-all: $(CHARTS)
-
-$(CHARTS):
-	@make $(TASK)-$@
-
-init-%:
-	@echo
-	@echo "===== Initializing $*"
-	if [ -f $*/Makefile ]; then make -C $*; fi
-	if [ -f $*/requirements.yaml ]; then helm dep up $*; fi
-
-lint-%: init-%
-	$(HELM) lint $*
-
-build-%: lint-%
-	$(HELM) package $*
-
-.PHONY: $(CHARTS)
+templates/_secrets.tpl: Makefile $(SECRETS)
+	echo Generating $(CURDIR)/$@
+	rm -f $@
+	for i in $(SECRETS); do  printf '{{ define "'$$i'" }}' >> $@; cat $$i >> $@; printf "{{ end }}\n" >> $@; done

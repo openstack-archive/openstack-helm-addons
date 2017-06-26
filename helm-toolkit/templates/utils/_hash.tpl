@@ -12,26 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-HELM = helm
-TASK = build
-
-CHARTS = helm-toolkit postgresql
-
-all: $(CHARTS)
-
-$(CHARTS):
-	@make $(TASK)-$@
-
-init-%:
-	@echo
-	@echo "===== Initializing $*"
-	if [ -f $*/Makefile ]; then make -C $*; fi
-	if [ -f $*/requirements.yaml ]; then helm dep up $*; fi
-
-lint-%: init-%
-	$(HELM) lint $*
-
-build-%: lint-%
-	$(HELM) package $*
-
-.PHONY: $(CHARTS)
+{{- define "helm-toolkit.utils.hash" -}}
+{{- $name := index . 0 -}}
+{{- $context := index . 1 -}}
+{{- $last := base $context.Template.Name }}
+{{- $wtf := $context.Template.Name | replace $last $name -}}
+{{- include $wtf $context | sha256sum | quote -}}
+{{- end -}}

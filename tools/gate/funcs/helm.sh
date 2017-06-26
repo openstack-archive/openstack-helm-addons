@@ -69,6 +69,7 @@ function helm_serve {
 }
 
 function helm_lint {
+  make build-helm-toolkit -C ${WORK_DIR}
   make TASK=lint -C ${WORK_DIR}
 }
 

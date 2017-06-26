@@ -12,26 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-HELM = helm
-TASK = build
-
-CHARTS = helm-toolkit postgresql
-
-all: $(CHARTS)
-
-$(CHARTS):
-	@make $(TASK)-$@
-
-init-%:
-	@echo
-	@echo "===== Initializing $*"
-	if [ -f $*/Makefile ]; then make -C $*; fi
-	if [ -f $*/requirements.yaml ]; then helm dep up $*; fi
-
-lint-%: init-%
-	$(HELM) lint $*
-
-build-%: lint-%
-	$(HELM) package $*
-
-.PHONY: $(CHARTS)
+{{- define "helm-toolkit.utils.comma_joined_hostname_list" -}}
+{{- $deps := index . 0 -}}
+{{- $envAll := index . 1 -}}
+{{- range $k, $v := $deps -}}{{- if $k -}},{{- end -}}{{ tuple $v.service $v.endpoint $envAll | include "helm-toolkit.endpoints.hostname_endpoint_lookup" }}{{- end -}}
+{{- end -}}

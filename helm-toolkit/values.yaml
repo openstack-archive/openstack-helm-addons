@@ -12,26 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-HELM = helm
-TASK = build
+# Default values for utils.
+# This is a YAML-formatted file.
+# Declare name/value pairs to be passed into your templates.
+# name: value
 
-CHARTS = helm-toolkit postgresql
+global:
+  region: cluster
+  tld: local
 
-all: $(CHARTS)
+endpoints:
+  fqdn: null
 
-$(CHARTS):
-	@make $(TASK)-$@
-
-init-%:
-	@echo
-	@echo "===== Initializing $*"
-	if [ -f $*/Makefile ]; then make -C $*; fi
-	if [ -f $*/requirements.yaml ]; then helm dep up $*; fi
-
-lint-%: init-%
-	$(HELM) lint $*
-
-build-%: lint-%
-	$(HELM) package $*
-
-.PHONY: $(CHARTS)

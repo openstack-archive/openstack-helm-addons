@@ -12,26 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-HELM = helm
-TASK = build
+{{- define "helm-toolkit.scripts.rally_test" }}
+#!/bin/bash
+set -ex
 
-CHARTS = helm-toolkit postgresql
-
-all: $(CHARTS)
-
-$(CHARTS):
-	@make $(TASK)-$@
-
-init-%:
-	@echo
-	@echo "===== Initializing $*"
-	if [ -f $*/Makefile ]; then make -C $*; fi
-	if [ -f $*/requirements.yaml ]; then helm dep up $*; fi
-
-lint-%: init-%
-	$(HELM) lint $*
-
-build-%: lint-%
-	$(HELM) package $*
-
-.PHONY: $(CHARTS)
+: ${RALLY_ENV_NAME:="openstack-helm"}
+rally-manage db create
+rally deployment create --fromenv --name ${RALLY_ENV_NAME}
+rally deployment use ${RALLY_ENV_NAME}
+rally deployment check
+rally task validate /etc/rally/rally_tests.yaml
+rally task start /etc/rally/rally_tests.yaml
+rally deployment destroy --deployment ${RALLY_ENV_NAME}
+rally task sla-check
+{{- end }}

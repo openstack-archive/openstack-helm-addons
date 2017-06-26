@@ -1,3 +1,5 @@
+#!/bin/python
+
 # Copyright 2017 The Openstack-Helm Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,26 +14,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-HELM = helm
-TASK = build
+import os
+import struct
+import time
+import base64
 
-CHARTS = helm-toolkit postgresql
-
-all: $(CHARTS)
-
-$(CHARTS):
-	@make $(TASK)-$@
-
-init-%:
-	@echo
-	@echo "===== Initializing $*"
-	if [ -f $*/Makefile ]; then make -C $*; fi
-	if [ -f $*/requirements.yaml ]; then helm dep up $*; fi
-
-lint-%: init-%
-	$(HELM) lint $*
-
-build-%: lint-%
-	$(HELM) package $*
-
-.PHONY: $(CHARTS)
+key = os.urandom(16)
+header = struct.pack(
+    '<hiih',
+    1,                 # le16 type: CEPH_CRYPTO_AES
+    int(time.time()),  # le32 created: seconds
+    0,                 # le32 created: nanoseconds,
+    len(key),          # le16: len(key)
+)
+print(base64.b64encode(header + key).decode('ascii'))

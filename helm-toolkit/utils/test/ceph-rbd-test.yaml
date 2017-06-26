@@ -12,26 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-HELM = helm
-TASK = build
-
-CHARTS = helm-toolkit postgresql
-
-all: $(CHARTS)
-
-$(CHARTS):
-	@make $(TASK)-$@
-
-init-%:
-	@echo
-	@echo "===== Initializing $*"
-	if [ -f $*/Makefile ]; then make -C $*; fi
-	if [ -f $*/requirements.yaml ]; then helm dep up $*; fi
-
-lint-%: init-%
-	$(HELM) lint $*
-
-build-%: lint-%
-	$(HELM) package $*
-
-.PHONY: $(CHARTS)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ceph-rbd-test
+spec:
+  containers:
+  - name: cephrbd-rw
+    image: busybox
+    command:
+    - sh
+    - -c
+    - while true; do sleep 1; done
+    volumeMounts:
+    - mountPath: "/mnt/cephrbd"
+      name: cephrbd
+  volumes:
+  - name: cephrbd
+    rbd:
+      monitors:
+#This only works if you have skyDNS resolveable from the kubernetes node. Otherwise you must manually put in one or more mon pod ips.
+      - ceph-mon.ceph:6789
+      user: admin
+      image: ceph-rbd-test
+      pool: rbd
+      secretRef:
+        name: ceph-client-key
