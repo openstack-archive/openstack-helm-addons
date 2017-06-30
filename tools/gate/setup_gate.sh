@@ -43,6 +43,13 @@ fi
 net_resolv_pre_kube
 net_hosts_pre_kube
 
+# todo(srwilkers): remove this when zuul-cloner functional for helm-toolkit
+# Clones openstack-helm to retrieve helm-toolkit
+TMP_DIR=$(mktemp -d)
+git clone https://github.com/openstack/openstack-helm ${TMP_DIR}
+mv ${TMP_DIR}/helm-toolkit ${WORK_DIR}
+rm -rf ${TMP_DIR}
+
 # Setup helm
 helm_install
 helm_serve
