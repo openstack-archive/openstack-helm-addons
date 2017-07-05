@@ -1,0 +1,129 @@
+# Copyright 2017 The Openstack-Helm Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: elasticsearch-master
+  labels:
+    component: elasticsearch
+    role: master
+spec:
+  replicas: {{ .Values.replicas.master }}
+  revisionHistoryLimit: {{ .Values.upgrades.revision_history }}
+  strategy:
+    type: {{ .Values.upgrades.pod_replacement_strategy }}
+    {{ if eq .Values.upgrades.pod_replacement_strategy "RollingUpdate" }}
+    rollingUpdate:
+      maxUnavailable: {{ .Values.upgrades.rolling_update.max_unavailable }}
+      maxSurge: {{ .Values.upgrades.rolling_update.max_surge }}
+    {{ end }}
+  template:
+    metadata:
+      labels:
+        component: elasticsearch
+        role: master
+    spec:
+      serviceAccount: elasticsearch
+      initContainers:
+      - name: memory-map-increase
+        securityContext:
+          privileged: true
+        image: {{ .Values.images.memory_init }}
+        imagePullPolicy: {{ .Values.images.pull_policy }}
+        command:
+        - sysctl
+        - -w
+        - vm.max_map_count=262144
+      containers:
+      - name: elasticsearch-master
+        securityContext:
+          capabilities:
+            add:
+              - IPC_LOCK
+              - SYS_RESOURCE
+        image: {{ .Values.images.elasticsearch }}
+        imagePullPolicy: {{ .Values.images.pull_policy }}
+        {{ if .Values.resources.enabled }}
+        resources:
+          limits:
+            cpu: {{ .Values.resources.master.limits.cpu | quote }}
+            memory: {{ .Values.resources.master.limits.memory | quote }}
+          requests:
+            cpu: {{ .Values.resources.master.requests.cpu | quote }}
+            memory: {{ .Values.resources.master.requests.memory | quote }}
+        {{ end }}
+        command:
+        - /tmp/elasticsearch.sh
+        - start
+        lifecycle:
+          preStop:
+            exec:
+              command:
+                - /tmp/elasticsearch.sh
+                - stop
+        env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: NODE_MASTER
+          value: "true"
+        - name: NODE_INGEST
+          value: "false"
+        - name: NODE_DATA
+          value: "false"
+        - name: HTTP_ENABLE
+          value: "false"
+        - name: DISCOVERY_SERVICE
+          value: "elasticsearch-discovery"
+        - name: ES_JAVA_OPTS
+          value: "-Xms256m -Xmx256m"
+        ports:
+        - containerPort: {{ .Values.network.discovery.port }}
+          name: {{ .Values.network.discovery.name }}
+          protocol: {{ .Values.network.discovery.proto }}
+        volumeMounts:
+        - name: elastic-bin
+          mountPath: /tmp/elasticsearch.sh
+          subPath: elasticsearch.sh
+          readOnly: true
+        - name: elastic-config
+          mountPath: /usr/share/elasticsearch/config
+        - name: elastic-etc
+          mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
+          subPath: elasticsearch.yml
+          readOnly: true
+        - name: elastic-etc
+          mountPath: /usr/share/elasticsearch/config/logging.yml
+          subPath: logging.yml
+          readOnly: true
+        - mountPath: /data
+          name: storage
+      volumes:
+      - name: elastic-bin
+        configMap:
+          name: elastic-bin
+          defaultMode: 0555
+      - name: elastic-config
+        emptyDir: {}
+      - name: elastic-etc
+        configMap:
+          name: elastic-etc
+      - name: storage
+        emptyDir: {}

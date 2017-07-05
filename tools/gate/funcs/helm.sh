@@ -81,8 +81,9 @@ function helm_test_deployment {
   DEPLOYMENT=$1
   NAMESPACE=$2
   helm test ${DEPLOYMENT}
-  mkdir -p ${LOGS_DIR}/helm-test
-  kubectl logs -n ${NAMESPACE} ${DEPLOYMENT}-helm-test > ${LOGS_DIR}/helm-test/${DEPLOYMENT}
+  mkdir -p ${LOGS_DIR}/helm-tests
+  kubectl logs -n ${NAMESPACE} ${DEPLOYMENT}-helm-tests > ${LOGS_DIR}/helm-tests/${DEPLOYMENT}
+  kubectl delete pods ${DEPLOYMENT}-helm-tests -n ${NAMESPACE}
 }
 
 function helm_plugin_template_install {
