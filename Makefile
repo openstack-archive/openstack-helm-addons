@@ -12,26 +12,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-HELM = helm
-TASK = build
+HELM := helm
+TASK := build
 
-CHARTS = elasticsearch helm-toolkit postgresql
+EXCLUDES := helm-toolkit doc tests tools logs
+CHARTS := helm-toolkit $(filter-out $(EXCLUDES), $(patsubst %/.,%,$(wildcard */.)))
 
 all: $(CHARTS)
 
 $(CHARTS):
+	@echo
+	@echo "===== Processing [$@] chart ====="
 	@make $(TASK)-$@
 
 init-%:
-	@echo
-	@echo "===== Initializing $*"
 	if [ -f $*/Makefile ]; then make -C $*; fi
 	if [ -f $*/requirements.yaml ]; then helm dep up $*; fi
 
 lint-%: init-%
-	$(HELM) lint $*
+	if [ -d $* ]; then $(HELM) lint $*; fi
 
 build-%: lint-%
-	$(HELM) package $*
+	if [ -d $* ]; then $(HELM) package $*; fi
 
-.PHONY: $(CHARTS)
+clean:
+	@echo "Removed .b64, _partials.tpl, and _globals.tpl files"
+	rm -rf helm-toolkit/secrets/*.b64
+	rm -rf */templates/_partials.tpl
+	rm -rf */templates/_globals.tpl
+
+.PHONY: $(EXCLUDES) $(CHARTS)
