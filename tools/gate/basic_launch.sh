@@ -27,7 +27,9 @@ kube_wait_for_pods openstack 1200
 # todo(srwilkers): implement helm tests for postgresql
 #helm_test_deployment postgresql openstack
 
-helm install --name=elasticsearch local/elasticsearch --namespace=kube-system
+helm install --name=elasticsearch local/elasticsearch --namespace=kube-system \
+  --set conf.elasticsearch.bootstrap.memory_lock=false
+
 kube_wait_for_pods kube-system 600
 
 helm_test_deployment elasticsearch kube-system

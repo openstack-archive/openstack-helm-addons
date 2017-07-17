@@ -29,7 +29,8 @@ conf:
       host: 0.0.0.0
     path:
       data: /var/lib/elasticsearch/data
-      logs: /data/log
+      # TODO(srwilkers): Update this log path with meaningful config overrides
+      logs: /var/lib/elasticsearch/data
     zen:
       min_masters: 2
   logging:
@@ -57,9 +58,9 @@ replicas:
   client: 2
 
 images:
-  memory_init: docker.io/kolla/ubuntu-source-elasticsearch:3.0.3
-  elasticsearch: docker.io/kolla/ubuntu-source-elasticsearch:3.0.3
-  helm_tests: docker.io/kolla/ubuntu-source-elasticsearch:3.0.3
+  memory_init: docker.io/kolla/ubuntu-source-elasticsearch:4.0.0
+  elasticsearch: docker.io/kolla/ubuntu-source-elasticsearch:4.0.0
+  helm_tests: docker.io/kolla/ubuntu-source-elasticsearch:4.0.0
   pull_policy: "IfNotPresent"
 
 network:
