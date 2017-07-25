@@ -21,7 +21,7 @@ set -ex
 # Tests whether fluentd has successfully indexed data into Elasticsearch under
 # the logstash-* index via the fluent-elasticsearch plugin
 function check_logstash_index () {
-  total_hits=$(curl -XGET "$ELASTICSEARCH_ENDPOINT/logstash-*/fluentd/_search?pretty" -H 'Content-Type: application/json' \
+  total_hits=$(curl -XGET "${ELASTICSEARCH_ENDPOINT}logstash-*/fluentd/_search?pretty" -H 'Content-Type: application/json' \
               | python -c "import sys, json; print json.load(sys.stdin)['hits']['total']")
   if [ "$total_hits" -gt 0 ]; then
      echo "PASS: Successful hits on logstash-* index, provided by fluentd!"
@@ -34,7 +34,7 @@ function check_logstash_index () {
 # Tests whether fluentd has successfully tagged data with the kubernetes.var.*
 # prefix via the fluent-kubernetes plugin
 function check_kubernetes_tag () {
-  total_hits=$(curl -XGET "$ELASTICSEARCH_ENDPOINT/logstash-*/fluentd/_search?q=tag:kubernetes.var.*" -H 'Content-Type: application/json' \
+  total_hits=$(curl -XGET "${ELASTICSEARCH_ENDPOINT}logstash-*/fluentd/_search?q=tag:kubernetes.var.*" -H 'Content-Type: application/json' \
               | python -c "import sys, json; print json.load(sys.stdin)['hits']['total']")
   if [ "$total_hits" -gt 0 ]; then
      echo "PASS: Successful hits on logstash-* index, provided by fluentd!"

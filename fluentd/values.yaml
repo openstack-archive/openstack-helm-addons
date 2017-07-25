@@ -17,7 +17,7 @@
 # Declare variables to be passed into your templates.
 
 images:
-  fluentd: gcr.io/google_containers/fluentd-elasticsearch:1.11
+  fluentd: gcr.io/google_containers/fluentd-elasticsearch:1.23
   helm_tests: docker.io/kolla/ubuntu-source-elasticsearch:3.0.3
   pull_policy: IfNotPresent
 

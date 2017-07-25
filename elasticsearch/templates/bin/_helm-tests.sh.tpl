@@ -19,7 +19,7 @@ limitations under the License.
 set -ex
 
 function create_index () {
-  index_result=$(curl -XPUT "$ELASTICSEARCH_ENDPOINT/test_index?pretty" -H 'Content-Type: application/json' -d'
+  index_result=$(curl -XPUT "${ELASTICSEARCH_ENDPOINT}test_index?pretty" -H 'Content-Type: application/json' -d'
   {
     "settings" : {
       "index" : {
@@ -39,7 +39,7 @@ function create_index () {
 }
 
 function insert_test_data () {
-  insert_result=$(curl -XPUT "$ELASTICSEARCH_ENDPOINT/sample_index/sample_type/123/_create?pretty" -H 'Content-Type: application/json' -d'
+  insert_result=$(curl -XPUT "${ELASTICSEARCH_ENDPOINT}sample_index/sample_type/123/_create?pretty" -H 'Content-Type: application/json' -d'
   {
       "name" : "Elasticsearch",
       "message" : "Test data text entry"
@@ -56,7 +56,7 @@ function insert_test_data () {
 
 
 function check_hits () {
-  total_hits=$(curl -XGET "$ELASTICSEARCH_ENDPOINT/_search?pretty" -H 'Content-Type: application/json' -d'
+  total_hits=$(curl -XGET "${ELASTICSEARCH_ENDPOINT}_search?pretty" -H 'Content-Type: application/json' -d'
     {
       "query" : {
         "bool": {

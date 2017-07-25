@@ -47,9 +47,9 @@ spec:
           subPath: kibana.sh
           readOnly: true
         - name: etckibana
-          mountPath: /opt/kibana/config
+          mountPath: /etc/kibana
         - name: kibana-etc
-          mountPath: /opt/kibana/config/kibana.yml
+          mountPath: /etc/kibana/kibana.yml
           subPath: kibana.yml
           readOnly: true
       volumes:

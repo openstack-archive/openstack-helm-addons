@@ -39,6 +39,7 @@ spec:
       - name: memory-map-increase
         securityContext:
           privileged: true
+          runAsUser: 0
         image: {{ .Values.images.memory_init }}
         imagePullPolicy: {{ .Values.images.pull_policy }}
         command:
@@ -103,7 +104,11 @@ spec:
           mountPath: /usr/share/elasticsearch/config/logging.yml
           subPath: logging.yml
           readOnly: true
-        - mountPath: /data
+        - name: elastic-etc
+          mountPath: /usr/share/elasticsearch/config/log4j2.properties
+          subPath: log4j2.properties
+          readOnly: true
+        - mountPath: /var/lib/elasticsearch/data
           name: storage
       volumes:
       - name: elastic-bin

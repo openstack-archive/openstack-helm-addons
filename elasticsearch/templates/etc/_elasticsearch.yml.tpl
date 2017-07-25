@@ -21,6 +21,7 @@ node:
   master: ${NODE_MASTER}
   data: ${NODE_DATA}
   name: ${NODE_NAME}
+  max_local_storage_nodes: {{ .Values.pod.replicas.data }}
 
 network.host: {{ .Values.conf.elasticsearch.network.host }}
 

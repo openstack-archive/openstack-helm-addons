@@ -35,7 +35,7 @@ conf:
       min_masters: 2
     env:
       java_opts: "-Xms256m -Xmx256m"
-  logging:
+  log4j2:
     override:
     prefix:
     append:
@@ -60,9 +60,9 @@ endpoints:
         default: 9200
 
 images:
-  memory_init: docker.io/kolla/ubuntu-source-elasticsearch:4.0.0
-  elasticsearch: docker.io/kolla/ubuntu-source-elasticsearch:4.0.0
-  helm_tests: docker.io/kolla/ubuntu-source-elasticsearch:4.0.0
+  memory_init: docker.io/kolla/ubuntu-source-kolla-toolbox:4.0.0
+  elasticsearch: docker.io/elasticsearch:5.4.2
+  helm_tests: docker.io/kolla/ubuntu-source-kolla-toolbox:3.0.3
   pull_policy: "IfNotPresent"
 
 pod:

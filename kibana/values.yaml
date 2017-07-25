@@ -17,7 +17,7 @@ labels:
   node_selector_value:
 
 images:
-  kibana: 'docker.io/kolla/ubuntu-source-kibana:3.0.3'
+  kibana: 'docker.io/kibana:5.4.2'
   pull_policy: IfNotPresent
 
 conf:

@@ -19,7 +19,7 @@ set -ex
 COMMAND="${@:-start}"
 
 function start () {
-  exec /opt/kibana/bin/kibana
+  exec kibana
 }
 
 function stop () {

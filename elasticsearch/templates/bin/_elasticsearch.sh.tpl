@@ -19,7 +19,8 @@ set -ex
 COMMAND="${@:-start}"
 
 function start () {
-  exec /usr/share/elasticsearch/bin/elasticsearch
+  ulimit -l unlimited
+  exec /docker-entrypoint.sh elasticsearch
 }
 
 function stop () {

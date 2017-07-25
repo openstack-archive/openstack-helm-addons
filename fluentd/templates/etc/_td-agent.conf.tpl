@@ -101,6 +101,7 @@
 
 # Example:
 # {"log":"[info:2016-02-16T16:04:05.930-08:00] Some log text here\n","stream":"stdout","time":"2016-02-17T00:04:05.931087621Z"}
+
 <source>
   type tail
   path /var/lib/docker/containers/*/*-json.log
@@ -110,25 +111,6 @@
   format json
   read_from_head true
 </source>
-
-# Used to scan multiple lines for Python error stacktraces. Tag with stack.*
-<source>
-  type tail
-  path /var/lib/docker/containers/*/*-json.log
-  pos_file stack.pos
-  time_format %Y-%m-%dT%H:%M:%S
-  tag stack.*
-  multiline_flush_interval 1s
-  format multiline
-  format_firstline /ERROR/
-  format1 /.*/ERROR/(?<log>.*)$/
-  key_name log
-  read_from_head true
-</source>
-
-<filter stack.**>
-  type kubernetes_metadata
-</filter>
 
 <filter kubernetes.**>
   type kubernetes_metadata
