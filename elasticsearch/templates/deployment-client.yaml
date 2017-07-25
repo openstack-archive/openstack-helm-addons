@@ -14,30 +14,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */}}
 
+{{- $envAll := . }}
+---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: elasticsearch-client
-  labels:
-    component: elasticsearch
-    role: client
 spec:
-  replicas: {{ .Values.replicas.client }}
-  revisionHistoryLimit: {{ .Values.upgrades.revision_history }}
-  strategy:
-    type: {{ .Values.upgrades.pod_replacement_strategy }}
-    {{ if eq .Values.upgrades.pod_replacement_strategy "RollingUpdate" }}
-    rollingUpdate:
-      maxUnavailable: {{ .Values.upgrades.rolling_update.max_unavailable }}
-      maxSurge: {{ .Values.upgrades.rolling_update.max_surge }}
-    {{ end }}
+  replicas: {{ .Values.pod.replicas.client }}
+{{ tuple $envAll | include "helm-toolkit.snippets.kubernetes_upgrades_deployment" | indent 2 }}
   template:
     metadata:
       labels:
-        component: elasticsearch
-        role: client
+{{ tuple $envAll "elasticsearch" "client" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
+      annotations:
+        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.utils.hash" }}
+        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.utils.hash" }}
     spec:
+      affinity:
+{{ tuple $envAll "elasticsearch" "client" | include "helm-toolkit.snippets.kubernetes_pod_anti_affinity" | indent 8 }}
       serviceAccount: elasticsearch
+      terminationGracePeriodSeconds: {{ .Values.pod.lifecycle.termination_grace_period.client.timeout | default "600" }}
       initContainers:
       - name: memory-map-increase
         securityContext:
@@ -57,15 +54,7 @@ spec:
               - SYS_RESOURCE
         image: {{ .Values.images.elasticsearch }}
         imagePullPolicy: {{ .Values.images.pull_policy }}
-        {{ if .Values.resources.enabled }}
-        resources:
-          limits:
-            cpu: {{ .Values.resources.client.limits.cpu | quote }}
-            memory: {{ .Values.resources.client.limits.memory | quote }}
-          requests:
-            cpu: {{ .Values.resources.client.requests.cpu | quote }}
-            memory: {{ .Values.resources.client.requests.memory | quote }}
-        {{ end }}
+{{ tuple $envAll $envAll.Values.pod.resources.client | include "helm-toolkit.snippets.kubernetes_resources" | indent 8 }}
         command:
         - /tmp/elasticsearch.sh
         - start
@@ -91,16 +80,14 @@ spec:
         - name: HTTP_ENABLE
           value: "true"
         - name: DISCOVERY_SERVICE
-          value: "elasticsearch-discovery"
+          value: {{ tuple "logging_db" "discovery" $envAll | include "helm-toolkit.endpoints.hostname_short_endpoint_lookup" }}
         - name: ES_JAVA_OPTS
-          value: "-Xms256m -Xmx256m"
+          value: "{{ .Values.conf.elasticsearch.env.java_opts }}"
         ports:
         - containerPort: {{ .Values.network.client.port }}
           name: {{ .Values.network.client.name }}
-          protocol: {{ .Values.network.client.proto }}
         - containerPort: {{ .Values.network.discovery.port }}
           name: {{ .Values.network.discovery.name }}
-          protocol: {{ .Values.network.discovery.proto }}
         volumeMounts:
         - name: elastic-bin
           mountPath: /tmp/elasticsearch.sh
@@ -128,5 +115,6 @@ spec:
       - name: elastic-etc
         configMap:
           name: elastic-etc
+          defaultMode: 0444
       - name: storage
         emptyDir: {}

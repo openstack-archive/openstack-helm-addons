@@ -14,17 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */}}
 
+{{- $envAll := . }}
+---
 apiVersion: v1
 kind: Service
 metadata:
-  name: elasticsearch-discovery
-  labels:
-    component: elasticsearch
-    role: master
+  name: {{ tuple "logging_db" "data" . | include "helm-toolkit.endpoints.hostname_short_endpoint_lookup" }}
 spec:
-  selector:
-    component: elasticsearch
-    role: master
   ports:
-  - name: transport
-    port: {{ .Values.network.discovery.port }}
+  - port: {{ .Values.network.data.port }}
+    name: transport
+    {{- if .Values.network.data.node_port.enabled }}
+    nodePort: {{ .Values.network.data.node_port.port }}
+    {{- end }}
+  selector:
+{{ tuple $envAll "elasticsearch" "data" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 4 }}
+  {{- if .Values.network.data.node_port.enabled }}
+  type: NodePort
+  {{- end }}

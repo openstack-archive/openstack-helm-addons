@@ -14,29 +14,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */}}
 
+{{- $envAll := . }}
+---
 apiVersion: apps/v1beta1
 kind: StatefulSet
 metadata:
   name: elasticsearch-data
-  labels:
-    component: elasticsearch
-    role: data
 spec:
   serviceName: elasticsearch-data
-  replicas: {{ .Values.replicas.data }}
+  replicas: {{ .Values.pod.replicas.data }}
   template:
     metadata:
       labels:
-        component: elasticsearch
-        role: data
+{{ tuple $envAll "elasticsearch" "data" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
     spec:
+      affinity:
+{{ tuple $envAll "elasticsearch" "data" | include "helm-toolkit.snippets.kubernetes_pod_anti_affinity" | indent 8 }}
       serviceAccount: elasticsearch
+      terminationGracePeriodSeconds: {{ .Values.pod.lifecycle.termination_grace_period.data.timeout | default "600" }}
       initContainers:
       - name: memory-map-increase
         securityContext:
           privileged: true
         image: {{ .Values.images.memory_init }}
         imagePullPolicy: {{ .Values.images.pull_policy }}
+{{ tuple $envAll $envAll.Values.pod.resources.data | include "helm-toolkit.snippets.kubernetes_resources" | indent 8 }}
         command:
         - sysctl
         - -w
@@ -75,13 +77,12 @@ spec:
         - name: HTTP_ENABLE
           value: "false"
         - name: ES_JAVA_OPTS
-          value: "-Xms256m -Xmx256m"
+          value: "{{ .Values.conf.elasticsearch.env.java_opts }}"
         - name: DISCOVERY_SERVICE
-          value: "elasticsearch-discovery"
+          value: {{ tuple "logging_db" "discovery" $envAll | include "helm-toolkit.endpoints.hostname_short_endpoint_lookup" }}
         ports:
         - containerPort: {{ .Values.network.data.port }}
           name: {{ .Values.network.data.name }}
-          protocol: TCP
         volumeMounts:
         - name: elastic-bin
           mountPath: /tmp/elasticsearch.sh
@@ -109,6 +110,7 @@ spec:
       - name: elastic-etc
         configMap:
           name: elastic-etc
+          defaultMode: 0444
       - name: storage
         persistentVolumeClaim:
           claimName: {{ .Values.pvc.name }}

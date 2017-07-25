@@ -14,17 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */}}
 
+{{- $envAll := . }}
+---
 apiVersion: v1
 kind: Service
 metadata:
-  name: elasticsearch-logging
-  labels:
-    component: elasticsearch
-    role: client
+  name: {{ tuple "logging_db" "default" . | include "helm-toolkit.endpoints.hostname_short_endpoint_lookup" }}
 spec:
-  selector:
-    component: elasticsearch
-    role: client
   ports:
   - name: {{ .Values.network.client.name }}
     port: {{ .Values.network.client.port }}
+    {{- if .Values.network.client.node_port.enabled }}
+    nodePort: {{ .Values.network.client.node_port.port }}
+    {{- end }}
+  selector:
+{{ tuple $envAll "elasticsearch" "client" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 4 }}
+  {{- if .Values.network.client.node_port.enabled }}
+  type: NodePort
+  {{- end }}

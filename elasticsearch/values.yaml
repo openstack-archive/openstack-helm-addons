@@ -33,6 +33,8 @@ conf:
       logs: /var/lib/elasticsearch/data
     zen:
       min_masters: 2
+    env:
+      java_opts: "-Xms256m -Xmx256m"
   logging:
     override:
     prefix:
@@ -42,7 +44,9 @@ endpoints:
   logging_db:
     name: elasticsearch
     hosts:
+      data: elasticsearch-data
       default: elasticsearch-logging
+      discovery: elasticsearch-discovery
       public: elasticsearch
     path:
       default: null
@@ -52,48 +56,78 @@ endpoints:
       api:
         default: 9200
 
-replicas:
-  master: 3
-  data: 3
-  client: 2
-
 images:
   memory_init: docker.io/kolla/ubuntu-source-elasticsearch:4.0.0
   elasticsearch: docker.io/kolla/ubuntu-source-elasticsearch:4.0.0
   helm_tests: docker.io/kolla/ubuntu-source-elasticsearch:4.0.0
   pull_policy: "IfNotPresent"
 
+pod:
+  affinity:
+      anti:
+        type:
+          default: preferredDuringSchedulingIgnoredDuringExecution
+        topologyKey:
+          default: kubernetes.io/hostname
+  replicas:
+    master: 3
+    data: 3
+    client: 2
+  lifecycle:
+    upgrades:
+      deployments:
+        revision_history: 3
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 3
+    termination_grace_period:
+      master:
+        timeout: 600
+      data:
+        timeout: 600
+      client:
+        timeout: 600
+  resources:
+    enabled: false
+    client:
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+      requests:
+        memory: "128Mi"
+        cpu: "500m"
+    master:
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+      requests:
+        memory: "128Mi"
+        cpu: "500m"
+    data:
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+      requests:
+        memory: "128Mi"
+        cpu: "500m"
+
 network:
   client:
     port: 9200
+    node_port:
+      enabled: false
+      port: 30920
   discovery:
     port: 9300
+    node_port:
+      enabled: false
+      port: 30930
   data:
     port: 9300
-
-upgrades:
-  revision_history: 3
-  pod_replacement_strategy: RollingUpdate
-  rolling_update:
-    max_unavailable: 1
-    max_surge: 3
-
-resources:
-  enabled: false
-  client:
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-    requests:
-      memory: "128Mi"
-      cpu: "500m"
-  master:
-    limits:
-      memory: "1024Mi"
-      cpu: "2000m"
-    requests:
-      memory: "128Mi"
-      cpu: "500m"
+    node_port:
+      enabled: false
+      port: 30931
 
 pvc:
   name: pvc-elastic
