@@ -101,14 +101,10 @@ spec:
           subPath: elasticsearch.yml
           readOnly: true
         - name: elastic-etc
-          mountPath: /usr/share/elasticsearch/config/logging.yml
-          subPath: logging.yml
-          readOnly: true
-        - name: elastic-etc
           mountPath: /usr/share/elasticsearch/config/log4j2.properties
           subPath: log4j2.properties
           readOnly: true
-        - mountPath: /var/lib/elasticsearch/data
+        - mountPath: {{ .Values.conf.elasticsearch.path.data }}
           name: storage
       volumes:
       - name: elastic-bin

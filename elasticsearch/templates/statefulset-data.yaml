@@ -100,7 +100,7 @@ spec:
           subPath: log4j2.properties
           readOnly: true
         - name: storage
-          mountPath: /var/lib/elasticsearch/data
+          mountPath: {{ .Values.conf.elasticsearch.path.data }}
       volumes:
       - name: elastic-bin
         configMap:

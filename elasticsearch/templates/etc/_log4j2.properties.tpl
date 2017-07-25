@@ -12,23 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-appender.rolling.type = RollingFile
-appender.rolling.name = rolling
-appender.rolling.fileName = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}.log
-appender.rolling.layout.type = PatternLayout
-appender.rolling.layout.pattern = [%d{ISO8601}][%-5p][%-25c] %.10000m%n
-appender.rolling.filePattern = ${sys:es.logs.base_path}${sys:file.separator}${sys:es.logs.cluster_name}-%d{yyyy-MM-dd}.log
-appender.rolling.policies.type = Policies
-appender.rolling.policies.time.type = TimeBasedTriggeringPolicy
-appender.rolling.policies.time.interval = 1
-appender.rolling.policies.time.modulate = true
-
-status = error
-
 appender.console.type = Console
 appender.console.name = console
 appender.console.layout.type = PatternLayout
 appender.console.layout.pattern = [%d{ISO8601}][%-5p][%-25c{1.}] %marker%m%n
 
+appender.rolling.type = RollingFile
+appender.rolling.name = rolling
+appender.rolling.fileName = ${sys:es.logs.base_path}${sys:file.separator}${hostName}.log
+appender.rolling.filePattern = ${sys:es.logs.base_path}${sys:file.separator}${hostName}.log.%i
+appender.rolling.layout.type = PatternLayout
+appender.rolling.layout.pattern = [%d{DEFAULT}][%-5p][%-25c] %.10000m%n
+appender.rolling.policies.type = Policies
+appender.rolling.policies.size.type = SizeBasedTriggeringPolicy
+appender.rolling.policies.size.size=100MB
+appender.rolling.strategy.type = DefaultRolloverStrategy
+appender.rolling.strategy.max = 5
+appender.rolling.strategy.fileIndex = min
+
 rootLogger.level = info
 rootLogger.appenderRef.console.ref = console
+rootLogger.appenderRef.rolling.ref = rolling
