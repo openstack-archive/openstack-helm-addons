@@ -1,8 +1,8 @@
 FROM ubuntu:16.04
 MAINTAINER pete.birley@att.com
 
-ENV HELM_VERSION=v2.4.1 \
-    KUBE_VERSION=v1.6.5 \
+ENV HELM_VERSION=v2.5.0\
+    KUBE_VERSION=v1.6.7 \
     CNI_VERSION=v0.5.2 \
     container="docker" \
     DEBIAN_FRONTEND="noninteractive"
