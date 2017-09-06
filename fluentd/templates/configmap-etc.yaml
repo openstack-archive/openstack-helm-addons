@@ -22,8 +22,4 @@ metadata:
   name: fluentd-etc
 data:
   td-agent.conf: |+
-{{ if .Values.conf.fluentd.override -}}
-{{ .Values.conf.fluentd.override | indent 4 }}
-{{- else -}}
-{{ tuple "etc/_td-agent.conf.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
-{{- end }}
+{{- tuple .Values.conf.td_agent "etc/_td-agent.conf.tpl" . | include "helm-toolkit.utils.configmap_templater" }}

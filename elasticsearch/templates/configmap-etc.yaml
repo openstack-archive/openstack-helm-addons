@@ -19,27 +19,7 @@ kind: ConfigMap
 metadata:
   name: elastic-etc
 data:
-  elasticsearch.yml: |
-{{ if .Values.conf.elasticsearch.override -}}
-{{ .Values.conf.elasticsearch.override | indent 4 }}
-{{- else -}}
-{{- if .Values.conf.elasticsearch.prefix -}}
-{{ .Values.conf.elasticsearch.prefix | indent 4 }}
-{{- end }}
-{{ tuple "etc/_elasticsearch.yml.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
-{{- end }}
-{{- if .Values.conf.elasticsearch.append -}}
-{{ .Values.conf.elasticsearch.append | indent 4 }}
-{{- end }}
-  logging.yml: |
-{{ if .Values.conf.logging.override -}}
-{{ .Values.conf.logging.override | indent 4 }}
-{{- else -}}
-{{- if .Values.conf.logging.prefix -}}
-{{ .Values.conf.logging.prefix | indent 4 }}
-{{- end }}
-{{ tuple "etc/_logging.yml.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
-{{- end }}
-{{- if .Values.conf.logging.append -}}
-{{ .Values.conf.logging.append | indent 4 }}
-{{- end }}
+  elasticsearch.yml: |+
+{{- tuple .Values.conf.elasticsearch "etc/_elasticsearch.yml.tpl" . | include "helm-toolkit.utils.configmap_templater" }}
+  logging.yml: |+
+{{- tuple .Values.conf.elasticsearch "etc/_logging.yml.tpl" . | include "helm-toolkit.utils.configmap_templater" }}

@@ -22,15 +22,18 @@ images:
   pull_policy: IfNotPresent
 
 conf:
-  fluentd:
+  td_agent:
     override:
 
 endpoints:
-  log_database:
+  cluster_domain_suffix: cluster.local
+  logging_db:
     name: elasticsearch
     hosts:
       default: elasticsearch-logging
       public: elasticsearch
+    host_fqdn_override:
+      default: null
     path:
       default: null
     scheme:

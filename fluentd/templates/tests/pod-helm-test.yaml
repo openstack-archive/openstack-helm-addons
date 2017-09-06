@@ -30,7 +30,7 @@ spec:
       - /tmp/fluentd-test.sh
       env:
       - name: ELASTICSEARCH_ENDPOINT
-        value: {{ tuple "log_database" "default" "client" $envAll | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }}
+        value: {{ tuple "logging_db" "internal" "client" . | include "helm-toolkit.endpoints.host_and_port_endpoint_uri_lookup" }}
       volumeMounts:
       - name: fluentd-bin
         mountPath: /tmp/fluentd-test.sh

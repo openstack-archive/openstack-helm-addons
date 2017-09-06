@@ -41,6 +41,7 @@ conf:
     append:
 
 endpoints:
+  cluster_domain_suffix: cluster.local
   logging_db:
     name: elasticsearch
     hosts:
@@ -48,12 +49,14 @@ endpoints:
       default: elasticsearch-logging
       discovery: elasticsearch-discovery
       public: elasticsearch
+    host_fqdn_override:
+      default: null
     path:
       default: null
     scheme:
       default: http
     port:
-      api:
+      client:
         default: 9200
 
 images:

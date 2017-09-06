@@ -60,10 +60,13 @@ conf:
   append:
 
 endpoints:
+  cluster_domain_suffix: cluster.local
   log_database:
     hosts:
       default: elasticsearch-logging
       public: elasticsearch
+    host_fqdn_override:
+      default: null
     name: elasticsearch
     path:
       default: null
@@ -76,6 +79,8 @@ endpoints:
     hosts:
       default: kibana-dash
       public: kibana
+    host_fqdn_override:
+      default: null
     name: kibana
     path:
       default: null
