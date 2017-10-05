@@ -20,10 +20,6 @@ helm_build
 
 helm search
 
-helm install --name=postgresql local/postgresql --namespace=openstack
-
-kube_wait_for_pods openstack 1200
-
 helm install --name=kibana local/kibana --namespace=kube-system
 
 kube_wait_for_pods kube-system 600
