@@ -20,19 +20,9 @@ helm_build
 
 helm search
 
-helm install --name=kibana local/kibana --namespace=kube-system
-
 kube_wait_for_pods kube-system 600
 
 # todo(srwilkers): implement helm tests for postgresql
 #helm_test_deployment postgresql openstack
 
-helm install --name=elasticsearch local/elasticsearch --namespace=kube-system \
-  --set conf.elasticsearch.bootstrap.memory_lock=false
-
-helm install --name=fluentd local/fluentd --namespace=kube-system
-
 kube_wait_for_pods kube-system 600
-
-helm_test_deployment elasticsearch kube-system
-helm_test_deployment fluentd kube-system
