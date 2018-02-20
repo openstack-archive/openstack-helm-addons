@@ -12,11 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# It's necessary to set this because some environments don't link sh -> bash.
+SHELL := /bin/bash
+
 HELM := helm
 TASK := build
 
-EXCLUDES := helm-toolkit doc tests tools logs
+EXCLUDES := helm-toolkit doc tests tools logs tmp
 CHARTS := helm-toolkit $(filter-out $(EXCLUDES), $(patsubst %/.,%,$(wildcard */.)))
+
+.PHONY: $(EXCLUDES) $(CHARTS)
 
 all: $(CHARTS)
 
@@ -37,8 +42,21 @@ build-%: lint-%
 
 clean:
 	@echo "Removed .b64, _partials.tpl, and _globals.tpl files"
-	rm -rf helm-toolkit/secrets/*.b64
-	rm -rf */templates/_partials.tpl
-	rm -rf */templates/_globals.tpl
+	rm -f helm-toolkit/secrets/*.b64
+	rm -f */templates/_partials.tpl
+	rm -f */templates/_globals.tpl
+	rm -f *tgz */charts/*tgz
+	rm -f */requirements.lock
+	-rm -rf */charts */tmpcharts
 
-.PHONY: $(EXCLUDES) $(CHARTS)
+pull-all-images:
+	@./tools/pull-images.sh
+
+pull-images:
+	@./tools/pull-images.sh $(filter-out $@,$(MAKECMDGOALS))
+
+dev-deploy:
+	@./tools/gate/devel/start.sh $(filter-out $@,$(MAKECMDGOALS))
+
+%:
+	@:
