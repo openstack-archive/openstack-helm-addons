@@ -18,8 +18,12 @@
 # name: value
 
 labels:
-  node_selector_key: openstack-control-plane
-  node_selector_value: enabled
+  server:
+    node_selector_key: openstack-control-plane
+    node_selector_value: enabled
+  job:
+    node_selector_key: openstack-control-plane
+    node_selector_value: enabled
 
 release_group: null
 
@@ -45,17 +49,21 @@ network:
     node_port: 31776
 
 dependencies:
-  db_init:
-    services:
-    - service: oslo_db
-      endpoint: internal
-  db_drop:
-    services:
-    - service: oslo_db
-      endpoint: internal
-  artifactory:
-    jobs: null
-    services: null
+  static:
+    server:
+      services:
+        - endpoint: internal
+          service: oslo_cache
+        - endpoint: internal
+          service: oslo_db
+    db_drop:
+      services:
+        - endpoint: internal
+          service: oslo_db
+    db_init:
+      services:
+        - endpoint: internal
+          service: oslo_db
 
 storage: pvc
 

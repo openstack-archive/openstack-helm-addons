@@ -45,7 +45,7 @@ spec:
     protocol: TCP
     targetPort: 5052
   selector:
-{{ tuple $envAll "artifactory" "dashboard" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 4 }}
+{{ tuple $envAll "artifactory" "server" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 4 }}
   sessionAffinity: None
 {{ if .Values.network.node_ports.enabled }}
   type: NodePort
