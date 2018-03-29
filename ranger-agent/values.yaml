@@ -1,0 +1,452 @@
+# Copyright 2017 The Openstack-Helm Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Default values for ranger-agent.
+# This is a YAML-formatted file.
+# Declare name/value pairs to be passed into your templates.
+# name: value
+
+release_group: null
+
+labels:
+  api:
+    node_selector_key: openstack-control-plane
+    node_selector_value: enabled
+  engine:
+    node_selector_key: openstack-control-plane
+    node_selector_value: enabled
+  job:
+    node_selector_key: openstack-control-plane
+    node_selector_value: enabled
+  test:
+    node_selector_key: openstack-control-plane
+    node_selector_value: enabled
+
+images:
+  tags:
+    ranger_agent: quay.io/attcomdev/ranger-agent:5d29fd462bb85cf6c1b0acb25bfb898944e62b1a
+    ranger-agent_db_sync: quay.io/attcomdev/ranger-agent:5d29fd462bb85cf6c1b0acb25bfb898944e62b1a
+    db_drop: docker.io/openstackhelm/heat:newton
+    db_init: docker.io/openstackhelm/heat:newton
+    ks_user: docker.io/openstackhelm/heat:newton
+    ks_service: docker.io/openstackhelm/heat:newton
+    rabbit_init: docker.io/rabbitmq:3.7-management
+    ks_endpoints: docker.io/openstackhelm/heat:newton
+    dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.2.1
+    scripted_test: docker.io/openstackhelm/heat:newton
+  pull_policy: "IfNotPresent"
+
+conf:
+  paste:
+    pipeline:main:
+      pipeline: request_id api-server
+    app:api-server:
+      paste.app_factory: ord.api.app:app_factory
+    filter:authtoken:
+      paste.filter_factory: keystonemiddleware.auth_token:filter_factory
+    filter:request_id:
+      paste.filter_factory: oslo_middleware:RequestId.factory
+  ranger_agent:
+    DEFAULT:
+      api_workers: 1
+      debug: False
+      verbose: True
+      pecan_debug: True
+      repo_connection_timeout: 120
+      resource_creation_timeout_min: 1200
+      resource_creation_timeout_max: 14400
+      log_dir: /var/log/ranger-agent
+      api_paste_config: /etc/ranger-agent/api-paste.ini
+      local_repo: ranger_repo
+      resource_status_check_wait: 15
+    api:
+      host: 0.0.0.0
+    database:
+      max_retries: -1
+    oslo_messaging_notifications:
+      driver: messagingv2
+    orm:
+      orm_template_repo_url: git@github.com:ranger-agent/templates.git
+      repo_pull_check_wait: 2
+      retry_limits: 5
+    keystone_authtoken:
+      auth_type: password
+      auth_version: v3
+  ssh:
+    user: ranger_agent
+    user_home: /home/ranger_agent
+    ssh_key_file: ranger_agent
+    ssh_key_file_location: cert/ranger_agent
+    ssh_config_file_location: cert/config
+
+network:
+  api:
+    ingress:
+      public: true
+      classes:
+        namespace: "nginx"
+        cluster: "nginx-cluster"
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /
+    external_policy_local: false
+    node_port:
+      enabled: false
+      port: 30010
+
+dependencies:
+  static:
+    api:
+      jobs:
+      - ranger-agent-db-sync
+      - ranger-agent-ks-user
+      - ranger-agent-ks-endpoints
+      - ranger-agent-rabbit-init
+      services:
+      - service: oslo_db
+        endpoint: internal
+    engine:
+      jobs:
+      - ranger-agent-db-sync
+      - ranger-agent-ks-user
+      - ranger-agent-rabbit-init
+      services:
+      - service: oslo_db
+        endpoint: internal
+      - service: identity
+        endpoint: internal
+      - service: orchestration
+        endpoint: internal
+      - service: image
+        endpoint: internal
+    db_init:
+      services:
+      - service: oslo_db
+        endpoint: internal
+    db_sync:
+      jobs:
+      - ranger-agent-db-init
+      services:
+      - service: oslo_db
+        endpoint: internal
+    db_drop:
+      services:
+      - service: oslo_db
+        endpoint: internal
+    ks_user:
+      services:
+      - service: identity
+        endpoint: internal
+    ks_service:
+      services:
+      - service: identity
+        endpoint: internal
+    ks_endpoints:
+      jobs:
+      - ranger-agent-ks-service
+      services:
+      - service: identity
+        endpoint: internal
+    rabbit_init:
+      services:
+      - service: oslo_messaging
+        endpoint: internal
+
+# Names of secrets used  and environmental checks
+secrets:
+  identity:
+    admin: admin
+    ranger_agent: ranger-agent-admin
+  oslo_db:
+    admin: ranger-agent-db-admin
+    ranger_agent: ranger-agent-db-user
+  oslo_messaging:
+    admin: ranger-agent-rabbitmq-admin
+    ranger-agent: ranger-agent-rabbitmq-user
+
+# typically overriden by environmental
+# values, but should include all endpoints
+# required by this chart
+endpoints:
+  cluster_domain_suffix: cluster.local
+  oslo_db:
+    auth:
+      admin:
+        username: root
+        password: password
+      ranger_agent:
+        username: ranger-agent
+        password: password
+    hosts:
+      default: mariadb
+    host_fqdn_override:
+      default: null
+    path: /ord
+    scheme: mysql+pymysql
+    port:
+      mysql:
+        default: 3306
+  oslo_cache:
+    hosts:
+      default: memcached
+    host_fqdn_override:
+      default: null
+    port:
+      memcache:
+        default: 11211
+  oslo_messaging:
+    auth:
+      admin:
+        username: rabbitmq
+        password: password
+      ranger-agent:
+        username: ranger-agent
+        password: password
+    hosts:
+      default: rabbitmq
+    host_fqdn_override:
+      default: null
+    path: /
+    scheme: rabbit
+    port:
+      amqp:
+        default: 5672
+      http:
+        default: 15672
+  ranger_rds:
+    name: rds-url
+    hosts:
+      default:
+    host_fqdn_override:
+      default: internal.ranger.com
+    path:
+      default: /v1/rds/status
+    scheme:
+      default: http
+    port:
+      rds:
+        default: 8777
+  identity:
+    name: keystone
+    auth:
+      admin:
+        region_name: RegionOne
+        username: admin
+        password: password
+        project_name: admin
+        user_domain_name: default
+        project_domain_name: default
+      ranger_agent:
+        role: admin
+        region_name: RegionOne
+        username: ranger-agent-admin
+        password: password
+        project_name: service
+        user_domain_name: default
+        project_domain_name: default
+    hosts:
+      default: keystone-api
+      public: keystone
+    host_fqdn_override:
+      default: null
+    path:
+      default: /v3
+    scheme:
+      default: http
+    port:
+      admin:
+        default: 35357
+      api:
+        default: 80
+  image:
+    name: glance
+    hosts:
+      default: glance-api
+      public: glance
+    host_fqdn_override:
+      default: null
+    path:
+      default: null
+    scheme:
+      default: http
+    port:
+      api:
+        default: 9292
+        public: 80
+  orchestration:
+    name: heat
+    hosts:
+      default: heat-api
+      public: heat
+    host_fqdn_override:
+      default: null
+    path:
+      default: '/v1/%(project_id)s'
+    scheme:
+      default: 'http'
+    port:
+      api:
+        default: 8004
+        public: 80
+  ranger_agent:
+    name: ranger-agent
+    hosts:
+      default: ranger-api
+      public: ranger-agent
+    host_fqdn_override:
+      default: null
+    path:
+      default: "/v1/ord/ord_notifier/"
+    scheme:
+      default: 'http'
+    port:
+      api:
+        default: 9010
+        public: 80
+
+pod:
+  user:
+    ranger_agent:
+      uid: 1000
+  affinity:
+      anti:
+        type:
+          default: preferredDuringSchedulingIgnoredDuringExecution
+        topologyKey:
+          default: kubernetes.io/hostname
+  mounts:
+    ranger_agent_api:
+      init_container: null
+      ranger_agent_api:
+    ranger_agent_engine:
+      init_container: null
+      ranger_agent_engine:
+    ranger_agent_tests:
+      init_container: null
+      ranger_agent_tests:
+  replicas:
+    api: 1
+    engine: 1
+  lifecycle:
+    upgrades:
+      deployments:
+        revision_history: 3
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 3
+    disruption_budget:
+      ranger_agent_api:
+        min_available: 0
+      ranger_agent_engine:
+        min_available: 0
+    termination_grace_period:
+      ranger_agent_api:
+        timeout: 30
+      ranger_agent_engine:
+        timeout: 30
+  resources:
+    enabled: false
+    ranger_agent_api:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    ranger_agent_engine:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    jobs:
+      db_init:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_drop:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_endpoints:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_service:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      ks_user:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      rabbit_init:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      tests:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+
+manifests:
+  configmap_bin: true
+  configmap_etc: true
+  deployment_ranger_agent_api: true
+  deployment_ranger_agent_engine: true
+  ingress_ranger_agent_api: true
+  secret_db: true
+  secret_keystone: true
+  secret_ssh_key: true
+  secret_rabbitmq: true
+  job_db_init: true
+  job_db_sync: true
+  job_db_drop: false
+  job_ks_endpoints: true
+  job_ks_service: true
+  job_ks_user: true
+  job_rabbit_init: true
+  pdb_api: true
+  pod_test: true
+  service_ingress_ranger_agent_api: true
+  service_ranger_agent_api: true
