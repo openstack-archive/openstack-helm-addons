@@ -108,59 +108,59 @@ dependencies:
   static:
     api:
       jobs:
-      - ranger-agent-db-sync
-      - ranger-agent-ks-user
-      - ranger-agent-ks-endpoints
-      - ranger-agent-rabbit-init
+        - ranger-agent-db-sync
+        - ranger-agent-ks-user
+        - ranger-agent-ks-endpoints
+        - ranger-agent-rabbit-init
       services:
-      - service: oslo_db
-        endpoint: internal
+        - service: oslo_db
+          endpoint: internal
     engine:
       jobs:
-      - ranger-agent-db-sync
-      - ranger-agent-ks-user
-      - ranger-agent-rabbit-init
+        - ranger-agent-db-sync
+        - ranger-agent-ks-user
+        - ranger-agent-rabbit-init
       services:
-      - service: oslo_db
-        endpoint: internal
-      - service: identity
-        endpoint: internal
-      - service: orchestration
-        endpoint: internal
-      - service: image
-        endpoint: internal
+        - service: oslo_db
+          endpoint: internal
+        - service: identity
+          endpoint: internal
+        - service: orchestration
+          endpoint: internal
+        - service: image
+          endpoint: internal
     db_init:
       services:
-      - service: oslo_db
-        endpoint: internal
+        - service: oslo_db
+          endpoint: internal
     db_sync:
       jobs:
-      - ranger-agent-db-init
+        - ranger-agent-db-init
       services:
-      - service: oslo_db
-        endpoint: internal
+        - service: oslo_db
+          endpoint: internal
     db_drop:
       services:
-      - service: oslo_db
-        endpoint: internal
+        - service: oslo_db
+          endpoint: internal
     ks_user:
       services:
-      - service: identity
-        endpoint: internal
+        - service: identity
+          endpoint: internal
     ks_service:
       services:
-      - service: identity
-        endpoint: internal
+        - service: identity
+          endpoint: internal
     ks_endpoints:
       jobs:
-      - ranger-agent-ks-service
+        - ranger-agent-ks-service
       services:
-      - service: identity
-        endpoint: internal
+        - service: identity
+          endpoint: internal
     rabbit_init:
       services:
-      - service: oslo_messaging
-        endpoint: internal
+        - service: oslo_messaging
+          endpoint: internal
 
 # Names of secrets used  and environmental checks
 secrets:
@@ -319,11 +319,11 @@ pod:
     ranger_agent:
       uid: 1000
   affinity:
-      anti:
-        type:
-          default: preferredDuringSchedulingIgnoredDuringExecution
-        topologyKey:
-          default: kubernetes.io/hostname
+    anti:
+      type:
+        default: preferredDuringSchedulingIgnoredDuringExecution
+      topologyKey:
+        default: kubernetes.io/hostname
   mounts:
     ranger_agent_api:
       init_container: null
