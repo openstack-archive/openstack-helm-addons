@@ -93,9 +93,8 @@ conf:
     user: ranger_agent
     user_home: /home/ranger_agent
     ssh_key_file: ranger_agent
-    ssh_key_file_location: cert/ranger_agent
-    ssh_config_file_location: cert/config
-
+    ssh_key: null
+    ssh_config: null
 network:
   api:
     ingress:
@@ -230,7 +229,7 @@ endpoints:
       default: rabbitmq
     host_fqdn_override:
       default: null
-    path: /
+    path: /ranger-agent
     scheme: rabbit
     port:
       amqp:
@@ -240,7 +239,7 @@ endpoints:
   ranger_rds:
     name: rds-url
     hosts:
-      default: rds
+      default: rds-server
     host_fqdn_override:
       default: null
     path:
