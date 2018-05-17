@@ -14,11 +14,43 @@
     check:
       jobs:
         - openstack-helm-addons-linter
+        - openstack-helm-addons-ubuntu:
+            irrelevant-files:
+              - ^.*\.rst$
+              - ^doc/.*$
+              - ^releasenotes/.*$
     gate:
       jobs:
         - openstack-helm-addons-linter
+        - openstack-helm-addons-ubuntu:
+            irrelevant-files:
+              - ^.*\.rst$
+              - ^doc/.*$
+              - ^releasenotes/.*$
 
 - job:
     name: openstack-helm-addons-linter
     run: tools/gate/playbooks/zuul-linter.yaml
+    nodeset: openstack-helm-single-node
+
+- job:
+    name: openstack-helm-addons
+    roles:
+      - zuul: openstack/openstack-helm-infra
+    vars:
+      zuul_osh_infra_relative_path: ../openstack-helm-infra/
+    timeout: 7200
+    pre-run:
+      - tools/gate/playbooks/osh-infra-upgrade-host.yaml
+      - tools/gate/playbooks/osh-infra-deploy-docker.yaml
+      - tools/gate/playbooks/osh-infra-build.yaml
+      - tools/gate/playbooks/osh-infra-deploy-k8s.yaml
+    run: tools/gate/playbooks/osh-addons-check.yaml
+    post-run: tools/gate/playbooks/osh-infra-collect-logs.yaml
+    required-projects:
+      - openstack/openstack-helm-infra
+
+- job:
+    name: openstack-helm-addons-ubuntu
+    parent: openstack-helm-addons
     nodeset: openstack-helm-single-node
