@@ -43,9 +43,15 @@ images:
     ks_service: docker.io/openstackhelm/heat:newton
     rabbit_init: docker.io/rabbitmq:3.7-management
     ks_endpoints: docker.io/openstackhelm/heat:newton
-    dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.2.1
+    dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.3.1
     scripted_test: docker.io/openstackhelm/heat:newton
+    image_repo_sync: docker.io/docker:17.07.0
   pull_policy: "IfNotPresent"
+  local_registry:
+    active: false
+    exclude:
+      - dep_check
+      - image_repo_sync
 
 conf:
   paste:
@@ -105,6 +111,14 @@ network:
       port: 30010
 
 dependencies:
+  dynamic:
+    common:
+      local_image_registry:
+        jobs:
+          - ranger-agent-image-repo-sync
+        services:
+          - endpoint: node
+            service: local_image_registry
   static:
     api:
       jobs:
@@ -226,9 +240,9 @@ endpoints:
   ranger_rds:
     name: rds-url
     hosts:
-      default:
+      default: rds
     host_fqdn_override:
-      default: internal.ranger.com
+      default: null
     path:
       default: /v1/rds/status
     scheme:
@@ -428,6 +442,13 @@ pod:
         limits:
           memory: "1024Mi"
           cpu: "2000m"
+      image_repo_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
 
 manifests:
   configmap_bin: true
@@ -442,6 +463,7 @@ manifests:
   job_db_init: true
   job_db_sync: true
   job_db_drop: false
+  job_image_repo_sync: true
   job_ks_endpoints: true
   job_ks_service: true
   job_ks_user: true
