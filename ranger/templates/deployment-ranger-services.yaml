@@ -1,0 +1,167 @@
+{{/*
+Copyright 2017 The Openstack-Helm Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/}}
+{{- if .Values.manifests.deployment_ranger_services }}
+{{- $envAll := . }}
+
+{{- $mounts_ranger := .Values.pod.mounts.ranger.ranger }}
+{{- $mounts_ranger_init := .Values.pod.mounts.ranger.init_container }}
+
+{{- $serviceAccountName := "ranger-services" }}
+{{ tuple $envAll "ranger" $serviceAccountName | include "helm-toolkit.snippets.kubernetes_pod_rbac_serviceaccount" }}
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: {{ $serviceAccountName }}
+spec:
+  replicas: {{ .Values.pod.replicas.ranger }}
+{{ tuple $envAll | include "helm-toolkit.snippets.kubernetes_upgrades_deployment" | indent 2 }}
+  template:
+    metadata:
+      labels:
+{{ tuple $envAll "ranger" "ranger" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
+      annotations:
+        configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.utils.hash" }}
+        configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.utils.hash" }}
+    spec:
+      serviceAccountName: {{ $serviceAccountName }}
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
+      affinity:
+{{ tuple $envAll "ranger" "ranger" | include "helm-toolkit.snippets.kubernetes_pod_anti_affinity" | indent 8 }}
+      nodeSelector:
+        {{ .Values.labels.ranger.node_selector_key }}: {{ .Values.labels.ranger.node_selector_value }}
+      terminationGracePeriodSeconds: {{ .Values.pod.lifecycle.termination_grace_period.ranger.timeout | default "30" }}
+      initContainers:
+{{ tuple $envAll "ranger" $mounts_ranger_init | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
+      containers:
+        - name: ranger-services
+          image: {{ .Values.images.tags.ranger }}
+          imagePullPolicy: {{ .Values.images.pull_policy }}
+{{ tuple $envAll $envAll.Values.pod.resources.ranger | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
+          securityContext:
+            runAsUser: {{ .Values.pod.user.ranger.uid }}
+          env:
+            - name: USER
+              valueFrom:
+                secretKeyRef:
+                  name: ranger-ssh-secret
+                  key: USER
+            - name: USER_HOME
+              valueFrom:
+                secretKeyRef:
+                  name: ranger-ssh-secret
+                  key: USER_HOME
+            - name: SSH_KEY_FILE
+              valueFrom:
+                secretKeyRef:
+                  name: ranger-ssh-secret
+                  key: SSH_KEY_FILE
+            - name: SSH_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ranger-ssh-secret
+                  key: RANGER_PRIVATE_KEY
+            - name: SSH_KEY_CONFIGURATION
+              valueFrom:
+                secretKeyRef:
+                  name: ranger-ssh-secret
+                  key: RANGER_SSH_CONFIG
+            - name: REPO_USER
+              value: {{ .Values.conf.ranger.rds.repo_user }}
+            - name: REPO_ACCOUNT
+              value: {{ .Values.conf.ranger.rds.repo_email }}
+            - name: LOCAL_REPO
+              value: {{ .Values.conf.ranger.rds.repo_local_location }}
+            - name: REMOTE_REPO
+              value: {{ .Values.conf.ranger.rds.repo_remote_location }}
+          {{- if .Values.conf.ranger.DEFAULT.ranger_agent_https_enable }}
+            - name: CERT_LOCATION
+              value: {{ .Values.conf.ranger.DEFAULT.ranger_agent_client_cert_path }}
+            - name: CERT_FILE
+              valueFrom:
+                secretKeyRef:
+                  name: ranger-ssh-secret
+                  key: CERT_FILE
+          {{- end }}
+            - name: CMS_SERVICE_URL
+              value: {{ tuple "cms" "public" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }}
+          command:
+            - /tmp/ranger-services.sh
+            - start
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - stop
+          ports:
+            - name: cms
+              containerPort: {{ tuple "cms" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
+            - name: ims
+              containerPort: {{ tuple "ims" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
+            - name: fms
+              containerPort: {{ tuple "fms" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
+            - name: rms
+              containerPort: {{ tuple "rms" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
+            - name: rds
+              containerPort: {{ tuple "rds" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
+            - name: uuid
+              containerPort: {{ tuple "uuid" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
+            - name: audit
+              containerPort: {{ tuple "audit" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
+          livenessProbe:
+            initialDelaySeconds: 30
+            timeoutSeconds: 10
+            exec:
+              command:
+              - /tmp/health-check.sh
+              - allservicesliveness
+          readinessProbe:
+            initialDelaySeconds: 30
+            timeoutSeconds: 10
+            exec:
+              command:
+              - /tmp/health-check.sh
+              - allservicesreadiness
+          volumeMounts:
+            - name: pod-etc-ranger
+              mountPath: /etc/ranger
+            - name: ranger-bin
+              mountPath: /tmp/ranger-services.sh
+              subPath: ranger-services.sh
+              readOnly: true
+            - name: ranger-bin
+              mountPath: /tmp/health-check.sh
+              subPath: health-check.sh
+              readOnly: true
+            - name: ranger-etc
+              mountPath: /etc/ranger/ranger.conf
+              subPath: ranger.conf
+              readOnly: true
+{{ if $mounts_ranger.volumeMounts }}{{ toYaml $mounts_ranger.volumeMounts | indent 12 }}{{ end }}
+      volumes:
+        - name: pod-etc-ranger
+          emptyDir: {}
+        - name: ranger-bin
+          configMap:
+            name: ranger-bin
+            defaultMode: 0555
+        - name: ranger-etc
+          secret:
+            secretName: ranger-etc
+            defaultMode: 0444
+{{ if $mounts_ranger.volumes}}{{ toYaml $mounts_ranger.volumes | indent 8 }}{{ end }}
+{{- end }}

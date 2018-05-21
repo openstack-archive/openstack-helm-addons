@@ -104,6 +104,8 @@ spec:
            initialDelaySeconds: 30
            timeoutSeconds: 5
           volumeMounts:
+            - name: pod-etc-ranger-agent
+              mountPath: /etc/ranger-agent
             - name: ranger-agent-bin
               mountPath: /tmp/ranger-agent-engine.sh
               subPath: ranger-agent-engine.sh
@@ -122,13 +124,15 @@ spec:
               readOnly: true
 {{ if $mounts_ranger_agent_engine.volumeMounts }}{{ toYaml $mounts_ranger_agent_engine.volumeMounts | indent 12 }}{{ end }}
       volumes:
+        - name: pod-etc-ranger-agent
+          emptyDir: {}
         - name: ranger-agent-bin
           configMap:
             name: ranger-agent-bin
             defaultMode: 0555
         - name: ranger-agent-etc
-          configMap:
-            name: ranger-agent-etc
+          secret:
+            secretName: ranger-agent-etc
             defaultMode: 0444
 {{ if $mounts_ranger_agent_engine.volumes}}{{ toYaml $mounts_ranger_agent_engine.volumes | indent 8 }}{{ end }}
 {{- end }}

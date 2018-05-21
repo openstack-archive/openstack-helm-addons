@@ -14,17 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */}}
 
-{{- if .Values.manifests.secret_keystone }}
-{{- $envAll := . }}
-{{- range $key1, $userClass := tuple "admin" "ranger" "ranger_agent" }}
-{{- $secretName := index $envAll.Values.secrets.identity $userClass }}
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: {{ $secretName }}
-type: Opaque
-data:
-{{- tuple $userClass "internal" $envAll | include "helm-toolkit.snippets.keystone_secret_openrc" | indent 2 -}}
-{{- end }}
+{{- if .Values.manifests.job_db_sync }}
+{{- $dbSyncJob := dict "envAll" . "serviceName" "ranger" -}}
+{{ $dbSyncJob | include "helm-toolkit.manifests.job_db_sync" }}
 {{- end }}

@@ -18,50 +18,48 @@ limitations under the License.
 {{- $envAll := . }}
 
 {{- if empty .Values.conf.ranger_agent.database.connection -}}
-{{- tuple "oslo_db" "internal" "ranger_agent" "mysql" . | include "helm-toolkit.endpoints.authenticated_endpoint_uri_lookup"| set .Values.conf.ranger_agent.database "connection" | quote | trunc 0 -}}
+{{- $_ := tuple "oslo_db" "internal" "ranger_agent" "mysql" . | include "helm-toolkit.endpoints.authenticated_endpoint_uri_lookup"| set .Values.conf.ranger_agent.database "connection" -}}
 {{- end -}}
 {{- if empty .Values.conf.ranger_agent.DEFAULT.transport_url -}}
-{{- tuple "oslo_messaging" "internal" "ranger-agent" "amqp" . | include "helm-toolkit.endpoints.authenticated_endpoint_uri_lookup" | set .Values.conf.ranger_agent.DEFAULT "transport_url" | quote | trunc 0 -}}
+{{- $_ := tuple "oslo_messaging" "internal" "ranger-agent" "amqp" . | include "helm-toolkit.endpoints.authenticated_endpoint_uri_lookup" | set .Values.conf.ranger_agent.DEFAULT "transport_url" -}}
 {{- end -}}
 {{- if empty .Values.conf.ranger_agent.orm.rds_listener_endpoint -}}
-{{- tuple "ranger_rds" "public" "rds" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | set .Values.conf.ranger_agent.orm "rds_listener_endpoint" | quote | trunc 0 -}}
+{{- $_ := tuple "ranger_rds" "public" "rds" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | set .Values.conf.ranger_agent.orm "rds_listener_endpoint" -}}
 {{- end -}}
 {{- if empty .Values.conf.ranger_agent.DEFAULT.ord_server_url -}}
-{{- tuple "ranger_agent" "public" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | trimSuffix .Values.endpoints.ranger_agent.path.default | set .Values.conf.ranger_agent.DEFAULT "ord_server_url" | quote | trunc 0 -}}
+{{- $_ := tuple "ranger_agent" "public" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | trimSuffix .Values.endpoints.ranger_agent.path.default | set .Values.conf.ranger_agent.DEFAULT "ord_server_url" -}}
 {{- end -}}
 {{- if empty .Values.conf.ranger_agent.keystone_authtoken.username -}}
-{{- set .Values.conf.ranger_agent.keystone_authtoken "username" .Values.endpoints.identity.auth.ranger_agent.username | quote | trunc 0 -}}
+{{- $_ := set .Values.conf.ranger_agent.keystone_authtoken "username" .Values.endpoints.identity.auth.ranger_agent.username -}}
 {{- end -}}
 {{- if empty .Values.conf.ranger_agent.keystone_authtoken.password -}}
-{{- set .Values.conf.ranger_agent.keystone_authtoken "password" .Values.endpoints.identity.auth.ranger_agent.password | quote | trunc 0 -}}
+{{- $_ := set .Values.conf.ranger_agent.keystone_authtoken "password" .Values.endpoints.identity.auth.ranger_agent.password -}}
 {{- end -}}
 {{- if empty .Values.conf.ranger_agent.keystone_authtoken.project_name -}}
-{{- set .Values.conf.ranger_agent.keystone_authtoken "project_name" .Values.endpoints.identity.auth.ranger_agent.project_name | quote | trunc 0 -}}
+{{- $_ := set .Values.conf.ranger_agent.keystone_authtoken "project_name" .Values.endpoints.identity.auth.ranger_agent.project_name -}}
 {{- end -}}
 {{- if empty .Values.conf.ranger_agent.keystone_authtoken.auth_url -}}
-{{- tuple "identity" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | set .Values.conf.ranger_agent.keystone_authtoken "auth_url" | quote | trunc 0 -}}
+{{- $_ := tuple "identity" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | set .Values.conf.ranger_agent.keystone_authtoken "auth_url" -}}
 {{- end -}}
 {{- if empty .Values.conf.ranger_agent.DEFAULT.region -}}
-{{- set .Values.conf.ranger_agent.DEFAULT "region" .Values.endpoints.identity.auth.ranger_agent.region_name | quote | trunc 0 -}}
+{{- $_ := set .Values.conf.ranger_agent.DEFAULT "region" .Values.endpoints.identity.auth.ranger_agent.region_name -}}
 {{- end -}}
 {{- if empty .Values.conf.ranger_agent.api.port -}}
-{{- tuple "ranger-agent" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" | set .Values.conf.ranger_agent.api "port" | quote | trunc 0 -}}
+{{- $_ := tuple "ranger-agent" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" | set .Values.conf.ranger_agent.api "port" -}}
 {{- end -}}
 {{- if empty .Values.conf.ranger_agent.keystone_authtoken.project_domain_name -}}
-{{- set .Values.conf.ranger_agent.keystone_authtoken "project_domain_name" .Values.endpoints.identity.auth.ranger_agent.project_domain_name | quote | trunc 0 -}}
+{{- $_ := set .Values.conf.ranger_agent.keystone_authtoken "project_domain_name" .Values.endpoints.identity.auth.ranger_agent.project_domain_name -}}
 {{- end -}}
 {{- if empty .Values.conf.ranger_agent.keystone_authtoken.user_domain_name -}}
-{{- set .Values.conf.ranger_agent.keystone_authtoken "user_domain_name" .Values.endpoints.identity.auth.ranger_agent.user_domain_name | quote | trunc 0 -}}
+{{- $_ := set .Values.conf.ranger_agent.keystone_authtoken "user_domain_name" .Values.endpoints.identity.auth.ranger_agent.user_domain_name -}}
 {{- end -}}
-
 ---
 apiVersion: v1
-kind: ConfigMap
+kind: Secret
 metadata:
   name: ranger-agent-etc
+type: Opaque
 data:
-  api-paste.ini: |
-{{ include "helm-toolkit.utils.to_ini" .Values.conf.paste | indent 4 }}
-  ranger-agent.conf: |
-{{ include "helm-toolkit.utils.to_oslo_conf" .Values.conf.ranger_agent | indent 4 }}
+  api-paste.ini: {{ include "helm-toolkit.utils.to_ini" .Values.conf.paste | b64enc }}
+  ranger-agent.conf: {{ include "helm-toolkit.utils.to_oslo_conf" .Values.conf.ranger_agent | b64enc }}
 {{- end }}

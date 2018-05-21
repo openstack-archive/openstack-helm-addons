@@ -66,13 +66,13 @@ conf:
   ranger_agent:
     DEFAULT:
       api_workers: 1
-      debug: False
-      verbose: True
-      pecan_debug: True
+      debug: false
+      verbose: true
+      pecan_debug: true
       repo_connection_timeout: 120
       resource_creation_timeout_min: 1200
       resource_creation_timeout_max: 14400
-      log_dir: /var/log/ranger-agent
+      use_stderr: true
       api_paste_config: /etc/ranger-agent/api-paste.ini
       local_repo: ranger_repo
       resource_status_check_wait: 15
@@ -174,11 +174,16 @@ dependencies:
       services:
         - service: oslo_messaging
           endpoint: internal
+    image_repo_sync:
+      services:
+        - endpoint: internal
+          service: local_image_registry
 
 # Names of secrets used  and environmental checks
 secrets:
   identity:
     admin: admin
+    ranger: ranger-admin
     ranger_agent: ranger-agent-admin
   oslo_db:
     admin: ranger-agent-db-admin
@@ -186,12 +191,28 @@ secrets:
   oslo_messaging:
     admin: ranger-agent-rabbitmq-admin
     ranger-agent: ranger-agent-rabbitmq-user
+  tls:
+    ranger-agent:
+      api:
+        public: ranger-agent
 
 # typically overridden by environmental
 # values, but should include all endpoints
 # required by this chart
 endpoints:
   cluster_domain_suffix: cluster.local
+  local_image_registry:
+    name: docker-registry
+    namespace: docker-registry
+    hosts:
+      default: localhost
+      internal: docker-registry
+      node: localhost
+    host_fqdn_override:
+      default: null
+    port:
+      registry:
+        node: 5000
   oslo_db:
     auth:
       admin:
@@ -239,7 +260,8 @@ endpoints:
   ranger_rds:
     name: rds-url
     hosts:
-      default: rds-server
+      default: rds
+      public: rds-public
     host_fqdn_override:
       default: null
     path:
@@ -249,6 +271,7 @@ endpoints:
     port:
       rds:
         default: 8777
+        public: 80
   identity:
     name: keystone
     auth:
@@ -267,9 +290,23 @@ endpoints:
         project_name: service
         user_domain_name: default
         project_domain_name: default
+      ranger:
+        role:
+          - admin
+          - admin_support
+          - admin_viewer
+          - customer_creator
+          - flavor_creator
+          - admin_image
+        region_name: RegionOne
+        username: ranger-admin
+        password: password
+        project_name: service
+        user_domain_name: default
+        project_domain_name: default
     hosts:
-      default: keystone-api
-      public: keystone
+      default: keystone
+      internal: keystone-api
     host_fqdn_override:
       default: null
     path:
@@ -277,10 +314,9 @@ endpoints:
     scheme:
       default: http
     port:
-      admin:
-        default: 35357
       api:
         default: 80
+        internal: 5000
   image:
     name: glance
     hosts:
@@ -316,6 +352,13 @@ endpoints:
     hosts:
       default: ranger-api
       public: ranger-agent
+      # NOTE: this chart supports TLS for fqdn over-ridden public
+      # endpoints using the following format:
+      # public:
+      #   host: null
+      #   tls:
+      #     crt: null
+      #     key: null
     host_fqdn_override:
       default: null
     path:
@@ -459,6 +502,7 @@ manifests:
   secret_keystone: true
   secret_ssh_key: true
   secret_rabbitmq: true
+  secret_ingress_tls: true
   job_db_init: true
   job_db_sync: true
   job_db_drop: false
@@ -466,6 +510,7 @@ manifests:
   job_ks_endpoints: true
   job_ks_service: true
   job_ks_user: true
+  job_ks_user_ranger: true
   job_rabbit_init: true
   pdb_api: true
   pod_test: true
