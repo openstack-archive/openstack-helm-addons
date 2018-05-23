@@ -126,7 +126,7 @@ secrets:
     admin: artifactory-db-admin
     artifactory: artifactory-db-user
 
-# typically overriden by environmental values, but should include all
+# typically overridden by environmental values, but should include all
 # endpoints required by this chart
 endpoints:
   cluster_domain_suffix: cluster.local
