@@ -32,7 +32,7 @@ images:
     db_init: docker.io/kolla/ubuntu-source-heat-engine:3.0.3
     db_drop: docker.io/kolla/ubuntu-source-heat-engine:3.0.3
     dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.2.1
-    artifactory: quay.io/attcomdev/artifactory-pro-mysql:5.9.3
+    artifactory: quay.io/attcomdev/artifactory-pro-mysql:5.11.1
     image_repo_sync: docker.io/docker:17.07.0
   pull_policy: "IfNotPresent"
   local_registry:
