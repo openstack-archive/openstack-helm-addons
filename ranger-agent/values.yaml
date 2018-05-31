@@ -188,7 +188,7 @@ secrets:
     admin: ranger-agent-rabbitmq-admin
     ranger-agent: ranger-agent-rabbitmq-user
 
-# typically overriden by environmental
+# typically overridden by environmental
 # values, but should include all endpoints
 # required by this chart
 endpoints:
