@@ -90,6 +90,13 @@ chown_on_start: true
 pod:
   resources:
     enabled: false
+    artifactory:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "2048Mi"
+        cpu: "2000m"
     jobs:
       db_init:
         requests:
@@ -152,6 +159,11 @@ endpoints:
     name: artifactory
     hosts:
       default: artifactory
+
+conf:
+  artifactory:
+    env:
+      java_opts: "-Xms512m -Xmx2g"
 
 manifests:
   configmap_bin: true

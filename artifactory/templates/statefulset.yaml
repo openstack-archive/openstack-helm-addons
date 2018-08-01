@@ -54,6 +54,8 @@ spec:
                 key: DB_PASSWORD
           - name: DB_HOST
             value: {{ .Values.endpoints.oslo_db.hosts.default }}
+          - name: EXTRA_JAVA_OPTIONS
+            value: {{ .Values.conf.artifactory.env.java_opts }}
 {{ if .Values.bootstrap.master_key }}
           - name: ARTIFACTORY_MASTER_KEY
             value: {{ .Values.bootstrap.master_key }}
