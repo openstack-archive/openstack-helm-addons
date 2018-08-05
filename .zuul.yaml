@@ -34,10 +34,11 @@
     nodeset: openstack-helm-single-node
 
 - job:
-    name: openstack-helm-addons
+    name: openstack-helm-addons-ubuntu
     roles:
       - zuul: openstack/openstack-helm-infra
     vars:
+      osh_openstack_release: newton
       zuul_osh_infra_relative_path: ../openstack-helm-infra/
     timeout: 7200
     pre-run:
@@ -49,8 +50,4 @@
     post-run: tools/gate/playbooks/osh-infra-collect-logs.yaml
     required-projects:
       - openstack/openstack-helm-infra
-
-- job:
-    name: openstack-helm-addons-ubuntu
-    parent: openstack-helm-addons
-    nodeset: openstack-helm-single-node
+    nodeset: openstack-helm-ubuntu

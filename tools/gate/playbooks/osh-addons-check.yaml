@@ -19,4 +19,4 @@
         set -xe;
         ./tools/gate/scripts/build-charts.sh
       args:
-        chdir: "{{ zuul_osh_relative_path | default(zuul.project.src_dir) }}"
+        chdir: "{{ zuul_osh_addons_relative_path | default(zuul.project.src_dir) }}"
