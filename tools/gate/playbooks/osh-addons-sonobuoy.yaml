@@ -1,0 +1,8 @@
+- hosts: primary
+  tasks:
+    - name: Install and Test Sonobuoy Chart
+      shell: |
+        set -xe;
+        ./tools/gate/scripts/sonobuoy.sh
+      args:
+        chdir: "{{ zuul.project.src_dir }}"
