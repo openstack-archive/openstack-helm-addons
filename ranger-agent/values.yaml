@@ -295,8 +295,8 @@ endpoints:
           - admin
           - admin_support
           - admin_viewer
-          - customer_creator
-          - flavor_creator
+          - ranger_customer_creator
+          - ranger_flavor_creator
           - admin_image
         region_name: RegionOne
         username: ranger-admin
