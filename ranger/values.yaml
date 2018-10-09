@@ -32,8 +32,8 @@ labels:
 
 images:
   tags:
-    ranger: docker.io/hosingh000/ranger:0.1.0
-    ranger_db_sync: docker.io/hosingh000/ranger:0.1.0
+    ranger: quay.io/attcomdev/ranger:d376b6059733a4d9b0c47d1c8ba1edf98c8953e3
+    ranger_db_sync: quay.io/attcomdev/ranger:d376b6059733a4d9b0c47d1c8ba1edf98c8953e3
     db_drop: docker.io/openstackhelm/heat:newton
     db_init: docker.io/openstackhelm/heat:newton
     dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.3.1
@@ -54,27 +54,27 @@ conf:
       pecan_debug: True
       ranger_base: '/home/ranger/ranger'
       ssl_verify: False
-      log_location: '/var/log/ranger'
+      use_handlers: console
       ranger_agent_https_enable: False
       ranger_agent_client_cert_path: ''
     cms:
-      log: cms.log
+      log: null
     fms:
-      log: fms.log
+      log: null
     ims:
-      log: ims.log
+      log: null
     rms:
-      log: rms.log
+      log: null
     rds:
-      log: rds.log
+      log: null
       repo_local_location: /home/ranger/git_repo
       repo_remote_location: git@127.0.0.1:/home/repo/ORM.git
       repo_user: orm
       repo_email: orm@test.com
     uuid:
-      log: uuid.log
+      log: null
     audit:
-      log: audit.log
+      log: null
     cli:
       base_region: RegionOne
     database:
@@ -82,6 +82,7 @@ conf:
     keystone_authtoken:
       auth_type: password
       auth_version: v3
+      auth_enabled: False
   ssh:
     user: ranger
     user_home: /home/ranger

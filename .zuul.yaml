@@ -43,6 +43,7 @@
     vars:
       osh_openstack_release: newton
       zuul_osh_infra_relative_path: ../openstack-helm-infra/
+      zuul_osh_relative_path: ../openstack-helm/
     timeout: 7200
     pre-run:
       - tools/gate/playbooks/osh-infra-upgrade-host.yaml
@@ -53,6 +54,7 @@
     post-run: tools/gate/playbooks/osh-infra-collect-logs.yaml
     required-projects:
       - openstack/openstack-helm-infra
+      - openstack/openstack-helm
     nodeset: openstack-helm-ubuntu
 
 - job:
