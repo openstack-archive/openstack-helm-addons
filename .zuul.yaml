@@ -59,6 +59,19 @@
 
 - job:
     name: openstack-helm-addons-sonobuoy
-    parent: openstack-helm-multinode
+    required-projects:
+      - openstack/openstack-helm-infra
+    roles:
+      - zuul: openstack/openstack-helm-infra
+    timeout: 7200
+    vars:
+      osh_openstack_release: newton
+      zuul_osh_infra_relative_path: ../openstack-helm-infra/
     nodeset: openstack-helm-ubuntu
+    pre-run:
+      - tools/gate/playbooks/osh-infra-upgrade-host.yaml
+      - tools/gate/playbooks/osh-infra-deploy-docker.yaml
+      - tools/gate/playbooks/osh-infra-build.yaml
+      - tools/gate/playbooks/osh-infra-deploy-k8s.yaml
     run: tools/gate/playbooks/osh-addons-sonobuoy.yaml
+    post-run: tools/gate/playbooks/osh-infra-collect-logs.yaml
