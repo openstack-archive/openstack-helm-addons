@@ -84,6 +84,6 @@ spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: {{ .Values.volume.size }}
-      storageClassName: {{ .Values.volume.class_name }}
+          storage: {{ .Values.storage.requests.storage }}
+      storageClassName: {{ .Values.storage.storage_class }}
 {{- end }}
