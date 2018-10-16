@@ -12,24 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Default values for Sonobuoy.
-# This is a YAML-formatted file.
-# Declare name/value pairs to be passed into your templates.
-# name: value
+images:
+  tags:
+    sonobuoy_api: gcr.io/heptio-images/sonobuoy:v0.11.4
+    systemd_logs: gcr.io/heptio-images/sonobuoy-plugin-systemd-logs:v0.1
+  pull_policy: "IfNotPresent"
+  local_registry:
+    active: false
+    exclude: []
 
 labels:
   api:
     node_selector_key: openstack-control-plane
     node_selector_value: enabled
 
-images:
-  tags:
-    sonobuoy_api: gcr.io/heptio-images/sonobuoy:v0.11.4
-    systemd_logs: gcr.io/heptio-images/sonobuoy-plugin-systemd-logs:v0.1
-  pull_policy: IfNotPresent
-  local_registry:
-    active: false
-    exclude: []
+dependencies:
+  dynamic: {}
+  static: {}
+
+manifests:
+  configmap_bin: true
+  configmap_plugins: true
+  pod_api: true
+  secret_etc: true
 
 conf:
   sonobuoy:
@@ -63,22 +68,22 @@ conf:
           plugin-name: systemd-logs
           result-type: systemd_logs
         spec:
-          command:
-          - sh
-          - -c
-          - /get_systemd_logs.sh && sleep 3600
+          name: sonobuoy-systemd-logs-config
           env:
+          - name: CHROOT_DIR
+            value: /node
           - name: NODE_NAME
             valueFrom:
               fieldRef:
                 fieldPath: spec.nodeName
           - name: RESULTS_DIR
             value: /tmp/results
-          - name: CHROOT_DIR
-            value: /node
           image: {{ .Values.images.tags.systemd_logs }}
           imagePullPolicy: Always
-          name: sonobuoy-systemd-logs-config
+          command:
+          - sh
+          - -c
+          - /get_systemd_logs.sh && sleep 3600
           securityContext:
             privileged: true
           volumeMounts:
@@ -88,13 +93,3 @@ conf:
           - mountPath: /node
             name: root
             readOnly: false
-
-dependencies:
-  dynamic: {}
-  static: {}
-
-manifests:
-  configmap_bin: true
-  configmap_plugins: true
-  pod_api: true
-  secret_etc: true
