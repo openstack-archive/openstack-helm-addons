@@ -12,172 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Default values for ranger.
-# This is a YAML-formatted file.
-# Declare name/value pairs to be passed into your templates.
-# name: value
-
-release_group: null
-
-labels:
-  ranger:
-    node_selector_key: openstack-control-plane
-    node_selector_value: enabled
-  job:
-    node_selector_key: openstack-control-plane
-    node_selector_value: enabled
-  test:
-    node_selector_key: openstack-control-plane
-    node_selector_value: enabled
-
 images:
   tags:
-    ranger: quay.io/attcomdev/ranger:d376b6059733a4d9b0c47d1c8ba1edf98c8953e3
-    ranger_db_sync: quay.io/attcomdev/ranger:d376b6059733a4d9b0c47d1c8ba1edf98c8953e3
     db_drop: docker.io/openstackhelm/heat:newton
     db_init: docker.io/openstackhelm/heat:newton
     dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.3.1
-    scripted_test: docker.io/openstackhelm/heat:newton
     image_repo_sync: docker.io/docker:17.07.0
+    ranger: quay.io/attcomdev/ranger:d376b6059733a4d9b0c47d1c8ba1edf98c8953e3
+    ranger_db_sync: quay.io/attcomdev/ranger:d376b6059733a4d9b0c47d1c8ba1edf98c8953e3
+    scripted_test: docker.io/openstackhelm/heat:newton
   pull_policy: "IfNotPresent"
   local_registry:
     active: false
     exclude:
       - dep_check
       - image_repo_sync
-conf:
+
+labels:
+  job:
+    node_selector_key: openstack-control-plane
+    node_selector_value: enabled
   ranger:
-    DEFAULT:
-      protocol: http
-      log_level: INFO
-      orm_host: 0.0.0.0
-      pecan_debug: True
-      ranger_base: '/home/ranger/ranger'
-      ssl_verify: False
-      use_handlers: console
-      ranger_agent_https_enable: False
-      ranger_agent_client_cert_path: ''
-    cms:
-      log: null
-    fms:
-      log: null
-    ims:
-      log: null
-    rms:
-      log: null
-    rds:
-      log: null
-      repo_local_location: /home/ranger/git_repo
-      repo_remote_location: git@127.0.0.1:/home/repo/ORM.git
-      repo_user: orm
-      repo_email: orm@test.com
-    uuid:
-      log: null
-    audit:
-      log: null
-    cli:
-      base_region: RegionOne
-    database:
-      max_retries: -1
-    keystone_authtoken:
-      auth_type: password
-      auth_version: v3
-      auth_enabled: False
-  ssh:
-    user: ranger
-    user_home: /home/ranger
-    ssh_key_file: ranger
-    ssh_key: null
-    ssh_config: null
-  cert:
-    ranger_agent_client_cert: null
-
-network:
-  cms:
-    ingress:
-      public: true
-      classes:
-        namespace: "nginx"
-        cluster: "nginx-cluster"
-      annotations:
-        nginx.ingress.kubernetes.io/rewrite-target: /
-    external_policy_local: false
-    node_port:
-      enabled: false
-      port: 37080
-  fms:
-    ingress:
-      public: true
-      classes:
-        namespace: "nginx"
-        cluster: "nginx-cluster"
-      annotations:
-        nginx.ingress.kubernetes.io/rewrite-target: /
-    external_policy_local: false
-    node_port:
-      enabled: false
-      port: 38082
-  ims:
-    ingress:
-      public: true
-      classes:
-        namespace: "nginx"
-        cluster: "nginx-cluster"
-      annotations:
-        nginx.ingress.kubernetes.io/rewrite-target: /
-    external_policy_local: false
-    node_port:
-      enabled: false
-      port: 38084
-  rms:
-    ingress:
-      public: true
-      classes:
-        namespace: "nginx"
-        cluster: "nginx-cluster"
-      annotations:
-        nginx.ingress.kubernetes.io/rewrite-target: /
-    external_policy_local: false
-    node_port:
-      enabled: false
-      port: 38080
-  audit:
-    ingress:
-      public: true
-      classes:
-        namespace: "nginx"
-        cluster: "nginx-cluster"
-      annotations:
-        nginx.ingress.kubernetes.io/rewrite-target: /
-    external_policy_local: false
-    node_port:
-      enabled: false
-      port: 38776
-  rds:
-    ingress:
-      public: true
-      classes:
-        namespace: "nginx"
-        cluster: "nginx-cluster"
-      annotations:
-        nginx.ingress.kubernetes.io/rewrite-target: /
-    external_policy_local: false
-    node_port:
-      enabled: false
-      port: 38777
-  uuid:
-    ingress:
-      public: true
-      classes:
-        namespace: "nginx"
-        cluster: "nginx-cluster"
-      annotations:
-        nginx.ingress.kubernetes.io/rewrite-target: /
-    external_policy_local: false
-    node_port:
-      enabled: false
-      port: 38090
-
+    node_selector_key: openstack-control-plane
+    node_selector_value: enabled
+  test:
+    node_selector_key: openstack-control-plane
+    node_selector_value: enabled
 
 dependencies:
   dynamic:
@@ -189,9 +49,11 @@ dependencies:
           - endpoint: node
             service: local_image_registry
   static:
-    ranger:
-      jobs:
-        - ranger-db-sync
+    db_drop:
+      services:
+        - service: oslo_db
+          endpoint: internal
+    db_init:
       services:
         - service: oslo_db
           endpoint: internal
@@ -201,18 +63,88 @@ dependencies:
       services:
         - service: oslo_db
           endpoint: internal
-    db_init:
-      services:
-        - service: oslo_db
-          endpoint: internal
-    db_drop:
-      services:
-        - service: oslo_db
-          endpoint: internal
     image_repo_sync:
       services:
         - service: local_image_registry
           endpoint: internal
+    ranger:
+      jobs:
+        - ranger-db-sync
+      services:
+        - service: oslo_db
+          endpoint: internal
+
+pod:
+  user:
+    ranger:
+      uid: 1000
+  affinity:
+    anti:
+      type:
+        default: preferredDuringSchedulingIgnoredDuringExecution
+      topologyKey:
+        default: kubernetes.io/hostname
+  mounts:
+    ranger:
+      init_container: null
+      ranger:
+    ranger_tests:
+      init_container: null
+      ranger_tests:
+  replicas:
+    ranger: 1
+  lifecycle:
+    upgrades:
+      deployments:
+        revision_history: 3
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 3
+    disruption_budget:
+      ranger:
+        min_available: 0
+    termination_grace_period:
+      ranger:
+        timeout: 30
+  resources:
+    enabled: false
+    jobs:
+      db_drop:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_init:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      db_sync:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      tests:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+    ranger:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
 
 # Names of secrets used  and environmental checks
 secrets:
@@ -229,12 +161,12 @@ secrets:
     ims:
       ims:
         public: ims
-    rms:
-      rms:
-        public: rms
     rds:
       rds:
         public: rds
+    rms:
+      rms:
+        public: rms
 
 # typically overriden by environmental
 # values, but should include all endpoints
@@ -252,32 +184,20 @@ endpoints:
       default: null
     port:
       registry:
-      node: 5000
-  oslo_db:
-    auth:
-      admin:
-        username: root
-        password: password
-      ranger:
-        username: ranger
-        password: password
+        node: 5000
+  audit:
+    name: audit
     hosts:
-      default: mariadb
+      default: audit-api
     host_fqdn_override:
       default: null
-    path: /orm
-    scheme: mysql+pymysql
+    path:
+      default: /v1/audit/transaction
+    scheme:
+      default: http
     port:
-      mysql:
-        default: 3306
-  oslo_cache:
-    hosts:
-      default: memcached
-    host_fqdn_override:
-      default: null
-    port:
-      memcache:
-        default: 11211
+      api:
+        default: 7008
   cms:
     name: cms
     hosts:
@@ -315,77 +235,6 @@ endpoints:
       api:
         default: 8082
         public: 80
-  ims:
-    name: ims
-    hosts:
-      default: ims-api
-      public: ims
-    host_fqdn_override:
-      default: null
-    path:
-      default: /v1/orm/images
-    scheme:
-      default: http
-    port:
-      api:
-        default: 8084
-        public: 80
-  rms:
-    name: rms
-    hosts:
-      default: rms-api
-      public: rms
-    host_fqdn_override:
-      default: null
-    path:
-      default: /v2/orm/regions
-    scheme:
-      default: http
-    port:
-      api:
-        default: 7003
-        public: 80
-  rds:
-    name: rds
-    hosts:
-      default: rds-api
-      public: rds
-    host_fqdn_override:
-      default: null
-    path:
-      default: /v1/rds/status
-    scheme:
-      default: http
-    port:
-      api:
-        default: 8777
-        public: 80
-  uuid:
-    name: uuid
-    hosts:
-      default: uuid-api
-    host_fqdn_override:
-      default: null
-    path:
-      default: /v1/uuids
-    scheme:
-      default: http
-    port:
-      api:
-        default: 7001
-  audit:
-    name: audit
-    hosts:
-      default: audit-api
-    host_fqdn_override:
-      default: null
-    path:
-      default: /v1/audit/transaction
-    scheme:
-      default: http
-    port:
-      api:
-        default: 7008
   identity:
     name: keystone
     auth:
@@ -410,78 +259,175 @@ endpoints:
       api:
         default: 80
         internal: 5000
+  ims:
+    name: ims
+    hosts:
+      default: ims-api
+      public: ims
+    host_fqdn_override:
+      default: null
+    path:
+      default: /v1/orm/images
+    scheme:
+      default: http
+    port:
+      api:
+        default: 8084
+        public: 80
+  oslo_cache:
+    hosts:
+      default: memcached
+    host_fqdn_override:
+      default: null
+    port:
+      memcache:
+        default: 11211
+  oslo_db:
+    auth:
+      admin:
+        username: root
+        password: password
+      ranger:
+        username: ranger
+        password: password
+    hosts:
+      default: mariadb
+    host_fqdn_override:
+      default: null
+    path: /orm
+    scheme: mysql+pymysql
+    port:
+      mysql:
+        default: 3306
+  rds:
+    name: rds
+    hosts:
+      default: rds-api
+      public: rds
+    host_fqdn_override:
+      default: null
+    path:
+      default: /v1/rds/status
+    scheme:
+      default: http
+    port:
+      api:
+        default: 8777
+        public: 80
+  rms:
+    name: rms
+    hosts:
+      default: rms-api
+      public: rms
+    host_fqdn_override:
+      default: null
+    path:
+      default: /v2/orm/regions
+    scheme:
+      default: http
+    port:
+      api:
+        default: 7003
+        public: 80
+  uuid:
+    name: uuid
+    hosts:
+      default: uuid-api
+    host_fqdn_override:
+      default: null
+    path:
+      default: /v1/uuids
+    scheme:
+      default: http
+    port:
+      api:
+        default: 7001
 
-pod:
-  user:
-    ranger:
-      uid: 1000
-  affinity:
-    anti:
-      type:
-        default: preferredDuringSchedulingIgnoredDuringExecution
-      topologyKey:
-        default: kubernetes.io/hostname
-  mounts:
-    ranger:
-      init_container: null
-      ranger:
-    ranger_tests:
-      init_container: null
-      ranger_tests:
-  replicas:
-    ranger: 1
-  lifecycle:
-    upgrades:
-      deployments:
-        revision_history: 3
-        pod_replacement_strategy: RollingUpdate
-        rolling_update:
-          max_unavailable: 1
-          max_surge: 3
-    disruption_budget:
-      ranger:
-        min_available: 0
-    termination_grace_period:
-      ranger:
-        timeout: 30
-  resources:
-    enabled: false
-    ranger:
-      requests:
-        memory: "128Mi"
-        cpu: "100m"
-      limits:
-        memory: "1024Mi"
-        cpu: "2000m"
-    jobs:
-      db_init:
-        requests:
-          memory: "128Mi"
-          cpu: "100m"
-        limits:
-          memory: "1024Mi"
-          cpu: "2000m"
-      db_sync:
-        requests:
-          memory: "128Mi"
-          cpu: "100m"
-        limits:
-          memory: "1024Mi"
-          cpu: "2000m"
-      db_drop:
-        requests:
-          memory: "128Mi"
-          cpu: "100m"
-        limits:
-          memory: "1024Mi"
-          cpu: "2000m"
-      tests:
-        requests:
-          memory: "128Mi"
-          cpu: "100m"
-        limits:
-          memory: "1024Mi"
-          cpu: "2000m"
+network:
+  audit:
+    ingress:
+      public: true
+      classes:
+        namespace: "nginx"
+        cluster: "nginx-cluster"
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /
+    external_policy_local: false
+    node_port:
+      enabled: false
+      port: 38776
+  cms:
+    ingress:
+      public: true
+      classes:
+        namespace: "nginx"
+        cluster: "nginx-cluster"
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /
+    external_policy_local: false
+    node_port:
+      enabled: false
+      port: 37080
+  fms:
+    ingress:
+      public: true
+      classes:
+        namespace: "nginx"
+        cluster: "nginx-cluster"
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /
+    external_policy_local: false
+    node_port:
+      enabled: false
+      port: 38082
+  ims:
+    ingress:
+      public: true
+      classes:
+        namespace: "nginx"
+        cluster: "nginx-cluster"
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /
+    external_policy_local: false
+    node_port:
+      enabled: false
+      port: 38084
+  rds:
+    ingress:
+      public: true
+      classes:
+        namespace: "nginx"
+        cluster: "nginx-cluster"
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /
+    external_policy_local: false
+    node_port:
+      enabled: false
+      port: 38777
+  rms:
+    ingress:
+      public: true
+      classes:
+        namespace: "nginx"
+        cluster: "nginx-cluster"
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /
+    external_policy_local: false
+    node_port:
+      enabled: false
+      port: 38080
+  uuid:
+    ingress:
+      public: true
+      classes:
+        namespace: "nginx"
+        cluster: "nginx-cluster"
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /
+    external_policy_local: false
+    node_port:
+      enabled: false
+      port: 38090
 
 manifests:
   configmap_bin: true
@@ -489,28 +435,74 @@ manifests:
   deployment_ranger_services: true
   ingress_cms: true
   ingress_fms: true
-  ingress_rms: true
   ingress_ims: true
   ingress_rds: true
+  ingress_rms: true
   secret_db: true
-  secret_ssh_key: true
   secret_ingress_tls: true
+  secret_ssh_key: true
+  job_db_drop: false
   job_db_init: true
   job_db_sync: true
-  job_db_drop: false
   job_image_repo_sync: true
   pdb_api: true
   pod_test: true
   service_ingress_cms: true
   service_ingress_fms: true
   service_ingress_ims: true
-  service_ingress_rms: true
   service_ingress_rds: true
+  service_ingress_rms: true
+  service_audit: true
   service_cms: true
   service_fms: true
   service_ims: true
-  service_rms: true
   service_rds: true
+  service_rms: true
   service_uuid: true
-  service_audit: true
 
+conf:
+  ranger:
+    DEFAULT:
+      protocol: http
+      log_level: INFO
+      orm_host: 0.0.0.0
+      pecan_debug: True
+      ranger_base: '/home/ranger/ranger'
+      ssl_verify: False
+      use_handlers: console
+      ranger_agent_https_enable: False
+      ranger_agent_client_cert_path: ''
+    audit:
+      log: null
+    cli:
+      base_region: RegionOne
+    cms:
+      log: null
+    database:
+      max_retries: -1
+    fms:
+      log: null
+    ims:
+      log: null
+    keystone_authtoken:
+      auth_type: password
+      auth_version: v3
+      auth_enabled: False
+    rds:
+      log: null
+      repo_local_location: /home/ranger/git_repo
+      repo_remote_location: git@127.0.0.1:/home/repo/ORM.git
+      repo_user: orm
+      repo_email: orm@test.com
+    rms:
+      log: null
+    uuid:
+      log: null
+  ssh:
+    user: ranger
+    user_home: /home/ranger
+    ssh_key_file: ranger
+    ssh_key: null
+    ssh_config: null
+  cert:
+    ranger_agent_client_cert: null
