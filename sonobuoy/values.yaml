@@ -97,6 +97,7 @@ manifests:
   pod_api: true
   secret_etc: true
   secret_keystone: true
+  serviceaccount_readonly: false
 
 conf:
   publish_results: true
