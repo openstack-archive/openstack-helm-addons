@@ -221,19 +221,19 @@ secrets:
     ranger: ranger-db-user
   tls:
     cms:
-      api:
+      cms:
         public: cms
     fms:
-      api:
+      fms:
         public: fms
     ims:
-      api:
+      ims:
         public: ims
     rms:
-      api:
+      rms:
         public: rms
     rds:
-      api:
+      rds:
         public: rds
 
 # typically overriden by environmental
@@ -491,8 +491,7 @@ manifests:
   ingress_fms: true
   ingress_rms: true
   ingress_ims: true
-  ingress_uuid: true
-  ingress_audit: true
+  ingress_rds: true
   secret_db: true
   secret_ssh_key: true
   secret_ingress_tls: true
