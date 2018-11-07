@@ -39,13 +39,3 @@ limitations under the License.
 {{ $ingressOpts | include "helm-toolkit.manifests.ingress" }}
 {{- end }}
 
-{{- if .Values.manifests.ingress_uuid }}
-{{- $ingressOpts := dict "envAll" . "backendService" "uuid" "backendServiceType" "uuid" "backendPort" "uuid" -}}
-{{ $ingressOpts | include "helm-toolkit.manifests.ingress" }}
-{{- end }}
-
-{{- if .Values.manifests.ingress_audit }}
-{{- $ingressOpts := dict "envAll" . "backendService" "audit" "backendServiceType" "audit" "backendPort" "audit" -}}
-{{ $ingressOpts | include "helm-toolkit.manifests.ingress" }}
-{{- end }}
-
