@@ -58,6 +58,8 @@ metadata:
 spec:
   nodeSelector:
     {{ .Values.labels.api.node_selector_key }}: {{ .Values.labels.api.node_selector_value}}
+  initContainers:
+{{ tuple $envAll "sonobuoy" list | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 4 }}
   containers:
   - name: kube-sonobuoy
     env:
@@ -79,6 +81,23 @@ spec:
       mountPath: /run_master.sh
       subPath: run_master.sh
       readOnly: true
+  - name: results-publisher
+{{ tuple $envAll "results_publisher" | include "helm-toolkit.snippets.image" | indent 4 }}
+    env:
+{{- with $env := dict "ksUserSecret" $envAll.Values.secrets.identity.sonobuoy }}
+{{- include "helm-toolkit.snippets.keystone_openrc_env_vars" $env | indent 4 }}
+{{- end }}
+    - name: RESULTS_DIR
+      value: {{ .Values.conf.sonobuoy.ResultsDir }}
+    command:
+    - /publish_results.sh
+    volumeMounts:
+    - name: sonobuoy-bin
+      mountPath: /publish_results.sh
+      subPath: publish_results.sh
+      readOnly: true
+    - mountPath: {{ .Values.conf.sonobuoy.ResultsDir }}
+      name: sonobuoy-output
   restartPolicy: Never
   serviceAccountName: {{ $serviceAccountName }}
   volumes:

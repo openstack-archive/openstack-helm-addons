@@ -1,5 +1,91 @@
 - hosts: primary
   tasks:
+    - name: Build Charts
+      shell: |
+        set -xe;
+        ./tools/gate/scripts/010-setup-client.sh
+      args:
+        chdir: "{{ zuul_osh_addons_relative_path | default(zuul.project.src_dir) }}"
+    - name: Deploy MariaDB
+      environment:
+        OSH_EXTRA_HELM_ARGS: "{{ zuul_osh_extra_helm_args_relative_path | default('') }}"
+        OSH_INFRA_PATH: "{{ zuul_osh_infra_relative_path | default('') }}"
+        zuul_site_mirror_fqdn: "{{ zuul_site_mirror_fqdn }}"
+      shell: |
+        set -xe;
+        ./tools/gate/scripts/020-deploy-mariadb.sh
+      args:
+        chdir: "{{ zuul_osh_addons_relative_path | default(zuul.project.src_dir) }}"
+    - name: Deploy RabbitMQ
+      environment:
+        OSH_EXTRA_HELM_ARGS: "{{ zuul_osh_extra_helm_args_relative_path | default('') }}"
+        OSH_INFRA_PATH: "{{ zuul_osh_infra_relative_path | default('') }}"
+        zuul_site_mirror_fqdn: "{{ zuul_site_mirror_fqdn }}"
+      shell: |
+        set -xe;
+        ./tools/gate/scripts/030-deploy-rabbitmq.sh
+      args:
+        chdir: "{{ zuul_osh_addons_relative_path | default(zuul.project.src_dir) }}"
+    - name: Deploy Memcached
+      environment:
+        OSH_EXTRA_HELM_ARGS: "{{ zuul_osh_extra_helm_args_relative_path | default('') }}"
+        OSH_INFRA_PATH: "{{ zuul_osh_infra_relative_path | default('') }}"
+        zuul_site_mirror_fqdn: "{{ zuul_site_mirror_fqdn }}"
+      shell: |
+        set -xe;
+        ./tools/gate/scripts/040-deploy-memcached.sh
+      args:
+        chdir: "{{ zuul_osh_addons_relative_path | default(zuul.project.src_dir) }}"
+    - name: Deploy Keystone
+      environment:
+        OSH_EXTRA_HELM_ARGS: "{{ zuul_osh_extra_helm_args_relative_path | default('') }}"
+        OSH_PATH: "{{ zuul_osh_relative_path | default('') }}"
+        zuul_site_mirror_fqdn: "{{ zuul_site_mirror_fqdn }}"
+      shell: |
+        set -xe;
+        ./tools/gate/scripts/050-deploy-keystone.sh
+      args:
+        chdir: "{{ zuul_osh_addons_relative_path | default(zuul.project.src_dir) }}"
+    - name: Deploy Ceph
+      environment:
+        OSH_EXTRA_HELM_ARGS: "{{ zuul_osh_extra_helm_args_relative_path | default('') }}"
+        OSH_INFRA_PATH: "{{ zuul_osh_infra_relative_path | default('') }}"
+        zuul_site_mirror_fqdn: "{{ zuul_site_mirror_fqdn }}"
+      shell: |
+        set -xe;
+        ./tools/gate/scripts/080-deploy-ceph.sh
+      args:
+        chdir: "{{ zuul_osh_addons_relative_path | default(zuul.project.src_dir) }}"
+    - name: Activate Ceph Namespace
+      environment:
+        OSH_EXTRA_HELM_ARGS: "{{ zuul_osh_extra_helm_args_relative_path | default('') }}"
+        OSH_INFRA_PATH: "{{ zuul_osh_infra_relative_path | default('') }}"
+        zuul_site_mirror_fqdn: "{{ zuul_site_mirror_fqdn }}"
+      shell: |
+        set -xe;
+        ./tools/gate/scripts/085-ceph-ns-activate.sh
+      args:
+        chdir: "{{ zuul_osh_addons_relative_path | default(zuul.project.src_dir) }}"
+    - name: Deploy RadosGW
+      environment:
+        OSH_EXTRA_HELM_ARGS: "{{ zuul_osh_extra_helm_args_relative_path | default('') }}"
+        OSH_INFRA_PATH: "{{ zuul_osh_infra_relative_path | default('') }}"
+        zuul_site_mirror_fqdn: "{{ zuul_site_mirror_fqdn }}"
+      shell: |
+        set -xe;
+        ./tools/gate/scripts/090-radosgw-openstack.sh
+      args:
+        chdir: "{{ zuul_osh_addons_relative_path | default(zuul.project.src_dir) }}"
+    - name: Deploy Ingress
+      environment:
+        OSH_EXTRA_HELM_ARGS: "{{ zuul_osh_extra_helm_args_relative_path | default('') }}"
+        OSH_INFRA_PATH: "{{ zuul_osh_infra_relative_path | default('') }}"
+        zuul_site_mirror_fqdn: "{{ zuul_site_mirror_fqdn }}"
+      shell: |
+        set -xe;
+        ./tools/gate/scripts/100-ingress.sh
+      args:
+        chdir: "{{ zuul_osh_addons_relative_path | default(zuul.project.src_dir) }}"
     - name: Install and Test Sonobuoy Chart
       shell: |
         set -xe;

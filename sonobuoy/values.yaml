@@ -14,6 +14,9 @@
 
 images:
   tags:
+    dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.3.1
+    ks_user: docker.io/openstackhelm/heat:ocata
+    results_publisher: docker.io/openstackhelm/heat:ocata
     sonobuoy_api: gcr.io/heptio-images/sonobuoy:v0.11.4
     systemd_logs: gcr.io/heptio-images/sonobuoy-plugin-systemd-logs:v0.1
   pull_policy: "IfNotPresent"
@@ -25,18 +28,82 @@ labels:
   api:
     node_selector_key: openstack-control-plane
     node_selector_value: enabled
+  job:
+    node_selector_key: openstack-control-plane
+    node_selector_value: enabled
 
 dependencies:
   dynamic: {}
-  static: {}
+  static:
+    sonobuoy:
+      jobs:
+      - sonobuoy-ks-user
+
+pod:
+  resources:
+    enabled: false
+    jobs:
+      ks_user:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "128Mi"
+          cpu: "2000m"
+
+secrets:
+  identity:
+    admin: sonobuoy-keystone-admin
+    sonobuoy: sonobuoy-keystone-user
+
+endpoints:
+  cluster_domain_suffix: cluster.local
+  identity:
+    name: keystone
+    auth:
+      admin:
+        region_name: RegionOne
+        username: admin
+        password: password
+        project_name: admin
+        user_domain_name: default
+        project_domain_name: default
+      sonobuoy:
+        role: admin
+        region_name: RegionOne
+        username: sonobuoy
+        password: password
+        project_name: sonobuoy
+        user_domain_name: sonobuoy
+        project_domain_name: sonobuoy
+    hosts:
+      default: keystone
+      internal: keystone-api
+    host_fqdn_override:
+      default: null
+    path:
+      default: /v3
+    scheme:
+      default: http
+    port:
+      api:
+        default: 80
+        internal: 5000
 
 manifests:
   configmap_bin: true
   configmap_plugins: true
+  job_ks_user: true
   pod_api: true
   secret_etc: true
+  secret_keystone: true
 
 conf:
+  swift:
+    container_name: sonobuoy
+    # delete objects after 1 month (60 * 60 * 24 * 30 seconds)
+    delete_objects_after_seconds: "2592000"
+    object_name_prefix: ""
   sonobuoy:
     Description: "sonobuoy run for scanner.heptio.com"
     Version: v0.11.4

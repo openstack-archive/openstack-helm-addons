@@ -17,5 +17,7 @@
 set -xe
 
 helm dependency update sonobuoy
-helm install sonobuoy --namespace=heptio-sonobuoy --name=sonobuoy
+helm upgrade --install sonobuoy sonobuoy \
+    --namespace=heptio-sonobuoy \
+    --set endpoints.identity.namespace=openstack
 helm test sonobuoy

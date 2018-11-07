@@ -14,18 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */}}
 
-{{- if .Values.manifests.configmap_bin }}
-{{- $envAll := . }}
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: sonobuoy-bin
-data:
-  ks-user.sh: |
-{{- include "helm-toolkit.scripts.keystone_user" $envAll | indent 4 }}
-  publish_results.sh: |
-{{ tuple "bin/_publish_results.sh.tpl" $envAll | include "helm-toolkit.utils.template" | indent 4 }}
-  run_master.sh: |
-{{ tuple "bin/_run_master.sh.tpl" $envAll | include "helm-toolkit.utils.template" | indent 4 }}
+{{- if .Values.manifests.job_ks_user }}
+{{- $ksUserJob := dict "envAll" . "serviceName" "sonobuoy" -}}
+{{ $ksUserJob | include "helm-toolkit.manifests.job_ks_user" }}
 {{- end }}
