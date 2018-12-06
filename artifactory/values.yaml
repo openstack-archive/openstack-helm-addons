@@ -12,27 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Default values for artifactory.
-# This is a YAML-formatted file.
-# Declare name/value pairs to be passed into your templates.
-# name: value
-
-labels:
-  server:
-    node_selector_key: openstack-control-plane
-    node_selector_value: enabled
-  job:
-    node_selector_key: openstack-control-plane
-    node_selector_value: enabled
-
-release_group: null
-
 images:
   tags:
-    db_init: docker.io/kolla/ubuntu-source-heat-engine:3.0.3
-    db_drop: docker.io/kolla/ubuntu-source-heat-engine:3.0.3
-    dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.2.1
     artifactory: quay.io/attcomdev/artifactory-pro-mysql:5.11.1
+    db_drop: docker.io/openstackhelm/heat:newton
+    db_init: docker.io/openstackhelm/heat:newton
+    dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.2.1
     image_repo_sync: docker.io/docker:17.07.0
   pull_policy: "IfNotPresent"
   local_registry:
@@ -41,18 +26,13 @@ images:
       - dep_check
       - image_repo_sync
 
-network:
-  node_ports:
-    enabled: false
-  http:
-    port: 8081
-    node_port: 31672
-  docker:
-    port: 5050
-    node_port: 31777
-  secure:
-    port: 5052
-    node_port: 31776
+labels:
+  job:
+    node_selector_key: openstack-control-plane
+    node_selector_value: enabled
+  server:
+    node_selector_key: openstack-control-plane
+    node_selector_value: enabled
 
 dependencies:
   dynamic:
@@ -64,12 +44,6 @@ dependencies:
           - endpoint: node
             service: local_image_registry
   static:
-    server:
-      services:
-        - endpoint: internal
-          service: oslo_cache
-        - endpoint: internal
-          service: oslo_db
     db_drop:
       services:
         - endpoint: internal
@@ -78,16 +52,22 @@ dependencies:
       services:
         - endpoint: internal
           service: oslo_db
-
-storage: pvc
-
-volume:
-  size: 100Gi
-  class_name: general
-
-chown_on_start: true
+    server:
+      services:
+        - endpoint: internal
+          service: oslo_cache
+        - endpoint: internal
+          service: oslo_db
 
 pod:
+  lifecycle:
+    upgrades:
+      deployments:
+        revision_history: 1
+        pod_replacement_strategy: RollingUpdate
+        rolling_update:
+          max_unavailable: 1
+          max_surge: 1
   resources:
     enabled: false
     artifactory:
@@ -119,14 +99,6 @@ pod:
         limits:
           memory: "1024Mi"
           cpu: "2000m"
-  lifecycle:
-    upgrades:
-      deployments:
-        pod_replacement_strategy: RollingUpdate
-        revision_history: 1
-        rolling_update:
-          max_surge: 1
-          max_unavailable: 1
 
 secrets:
   oslo_db:
@@ -137,6 +109,10 @@ secrets:
 # endpoints required by this chart
 endpoints:
   cluster_domain_suffix: cluster.local
+  cicd:
+    name: artifactory
+    hosts:
+      default: artifactory
   oslo_db:
     namespace: null
     auth:
@@ -155,28 +131,42 @@ endpoints:
     port:
       mysql:
         default: 3306
-  cicd:
-    name: artifactory
-    hosts:
-      default: artifactory
+
+# bootstrap/seed artifactory configuration
+bootstrap:
+  master_key: null
+
+network:
+  docker:
+    node_port: 31777
+    port: 5050
+  http:
+    node_port: 31672
+    port: 8081
+  node_ports:
+    enabled: false
+  secure:
+    node_port: 31776
+    port: 5052
+
+storage:
+  requests:
+    storage: 100Gi
+  storage_class: general
+
+manifests:
+  configmap_bin: true
+  configmap_etc: true
+  job_db_drop: false
+  job_db_init: true
+  job_image_repo_sync: true
+  pvc_artifactory: true
+  secret_db: true
+  secret_db_creds: true
+  service: true
+  statefulset: true
 
 conf:
   artifactory:
     env:
       java_opts: "-Xms512m -Xmx2g"
-
-manifests:
-  configmap_bin: true
-  configmap_etc: true
-  statefulset: true
-  job_image_repo_sync: true
-  job_db_init: true
-  job_db_drop: false
-  secret_db: true
-  secret_db_creds: true
-  pvc_artifactory: true
-  service: true
-
-# bootstrap/seed artifactory configuration
-bootstrap:
-  master_key: null
