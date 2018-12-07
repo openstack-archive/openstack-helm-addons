@@ -270,7 +270,7 @@ secrets:
     admin: ranger-agent-rabbitmq-admin
     ranger-agent: ranger-agent-rabbitmq-user
   tls:
-    ranger-agent:
+    ranger_agent:
       api:
         public: ranger-agent
 
