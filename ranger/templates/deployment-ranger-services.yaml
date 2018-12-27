@@ -125,15 +125,15 @@ spec:
             - name: audit
               containerPort: {{ tuple "audit" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
           livenessProbe:
-            initialDelaySeconds: 30
-            timeoutSeconds: 10
+            initialDelaySeconds: 600
+            timeoutSeconds: 300
             exec:
               command:
               - /tmp/health-check.sh
               - allservicesliveness
           readinessProbe:
-            initialDelaySeconds: 30
-            timeoutSeconds: 10
+            initialDelaySeconds: 600
+            timeoutSeconds: 300
             exec:
               command:
               - /tmp/health-check.sh
