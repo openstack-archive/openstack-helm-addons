@@ -99,6 +99,7 @@ manifests:
   secret_keystone: true
 
 conf:
+  publish_results: true
   swift:
     container_name: sonobuoy
     # delete objects after 1 month (60 * 60 * 24 * 30 seconds)

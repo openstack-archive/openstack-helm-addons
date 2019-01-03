@@ -81,6 +81,7 @@ spec:
       mountPath: /run_master.sh
       subPath: run_master.sh
       readOnly: true
+{{- if $envAll.Values.conf.publish_results }}
   - name: results-publisher
 {{ tuple $envAll "results_publisher" | include "helm-toolkit.snippets.image" | indent 4 }}
     env:
@@ -98,6 +99,7 @@ spec:
       readOnly: true
     - mountPath: {{ .Values.conf.sonobuoy.ResultsDir }}
       name: sonobuoy-output
+{{- end }}
   restartPolicy: Never
   serviceAccountName: {{ $serviceAccountName }}
   volumes:
