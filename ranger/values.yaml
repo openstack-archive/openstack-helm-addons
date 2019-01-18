@@ -467,7 +467,6 @@ conf:
       log_level: INFO
       orm_host: 0.0.0.0
       pecan_debug: True
-      ranger_base: '/home/ranger/ranger'
       ssl_verify: False
       use_handlers: console
       ranger_agent_https_enable: False
@@ -490,7 +489,6 @@ conf:
       auth_enabled: False
     rds:
       log: null
-      repo_local_location: /home/ranger/git_repo
       repo_remote_location: git@127.0.0.1:/home/repo/ORM.git
       repo_user: orm
       repo_email: orm@test.com
