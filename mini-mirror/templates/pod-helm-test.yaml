@@ -39,8 +39,6 @@ spec:
       env:
         - name: NO_PROXY
           value: 127.0.0.1,.svc.cluster.local
-        - name: MINI_MIRROR_ENDPOINT
-          value: {{ tuple "api" "public" $envAll | include "helm-toolkit.endpoints.endpoint_host_lookup" }}
       volumeMounts:
         - name: mini-mirror-bin
           mountPath: /tmp/helm-test.sh

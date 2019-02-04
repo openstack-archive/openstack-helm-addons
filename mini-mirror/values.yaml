@@ -167,3 +167,10 @@ conf:
         autoindex on;
       }
     }
+  test:
+    # NOTE(drewwalters96): Used by the mini-mirror Helm test; should be valid
+    # dists and components contained in the mini-mirror image.
+    dists:
+      - squeeze
+    components:
+      - main
