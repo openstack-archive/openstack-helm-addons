@@ -261,7 +261,8 @@ pod:
 secrets:
   identity:
     admin: admin
-    ranger: ranger-admin
+    ranger: ranger-service-admin
+    ranger_admin: ranger-admin
     ranger_agent: ranger-agent-admin
   oslo_db:
     admin: ranger-agent-db-admin
@@ -321,6 +322,14 @@ endpoints:
         username: ranger-admin
         password: password
         project_name: service
+        user_domain_name: default
+        project_domain_name: default
+      ranger_admin:
+        role: admin
+        region_name: RegionOne
+        username: ranger-admin
+        password: password
+        project_name: admin
         user_domain_name: default
         project_domain_name: default
     hosts:

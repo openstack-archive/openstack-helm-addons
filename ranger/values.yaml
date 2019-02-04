@@ -246,6 +246,14 @@ endpoints:
         project_name: service
         user_domain_name: default
         project_domain_name: default
+      ranger_admin:
+        role: admin
+        region_name: RegionOne
+        username: ranger-admin
+        password: password
+        project_name: admin
+        user_domain_name: default
+        project_domain_name: default
     hosts:
       default: keystone
       internal: keystone-api
