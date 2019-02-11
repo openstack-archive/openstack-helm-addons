@@ -126,6 +126,8 @@ conf:
     Limits:
       PodLogs:
         SizeLimitBytes: 10000
+    # NOTE: the Namespace should not be defined and is set in sonobuoy-etc
+    Namespace: null
     # NOTE: the WorkerImage should not be defined and is set in sonobuoy-etc
     WorkerImage: null
     ImagePullPolicy: IfNotPresent
