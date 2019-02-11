@@ -31,7 +31,7 @@ if [ -n "${SSH_KEY}" ] && [ -n "${SSH_KEY_CONFIGURATION}" ];then
     echo -e "${SSH_KEY}" >>${USER_HOME}/.ssh/${SSH_KEY_FILE}
     echo -e "${SSH_KEY_CONFIGURATION}" >>${USER_HOME}/.ssh/config
 
-    chown ranger_agent: ${USER_HOME}/.ssh
+    chown ${USER}: ${USER_HOME}/.ssh
     chmod 0700 -R ${USER_HOME}/.ssh
     chmod 0644 ${USER_HOME}/.ssh/config
     chmod 0600 ${USER_HOME}/.ssh/${SSH_KEY_FILE}
