@@ -20,14 +20,14 @@ limitations under the License.
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ tuple "api" "public" . | include "helm-toolkit.endpoints.hostname_short_endpoint_lookup" }}
+  name: {{ tuple "api" "internal" . | include "helm-toolkit.endpoints.hostname_short_endpoint_lookup" }}
 spec:
   ports:
-  - name: http
+  - name: api
 {{ if .Values.network.api.node_port.enabled }}
     nodePort: {{ .Values.network.api.node_port.port }}
 {{ end }}
-    port: {{ .Values.endpoints.api.port.http.public }}
+    port: {{ tuple "api" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
     protocol: TCP
     targetPort: 80
   selector:

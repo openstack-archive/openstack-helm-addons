@@ -110,12 +110,19 @@ endpoints:
       public: mini-mirror
     host_fqdn_override:
       default: null
+      # NOTE(drewwalters96): this chart supports TLS for fqdn over-ridden
+      # public endpoints using the following format:
+      # public:
+      #   host: null
+      #   tls:
+      #     crt: null
+      #     key: null
     path:
       default: /
     scheme:
       default: http
     port:
-      http:
+      api:
         default: 8888
         public: 80
 
@@ -125,13 +132,29 @@ network:
     node_port:
       enabled: false
       port: 8888
+    ingress:
+      public: true
+      classes:
+        namespace: "nginx"
+        cluster: "nginx-cluster"
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /
+
+secrets:
+  tls:
+    api:
+      api:
+        public: mini-mirror-tls-public
 
 manifests:
   configmap_bin: true
   configmap_etc: true
   deployment_mini_mirror: true
   helm_test: true
+  ingress: true
   job_image_repo_sync: true
+  secret_ingress_tls: true
+  service_ingress: true
   service_mini_mirror: true
 
 conf:

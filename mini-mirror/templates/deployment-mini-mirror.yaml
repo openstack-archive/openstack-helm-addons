@@ -40,8 +40,8 @@ spec:
         - name: mini-mirror-api
 {{ tuple $envAll "mini-mirror" | include "helm-toolkit.snippets.image" | indent 10 }}
           ports:
-            - name: http
-              containerPort: {{ tuple "api" "port" "http" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
+            - name: api
+              containerPort: {{ tuple "api" "port" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
 {{ if .Values.network.api.node_port.enabled }}
               nodePort: {{ .Values.network.api.node_port.port }}
 {{ end }}
