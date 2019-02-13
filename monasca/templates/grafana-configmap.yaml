@@ -1,0 +1,37 @@
+{{- if .Values.grafana.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "grafana.fullname" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    component: "{{ .Values.grafana.name }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+data:
+  grafana.ini: |
+    [paths]
+    plugins = /var/lib/grafana/plugins
+
+    [auth.basic]
+    enabled = false
+
+    [users]
+    allow_sign_up = true
+    allow_org_create = true
+
+    [auth.keystone]
+    enabled = true
+    verify_ssl_cert = false
+    v3 = true
+    default_domain = Default
+
+    [log.console]
+    level = trace
+
+    [database]
+    type = mysql
+    name = grafana
+    ssl_mode = disable
+{{- end}}

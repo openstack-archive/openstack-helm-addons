@@ -1,0 +1,41 @@
+{{- if .Values.grafana.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "grafana.fullname" . }}-init-job
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    component: "{{ .Values.grafana.name }}-init-job"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+        component: "{{ .Values.grafana.name }}-init-job"
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: grafana-init-job
+          image: "{{ .Values.grafana_init.image.repository }}:{{ .Values.grafana_init.image.tag }}"
+          imagePullPolicy: {{ .Values.grafana_init.image.pullPolicy }}
+          resources:
+{{ toYaml .Values.grafana_init.resources | indent 12 }}
+          env:
+            - name: LOG_LEVEL
+              value: {{ .Values.grafana_init.log_level }}
+            - name: GRAFANA_URL
+  {{- if $.Values.grafana.simple_name }}
+              value: "http://{{ $.Values.grafana.name}}:{{ .Values.grafana.service.port }}"
+  {{- else }}
+              value: "http://{{ template "grafana.fullname" . }}:{{ .Values.grafana.service.port }}"
+  {{- end }}
+            - name: GRAFANA_USERNAME
+{{- include "monasca_secret_env" .Values.grafana_init.username | indent 14 }}
+            - name: GRAFANA_PASSWORD
+{{- include "monasca_secret_env" .Values.grafana_init.password | indent 14 }}
+            - name: DATASOURCE_URL
+              value: "http://{{ template "api.fullname" . }}:{{ .Values.api.service.port }}"
+{{- end}}

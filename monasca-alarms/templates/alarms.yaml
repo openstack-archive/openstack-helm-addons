@@ -1,0 +1,68 @@
+{{- if .Values.kafka.enabled }}
+---
+apiVersion: "monasca.io/v1"
+kind: AlarmDefinition
+metadata:
+  name: kafka-not-starting
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+alarmDefinitionSpec:
+  name: "Kafka not started"
+  expression: "avg(kafka_watcher_status) < 0 times {{ .Values.kafka.start_periods }}"
+  match_by: []
+  description: "Kafka has not started in {{ .Values.kafka.start_periods }} minutes"
+  severity: "HIGH"
+---
+apiVersion: "monasca.io/v1"
+kind: AlarmDefinition
+metadata:
+  name: kafka-not-running
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+alarmDefinitionSpec:
+  name: "Kafka not running"
+  expression: "avg(kafka_watcher_status) > 0 times {{ .Values.kafka.running_periods }}"
+  match_by: []
+  description: "Kafka is not running for {{ .Values.kafka.running_periods }} minutes"
+  severity: "HIGH"
+{{- end }}
+{{- if .Values.zookeeper.enabled }}
+---
+apiVersion: "monasca.io/v1"
+kind: AlarmDefinition
+metadata:
+  name: zookeeper-not-starting
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+alarmDefinitionSpec:
+  name: "Zookeeper not started"
+  expression: "avg(zookeeper_watcher_status) < 0 times {{ .Values.zookeeper.start_periods }}"
+  match_by: []
+  description: "Zookeeper not started in {{ .Values.zookeeper.start_periods }} minutes"
+  severity: "HIGH"
+---
+apiVersion: "monasca.io/v1"
+kind: AlarmDefinition
+metadata:
+  name: zookeeper-not-running
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+alarmDefinitionSpec:
+  name: "Zookeeper not running"
+  expression: "avg(zookeeper_watcher_status) > 0 times {{ .Values.zookeeper.running_periods }}"
+  match_by: []
+  description: "Zookeeper is not running for {{ .Values.zookeeper.running_periods }} minutes"
+  severity: "HIGH"
+{{- end }}

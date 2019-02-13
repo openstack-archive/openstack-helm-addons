@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Chart to initialize users and databases in MySQL
+name: mysql-users-init
+version: 0.2.1

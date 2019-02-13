@@ -1,0 +1,61 @@
+{{- if .Values.tempest_tests.enabled }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ template "tempest_tests.fullname" . }}-test-pod
+  annotations:
+    "helm.sh/hook": test-success
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    component: "{{ .Values.tempest_tests.name }}-test-pod"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  restartPolicy: Never
+  containers:
+    - name: tempest-tests
+      image: "{{ .Values.tempest_tests.image.repository }}:{{ .Values.tempest_tests.image.tag }}"
+      imagePullPolicy: {{ .Values.tempest_tests.image.pullPolicy }}
+      env:
+        - name: MONASCA_WAIT_FOR_API
+          value: "{{ .Values.tempest_tests.wait.enabled }}"
+        - name: MONASCA_API_WAIT_RETRIES
+          value: "{{ .Values.tempest_tests.wait.retries }}"
+        - name: MONASCA_API_WAIT_DELAY
+          value: "{{ .Values.tempest_tests.wait.delay }}"
+        - name: OS_PASSWORD
+          value: "{{ .Values.tempest_tests.keystone.os_password }}"
+        - name: OS_USERNAME
+          value: "{{ .Values.tempest_tests.keystone.os_username }}"
+        - name: KEYSTONE_SERVER
+          value: {{ template "keystone.fullname" . }}
+        - name: KEYSTONE_PORT
+          value: "{{ .Values.keystone.service.port }}"
+        - name: OS_TENANT_NAME
+          value: "{{ .Values.tempest_tests.keystone.os_tenant_name }}"
+        - name: OS_DOMAIN_NAME
+          value: "{{ .Values.tempest_tests.keystone.os_domain_name }}"
+        - name: ALT_USERNAME
+          value: "{{ .Values.tempest_tests.keystone.alt_username }}"
+        - name: ALT_PASSWORD
+          value: "{{ .Values.tempest_tests.keystone.alt_password }}"
+        - name: ALT_TENANT_NAME
+          value: "{{ .Values.tempest_tests.keystone.alt_tenant_name }}"
+        - name: AUTH_USE_SSL
+          value: "{{ .Values.tempest_tests.keystone.auth_use_ssl }}"
+        - name: USE_DYNAMIC_CREDS
+          value: "{{ .Values.tempest_tests.use_dynamic_creds }}"
+        - name: ADMIN_PROJECT_NAME
+          value: "{{ .Values.tempest_tests.keystone.admin_project_name }}"
+        - name: ADMIN_USERNAME
+          value: "{{ .Values.tempest_tests.keystone.admin_username }}"
+        - name: ADMIN_PASSWORD
+          value: "{{ .Values.tempest_tests.keystone.admin_password }}"
+        - name: ADMIN_DOMAIN_NAME
+          value: "{{ .Values.tempest_tests.keystone.admin_domain_name }}"
+        - name: OSTESTR_REGEX
+          value: "{{ .Values.tempest_tests.ostestr_regex }}"
+        - name: STAY_ALIVE_ON_FAILURE
+          value: "{{ .Values.tempest_tests.stay_alive_on_failure }}"
+{{- end }}

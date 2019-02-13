@@ -1,0 +1,141 @@
+{{- if .Values.notification.enabled }}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    component: "{{ .Values.notification.name }}"
+    heritage: "{{ .Release.Service }}"
+    release: "{{ .Release.Name }}"
+  name: {{ template "notification.fullname" . }}
+spec:
+  replicas: {{ .Values.notification.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+        component: "{{ .Values.notification.name }}"
+    spec:
+      containers:
+        - name: notification
+          image: "{{ .Values.notification.image.repository }}:{{ .Values.notification.image.tag }}"
+          imagePullPolicy: {{ .Values.notification.image.pullPolicy }}
+          resources:
+{{ toYaml .Values.notification.resources | indent 12 }}
+          env:
+            - name: MYSQL_DB_HOST
+            {{- if .Values.notification.mysql.host }}
+            {{- if eq (kindOf .Values.notification.mysql.host) "map" }}
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.notification.mysql.host.secret_name }}"
+                  key: "{{ .Values.notification.mysql.host.secret_key | default "host" }}"
+            {{- else }}
+              value: "{{ .Values.notification.mysql.host }}"
+            {{- end}}
+            {{- else }}
+              value: "{{ .Release.Name }}-mysql"
+            {{- end}}
+            - name: MYSQL_DB_PORT
+{{- include "monasca_secret_env" .Values.notification.mysql.port | indent 14 }}
+            - name: MYSQL_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                {{- if .Values.notification.mysql.username.secret_name }}
+                  name: "{{ .Values.notification.mysql.username.secret_name }}"
+                {{- else }}
+                  name: "{{ .Release.Name }}-mysql-notification-secret"
+                {{- end}}
+                  key: "{{ .Values.notification.mysql.username.secret_key | default "username" }}"
+            - name: MYSQL_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                {{- if .Values.notification.mysql.password.secret_name }}
+                  name: "{{ .Values.notification.mysql.password.secret_name }}"
+                {{- else }}
+                  name: "{{ .Release.Name }}-mysql-notification-secret"
+                {{- end}}
+                  key: "{{ .Values.notification.mysql.password.secret_key | default "password" }}"
+            - name: MYSQL_DB_DATABASE
+              value: "mon"
+            - name: KAFKA_URI
+            {{- if .Values.kafka.overrideUri }}
+              value: "{{ .Values.kafka.overrideUri }}"
+            {{- else }}
+              value: "{{ template "kafka.fullname" . }}:9092"
+            {{- end }}
+            - name: ZOOKEEPER_URL
+            {{- if .Values.zookeeper.overrideUri }}
+              value: "{{ .Values.zookeeper.overrideUri }}"
+            {{- else }}
+              value: "{{ template "zookeeper.fullname" . }}:2181"
+            {{- end }}
+            - name: LOG_LEVEL
+              value: {{ .Values.notification.log_level | quote }}
+            - name: NF_PLUGINS
+              value: {{ .Values.notification.plugins | quote }}
+            {{- if .Values.notification.plugin_config.email.defined }}
+            - name: NF_EMAIL_SERVER
+              value: {{ .Values.notification.plugin_config.email.server | quote }}
+            - name: NF_EMAIL_PORT
+              value: {{ .Values.notification.plugin_config.email.port  | quote }}
+            {{- if .Values.notification.plugin_config.email.user }}
+            - name: NF_EMAIL_USER
+              value: {{ .Values.notification.plugin_config.email.user | quote }}
+            - name: NF_EMAIL_PASSWORD
+              value: {{ .Values.notification.plugin_config.email.password | quote }}
+            {{- end }}
+            - name: NF_EMAIL_FROM_ADDR
+              value: {{ .Values.notification.plugin_config.email.from_addr | quote }}
+            {{- end }}
+            - name: NF_WEBHOOK_TIMEOUT
+              value: {{ .Values.notification.plugin_config.webhook.timeout | quote }}
+            {{- if .Values.notification.plugin_config.hipchat.ssl_certs }}
+            - name: NF_HIPCHAT_SSL_CERTS
+              value: {{ .Values.notification.plugin_config.hipchat.ssl_certs | quote }}
+            {{- end }}
+            - name: NF_HIPCHAT_TIMEOUT
+              value: {{ .Values.notification.plugin_config.hipchat.timeout | quote }}
+            {{- if .Values.notification.plugin_config.hipchat.insecure }}
+            - name: NF_HIPCHAT_INSECURE
+              value: {{ .Values.notification.plugin_config.hipchat.insecure | quote }}
+            {{- end }}
+            {{- if .Values.notification.plugin_config.hipchat.proxy }}
+            - name: NF_HIPCHAT_PROXY
+              value: {{ .Values.notification.plugin_config.hipchat.proxy | quote }}
+            {{- end }}
+            - name: NF_SLACK_TIMEOUT
+              value: {{ .Values.notification.plugin_config.slack.timeout | quote }}
+            {{- if .Values.notification.plugin_config.slack.certs }}
+            - name: NF_SLACK_CERTS
+              value: {{ .Values.notification.plugin_config.slack.certs | quote }}
+            {{- end }}
+            {{- if .Values.notification.plugin_config.slack.insecure }}
+            - name: NF_SLACK_INSECURE
+              value: {{ .Values.notification.plugin_config.slack.insecure | quote }}
+            {{- end }}
+            {{- if .Values.notification.plugin_config.slack.proxy }}
+            - name: NF_SLACK_PROXY
+              value: {{ .Values.notification.plugin_config.slack.proxy | quote }}
+            {{- end }}
+            {{- if .Values.notification.plugin_config.hipchat.template }}
+            - name: NF_HIPCHAT_TEMPLATE
+              value: "/hipchat-template.yml.j2"
+            {{- end }}
+          {{- if .Values.notification.plugin_config.hipchat.template }}
+          volumeMounts:
+            - name: hipchat-template
+              mountPath: /hipchat-template.yml.j2
+              subPath: hipchat-template.yml.j2
+          {{- end }}
+      {{- if .Values.notification.plugin_config.hipchat.template }}
+      volumes:
+        - name: hipchat-template
+          configMap:
+            name: "{{ template "notification.fullname" . }}-hipchat-template"
+            items:
+              - key: hipchat-template.yml.j2
+                path: hipchat-template.yml.j2
+      {{- end }}
+{{- end}}

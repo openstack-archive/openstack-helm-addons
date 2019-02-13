@@ -1,0 +1,88 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+      {{- if .Values.watcher.enabled }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "{{ .Values.watcher.port }}"
+        monasca.io/usek8slabels: "false"
+        monasca.io/whitelist: |
+          - zookeeper_average_round_trip_time
+          - zookeeper_dropped_message_count
+          - zookeeper_max_round_trip_time
+          - zookeeper_min_round_trip_time
+          - zookeeper_read_failure_count
+          - zookeeper_running_average_round_trip_time
+          - zookeeper_watcher_status
+          - zookeeper_write_failure_count
+          - go_memstats_heap_objects
+          - go_memstats_heap_inuse_bytes
+      {{- end }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          env:
+            - name: SERVER_JVMFLAGS
+              value: "-XX:MaxRAMFraction={{ .Values.java.max_ram_fraction }} -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XshowSettings:vm"
+          ports:
+            - name: client
+              containerPort: 2181
+            - name: peer
+              containerPort: 2888
+            - name: leader-election
+              containerPort: 3888
+          volumeMounts:
+            - name: data-volume
+              mountPath: /data
+            - name: config-volume
+              mountPath: /conf
+        {{- if .Values.watcher.enabled }}
+        - name: watcher
+          image: "{{ .Values.watcher.image.repository }}:{{ .Values.watcher.image.tag }}"
+          imagePullPolicy: {{ .Values.watcher.image.pullPolicy }}
+          resources:
+{{ toYaml .Values.watcher.resources | indent 12 }}
+          env:
+            - name: HEALTH_CHECK_PATH
+              value: {{ .Values.watcher.health_check_path | quote }}
+            - name: ZOOKEEPER_SERVERS
+              value: "localhost"
+            - name: PROMETHEUS_ENDPOINT
+              value: "0.0.0.0:{{ .Values.watcher.port }}"
+            - name: WATCHER_PERIOD
+              value: {{ .Values.watcher.watcher_period | quote }}
+            - name: WATCHER_TIMEOUT
+              value: {{ .Values.watcher.watcher_timeout | quote }}
+            - name: STAY_ALIVE_ON_FAILURE
+              value: {{ .Values.watcher.stay_alive_on_failure | quote }}
+          ports:
+            - name: metrics
+              containerPort: {{ .Values.watcher.port }}
+         {{- end }}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ template "fullname" . }}
+        - name: data-volume
+        {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ template "fullname" . }}
+        {{- else }}
+          emptyDir: {}
+        {{- end -}}

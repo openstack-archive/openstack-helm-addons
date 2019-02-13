@@ -1,0 +1,24 @@
+{{- if .Values.grafana.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  {{- if $.Values.grafana.simple_name }}
+  name: {{ $.Values.grafana.name }}
+  {{- else }}
+  name: {{ template "grafana.fullname" . }}
+  {{- end }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    component: "{{ .Values.grafana.name }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  type: {{ .Values.grafana.service.type }}
+  ports:
+  - name: http
+    port: {{ .Values.grafana.service.port }}
+  selector:
+    app: {{ template "fullname" . }}
+    component: "{{ .Values.grafana.name }}"
+{{- end}}

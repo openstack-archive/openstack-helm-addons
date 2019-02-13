@@ -1,0 +1,26 @@
+{{- if and (.Values.rbac.create) (not .Values.cleanup.serviceAccount) }}
+{{- if .Capabilities.APIVersions.Has "rbac.authorization.k8s.io/v1" }}
+apiVersion: rbac.authorization.k8s.io/v1
+{{- else if .Capabilities.APIVersions.Has "rbac.authorization.k8s.io/v1beta1" }}
+apiVersion: rbac.authorization.k8s.io/v1beta1
+{{- else if .Capabilities.APIVersions.Has "rbac.authorization.k8s.io/v1alpha1" }}
+apiVersion: rbac.authorization.k8s.io/v1alpha1
+{{- end }}
+kind: RoleBinding
+metadata:
+  name: {{ template "cleanup.fullname" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    component: "{{ .Values.cleanup.name }}"
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "cleanup.fullname" . }}
+    namespace: "{{ .Release.Namespace }}"
+roleRef:
+  kind: Role
+  name: {{ template "cleanup.fullname" . }}
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}

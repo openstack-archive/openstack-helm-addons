@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Apache Storm configured for Monasca
+name: storm
+version: 0.5.3

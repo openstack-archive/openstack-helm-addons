@@ -1,0 +1,50 @@
+{{- if .Values.enabled }}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "storm.fullname" . }}-nimbus
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    component: "{{ .Values.name }}-nimbus"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+        component: "{{ .Values.name }}-nimbus"
+    spec:
+      containers:
+        - name: {{ template "name" . }}-{{ .Values.name }}-nimbus
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["storm", "nimbus"]
+          resources:
+{{ toYaml .Values.nimbus_resources | indent 12 }}
+          ports:
+            - containerPort: {{ .Values.service.port }}
+              name: nimbus
+          env:
+            - name: STORM_LOCAL_HOSTNAME
+              value: "{{ .Release.Name }}-storm-nimbus"
+            - name: ZOOKEEPER_SERVERS
+              value: "{{ .Release.Name }}-zookeeper"
+            - name: STORM_ZOOKEEPER_PORT
+              value: "2181"
+            - name: NIMBUS_SEEDS
+              value: "{{ template "storm.fullname" . }}-nimbus"
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+        {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ template "storm.fullname" . }}-nimbus
+        {{- else }}
+          emptyDir: {}
+        {{- end -}}
+{{- end}}

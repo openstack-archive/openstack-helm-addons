@@ -1,0 +1,32 @@
+{{- if .Values.keystone.enabled }}
+{{- if .Values.keystone.static_service.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    component: "{{ .Values.keystone.name }}"
+    heritage: "{{ .Release.Service }}"
+    release: "{{ .Release.Name }}"
+  name: {{ .Values.keystone.static_service.name }}
+spec:
+  type: {{ .Values.keystone.static_service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.keystone.static_service.port }}
+      targetPort: http
+      {{- if .Values.keystone.static_service.node_port }}
+      nodePort: {{ .Values.keystone.static_service.node_port }}
+      {{- end }}
+    - name: admin
+      port: {{ .Values.keystone.static_service.admin_port }}
+      targetPort: admin
+      {{- if .Values.keystone.static_service.admin_node_port }}
+      nodePort: {{ .Values.keystone.static_service.admin_node_port }}
+      {{- end }}
+  selector:
+    app: {{ template "fullname" . }}
+    component: "{{ .Values.keystone.name }}"
+{{- end }}
+{{- end }}

@@ -1,0 +1,23 @@
+{{- if .Values.api.static_service.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    component: "{{ .Values.api.name }}"
+    heritage: "{{ .Release.Service }}"
+    release: "{{ .Release.Name }}"
+  name: {{ .Values.api.static_service.name }}
+spec:
+  type: {{ .Values.api.static_service.type }}
+  ports:
+  - name: http
+    port: {{ .Values.api.static_service.port}}
+    {{- if .Values.api.static_service.node_port }}
+    nodePort: {{ .Values.api.static_service.node_port }}
+    {{- end }}
+  selector:
+    app: {{ template "fullname" . }}
+    component: "{{ .Values.api.name }}"
+{{- end }}

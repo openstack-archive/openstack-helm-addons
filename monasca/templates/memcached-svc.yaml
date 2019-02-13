@@ -1,0 +1,24 @@
+{{- if .Values.memcached.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    component: "{{ .Values.memcached.name }}"
+    heritage: "{{ .Release.Service }}"
+    release: "{{ .Release.Name }}"
+  name: {{ template "memcached.fullname" . }}
+spec:
+  type: {{ .Values.memcached.service.type | default "ClusterIP" }}
+  ports:
+    - name: memcached
+      port: {{ .Values.memcached.service.port | default "11211" }}
+      targetPort: memcached
+      {{- if .Values.memcached.service.node_port }}
+      nodePort: {{ .Values.memcached.service.node_port }}
+      {{- end }}
+  selector:
+    app: {{ template "fullname" . }}
+    component: "{{ .Values.memcached.name }}"
+{{- end}}

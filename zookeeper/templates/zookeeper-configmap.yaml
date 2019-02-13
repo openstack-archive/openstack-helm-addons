@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+data:
+  zoo.cfg: |
+    clientPort=2181
+    dataDir=/data
+    dataLogDir=/data
+    tickTime=2000
+    initLimit=5
+    syncLimit=2
+    maxClientCnxns=1000
+    autopurge.snapRetainCount={{ .Values.persistence.snap_retain_count }}
+    autopurge.purgeInterval={{ .Values.persistence.purge_interval }}
+  log4j.properties: |
+    # Root logger option
+    log4j.rootLogger=INFO, stdout
+
+    # Direct log messages to stdout
+    log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+    log4j.appender.stdout.Target=System.out
+    log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+    log4j.appender.stdout.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n

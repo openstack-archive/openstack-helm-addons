@@ -1,0 +1,9 @@
+{{- if .Values.alarm_definition_controller.resource_enabled }}
+apiVersion: extensions/v1beta1
+kind: ThirdPartyResource
+metadata:
+  name: alarm-definition.monasca.io
+description: "A specification to create a Monasca alarm definition"
+versions:
+- name: {{ .Values.alarm_definition_controller.version }}
+{{- end }}

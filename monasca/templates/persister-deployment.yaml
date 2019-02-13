@@ -1,0 +1,59 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    component: "{{ .Values.persister.name }}"
+    heritage: "{{ .Release.Service }}"
+    release: "{{ .Release.Name }}"
+  name: {{ template "persister.fullname" . }}
+spec:
+  replicas: {{ .Values.persister.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+        component: "{{ .Values.persister.name }}"
+    spec:
+      containers:
+      - name: persister
+        image: "{{ .Values.persister.image.repository }}:{{ .Values.persister.image.tag }}"
+        imagePullPolicy: {{ .Values.persister.image.pullPolicy }}
+        resources:
+{{ toYaml .Values.persister.resources | indent 10 }}
+        env:
+            - name: DEBUG
+              value: {{ .Values.persister.logging.debug | quote }}
+            - name: VERBOSE
+              value: {{ .Values.persister.logging.verbose | quote }}
+            - name: ZOOKEEPER_URI
+            {{- if .Values.zookeeper.overrideUri }}
+              value: "{{ .Values.zookeeper.overrideUri }}"
+            {{- else }}
+              value: "{{ template "zookeeper.fullname" . }}:2181"
+            {{- end }}
+            - name: KAFKA_URI
+            {{- if .Values.kafka.overrideUri }}
+              value: "{{ .Values.kafka.overrideUri }}"
+            {{- else }}
+              value: "{{ template "kafka.fullname" . }}:9092"
+            {{- end }}
+            - name: INFLUX_PORT
+              value: {{ .Values.influxdb.config.http.bind_address | quote }}
+            - name: INFLUX_USER
+              value: {{ .Values.persister.influxdb.user | quote }}
+            - name: INFLUX_PASSWORD
+              value: {{ .Values.persister.influxdb.password | quote }}
+            - name: INFLUX_DB
+              value: {{ .Values.persister.influxdb.database | quote }}
+            - name: INFLUX_HOST
+              value: "{{ .Release.Name }}-influxdb"
+            - name: KAFKA_METRICS_BATCH_SIZE
+              value: {{ .Values.persister.kafka.metrics.batch_size | quote }}
+            - name: KAFKA_METRICS_WAIT_TIME
+              value: {{ .Values.persister.kafka.metrics.wait_time | quote }}
+            - name: KAFKA_ALARM_HISTORY_BATCH_SIZE
+              value: {{ .Values.persister.kafka.alarm_history.batch_size | quote }}
+            - name: KAFKA_ALARM_HISTORY_WAIT_TIME
+              value: {{ .Values.persister.kafka.alarm_history.wait_time | quote }}

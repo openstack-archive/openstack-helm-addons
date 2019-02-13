@@ -1,0 +1,72 @@
+# Default values for mysql-users-init.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+mysql_users_init:
+  name: job
+
+  # an optional preexisting serviceAccount to use
+  # to create a service account with the deployment,
+  # deploy with rbac.create=true
+  serviceAccount: ''
+
+  image:
+    repository: monasca/mysql-users-init
+    tag: 1.1.0
+    pullPolicy: IfNotPresent
+
+  # general options for the init job
+  log_level: INFO # python logging level
+
+  # mysql connection details for this component
+  # note that these options allow the init container to connect to mysql and
+  # the referenced account must already exist
+  # each parameter may either be specified directly as a string OR reference a
+  # secret
+  # example:
+  #   # plaintext (will be stored in Helm's ConfigMap)
+  #   password: 'some-plaintext-password'
+  #
+  #   # secret ref
+  #   password:
+  #     secret_name: some-secret-name
+  #     secret_key: some-key
+  mysql:
+    host: mysql
+    port: '3306'
+    username: root
+    password: password
+
+  preload:
+    users: []
+    databases: []
+
+  # container resource limits and requests
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+cleanup:
+  name: cleanup
+  serviceAccount: ''
+  image:
+    repository: monasca/job-cleanup
+    tag: 1.2.1
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 200m
+    limits:
+      memory: 128Mi
+      cpu: 250m
+  wait:
+    retries: "24"
+    delay: "5.0"
+    timeout: "10"
+
+rbac:
+  create: false

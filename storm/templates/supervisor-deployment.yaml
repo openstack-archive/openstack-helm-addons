@@ -1,0 +1,60 @@
+{{- if .Values.enabled }}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "storm.fullname" . }}-supervisor
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    component: "{{ .Values.name }}-supervisor"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+        component: "{{ .Values.name }}-supervisor"
+    spec:
+      containers:
+        - name: {{ template "name" . }}-{{ .Values.name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["storm", "supervisor"]
+          resources:
+{{ toYaml .Values.supervisor_resources | indent 12 }}
+          env:
+            - name: STORM_HOSTNAME_FROM_IP
+              value: "true"
+            - name: ZOOKEEPER_SERVERS
+              value: "{{ .Release.Name }}-zookeeper"
+            - name: STORM_ZOOKEEPER_PORT
+              value: "2181"
+            - name: NIMBUS_SEEDS
+              value: "{{ template "storm.fullname" . }}-nimbus"
+            - name: SUPERVISOR_SLOTS_PORTS
+              value: {{ .Values.supervisor_ports | join "," | quote }}
+            - name: METRIC_SPOUT_THREADS
+              value: "{{ .Values.thresh.spout.metricSpoutThreads }}"
+            - name: METRIC_SPOUT_TASKS
+              value: "{{ .Values.thresh.spout.metricSpoutTasks }}"
+            - name: KAFKA_URI
+              value: "{{ .Release.Name }}-kafka:9092"
+            - name: MYSQL_DB_HOST
+              value: "{{ .Release.Name }}-mysql"
+            - name: MYSQL_DB_PORT
+              value: "3306"
+            - name: MYSQL_DB_DATABASE
+              value: "mon"
+            - name: MYSQL_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Release.Name }}-{{ .Values.thresh.secretSuffix }}"
+                  key: username
+            - name: MYSQL_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Release.Name }}-{{ .Values.thresh.secretSuffix }}"
+                  key: password
+{{- end}}

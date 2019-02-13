@@ -1,0 +1,30 @@
+{{- if and (.Values.rbac.create) (not .Values.agent.serviceAccount) }}
+kind: ClusterRole
+{{- if .Capabilities.APIVersions.Has "rbac.authorization.k8s.io/v1" }}
+apiVersion: rbac.authorization.k8s.io/v1
+{{- else if .Capabilities.APIVersions.Has "rbac.authorization.k8s.io/v1beta1" }}
+apiVersion: rbac.authorization.k8s.io/v1beta1
+{{- else if .Capabilities.APIVersions.Has "rbac.authorization.k8s.io/v1alpha1" }}
+apiVersion: rbac.authorization.k8s.io/v1alpha1
+{{- end }}
+metadata:
+  name: "{{ template "agent.fullname" . }}"
+rules:
+  - apiGroups: ["", "extensions", "storage.k8s.io"]
+    verbs: ["get", "list"]
+    resources:
+      - namespaces
+      - pods
+      - replicasets
+      - deployments
+      - replicationcontrollers
+      - nodes
+      - services
+      - componentstatuses
+      - storageclasses
+  - apiGroups: ["", "batch", "extensions", "storage.k8s.io"]
+    verbs: ["get", "list", "delete"]
+    resources:
+      - jobs
+      - pods
+{{- end  }}

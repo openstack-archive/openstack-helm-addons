@@ -1,0 +1,21 @@
+dependencies:
+  - name: influxdb
+    version: 0.6.2-0.0.2
+    condition: 'influxdb.enabled, global.influxdb.enabled'
+    repository: 'http://monasca.io/monasca-helm/'
+  - name: mysql
+    version: 0.2.4
+    condition: 'mysql.enabled, global.mysql.enabled'
+    repository: 'https://kubernetes-charts.storage.googleapis.com/'
+  - name: kafka
+    version: 0.4.2
+    condition: 'kafka.enabled, global.kafka.enabled'
+    repository: 'http://monasca.io/monasca-helm/'
+  - name: storm
+    version: 0.5.3
+    condition: 'storm.enabled, global.storm.enabled'
+    repository: 'http://monasca.io/monasca-helm/'
+  - name: zookeeper
+    version: 0.3.8
+    condition: 'zookeeper.enabled, global.zookeeper.enabled'
+    repository: 'http://monasca.io/monasca-helm/'

@@ -1,0 +1,109 @@
+# Default values for keystone-init.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+keystone_init:
+  name: keystone-init
+
+  # an optional preexisting serviceAccount to use
+  # to create a service account with the deployment,
+  # deploy with rbac.create=true
+  serviceAccount: ''
+
+  image:
+    repository: monasca/keystone-init
+    tag: 1.3.0
+    pullPolicy: IfNotPresent
+
+  # general options for the init job
+  log_level: INFO # python logging level
+  timeout: "10" # timeout in seconds
+  verify: "true" # if "true", verify SSL
+  cert: '' # cert to override if desired (must be mounted as configmap)
+
+  # keystone authentication for this component
+  # note that these options allow the init container to connect to keystone and
+  # the referenced account must already exist
+  # each parameter may either be specified directly as a string OR reference a
+  # secret
+  # example:
+  #   # plaintext (will be stored in Helm's ConfigMap)
+  #   password: 'some-plaintext-password'
+  #
+  #   # secret ref
+  #   password:
+  #     secret_name: some-secret-name
+  #     # key is optional, will default to `OS_`-style variables
+  #     secret_key: some-key
+  auth:
+    url: 'http://keystone:5000'
+    username: "admin"
+    password: "s3cr3t"
+    user_domain_name: Default
+    project_name: 'admin'
+    project_domain_name: Default
+
+  # specify domains, projects, roles, and users to create
+  preload:
+    # global roles
+    global_roles: []
+
+    # named domains, the key name will be used to look up keystone domain name
+    domains:
+      # note that `default` is special and refers directly to the ID `default`,
+      # not the name `Default`
+      default:
+        # a list of project names that must exist (will be created)
+        projects: []
+
+        # a list of domain-scoped role names that must exist (will be created)
+        roles: []
+
+        # a list of user objects that must exist
+        # example:
+        # users:
+        #   - username: some-user
+        #     project: some-project # will be created if it does not exist
+        #     roles: # will also be created automatically
+        #       - a
+        #       - b
+        #       - c
+        #     # if desired, create a secret (optional):
+        #     secret: some-secret-name
+        #     # alternatively, specify a namespace and name
+        #     secret: some-namespace/some-secret-name
+        #     # or even:
+        #     secret:
+        #       namespace: some-namespace
+        #       name: some-secret-name
+        users: []
+
+  # container resource limits and requests
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+cleanup:
+  name: cleanup
+  serviceAccount: ''
+  image:
+    repository: monasca/job-cleanup
+    tag: 1.2.1
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 200m
+    limits:
+      memory: 128Mi
+      cpu: 250m
+  wait:
+    retries: "10"
+    delay: "3.0"
+    timeout: "10"
+
+rbac:
+  create: false

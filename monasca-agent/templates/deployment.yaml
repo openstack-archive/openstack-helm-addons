@@ -1,0 +1,143 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+    component: "{{ template "fullname" . }}-deployment"
+spec:
+  template:
+    metadata:
+      labels:
+        component: "{{ template "fullname" . }}-deployment"
+        app: {{ template "fullname" . }}
+    spec:
+      containers:
+        - name: {{ template "name" . }}-collector-deployment
+          image: "{{ .Values.collector.image.repository }}:{{ .Values.collector.image.tag }}"
+          imagePullPolicy: {{ .Values.collector.image.pullPolicy }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          env:
+            - name: AGENT_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: AGENT_POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: KUBERNETES_API
+              value: "true"
+            - name: KUBERNETES_API_TIMEOUT
+              value: {{ .Values.kubernetes_api.timeout | quote }}
+            - name: KUBERNETES_API_LABELS
+              value: {{ .Values.kubernetes_api.kubernetes_labels | quote }}
+            - name: PROMETHEUS
+              value: {{ .Values.prometheus.auto_detect_service_endpoints | quote }}
+            - name: PROMETHEUS_TIMEOUT
+              value: {{ .Values.prometheus.timeout | quote }}
+            - name: PROMETHEUS_DETECT_METHOD
+              value: service
+            - name: PROMETHEUS_KUBERNETES_LABELS
+              value: {{ .Values.prometheus.kubernetes_labels | quote }}
+            - name: OS_AUTH_URL
+              value: {{ .Values.keystone.url | quote }}
+            - name: OS_USERNAME
+              value: {{ .Values.keystone.os_username | quote }}
+            - name: OS_USER_DOMAIN_NAME
+              value: {{ .Values.keystone.os_user_domain_name | quote }}
+            - name: OS_PASSWORD
+              value: {{ .Values.keystone.os_password | quote }}
+            - name: OS_PROJECT_NAME
+              value: {{ .Values.keystone.os_project_name | quote }}
+            - name: OS_PROJECT_DOMAIN_NAME
+              value: {{ .Values.keystone.os_project_domain_name | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.log_level | quote }}
+            - name: HOSTNAME_FROM_KUBERNETES
+              value: "true"
+            {{- if .Values.namespace_annotations }}
+            - name: KUBERNETES_NAMESPACE_ANNOTATIONS
+              value: {{ .Values.namespace_annotations | quote}}
+            {{- end}}
+            {{- if .Values.kubernetes_api.storage.parameter_dimensions }}
+            - name: STORAGE_PARAMETERS_DIMENSIONS
+              value: {{ .Values.kubernetes_api.storage.parameter_dimensions | quote}}
+            {{- end}}
+            - name: REPORT_PERSISTENT_STORAGE
+              value: {{ .Values.kubernetes_api.storage.report | quote }}
+            {{- if .Values.dimensions }}
+            - name: DIMENSIONS
+              value: {{ .Values.dimensions | quote}}
+            {{- end}}
+            - name: CHECK_FREQ
+              value: {{ .Values.collector.check_freq | quote }}
+            - name: NUM_COLLECTOR_THREADS
+              value: {{ .Values.collector.num_collector_threads | quote }}
+            - name: POOL_FULL_MAX_TRIES
+              value: {{ .Values.collector.pool_full_max_retries | quote }}
+            - name: SUB_COLLECTION_WARN
+              value: {{ .Values.collector.sub_collection_warn | quote }}
+          {{- if .Values.plugins.enabled }}
+          volumeMounts:
+            - name: agent-config
+              mountPath: /plugins.d
+          {{- end}}
+        - name: {{ template "name" . }}-forwarder-deployment
+          image: "{{ .Values.forwarder.image.repository }}:{{ .Values.forwarder.image.tag }}"
+          imagePullPolicy: {{ .Values.forwarder.image.pullPolicy }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          env:
+            - name: AGENT_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: AGENT_POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: OS_AUTH_URL
+              value: {{ .Values.keystone.url | quote }}
+            - name: OS_USERNAME
+              value: {{ .Values.keystone.os_username | quote }}
+            - name: OS_USER_DOMAIN_NAME
+              value: {{ .Values.keystone.os_user_domain_name | quote }}
+            - name: OS_PASSWORD
+              value: {{ .Values.keystone.os_password | quote }}
+            - name: OS_PROJECT_NAME
+              value: {{ .Values.keystone.os_project_name | quote }}
+            - name: OS_PROJECT_DOMAIN_NAME
+              value: {{ .Values.keystone.os_project_domain_name | quote }}
+            - name: MONASCA_URL
+              value: {{ .Values.monasca_url | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.log_level | quote }}
+            - name: INSECURE
+              value: {{ .Values.insecure | quote }}
+            - name: MAX_BATCH_SIZE
+              value: {{ .Values.forwarder.max_batch_size | quote }}
+            - name: MAX_MEASUREMENT_BUFFER_SIZE
+              value: {{ .Values.forwarder.max_measurement_buffer_size | quote }}
+            - name: BACKLOG_SEND_RATE
+              value: {{ .Values.forwarder.backlog_send_rate | quote }}
+            - name: HOSTNAME_FROM_KUBERNETES
+              value: "true"
+            - name: NON_LOCAL_TRAFFIC
+              value: {{ .Values.forwarder.non_local_traffic | quote }}
+      {{- if .Values.plugins.enabled }}
+      volumes:
+        - name: agent-config
+          configMap:
+            name: {{ template "fullname" . }}
+      {{- end}}
+      {{- if .Values.plugins.enabled }}
+      volumes:
+        - name: agent-config
+          configMap:
+            name: {{ template "fullname" . }}
+      {{- end}}

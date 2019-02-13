@@ -1,0 +1,52 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "fullname" . }}-job
+  labels:
+    app: {{ template "fullname" . }}
+    component: "{{ .Values.mysql_users_init.name }}"
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+{{- if .Values.mysql_users_init.deadline }}
+  activeDeadlineSeconds: {{ .Values.mysql_users_init.deadline }}
+{{- end }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+        component: "{{ .Values.mysql_users_init.name }}"
+    spec:
+      restartPolicy: OnFailure
+      volumes:
+        - name: preload-config
+          configMap:
+            name: "{{ template "fullname" . }}-preload"
+      containers:
+        - name: {{ template "fullname" . }}-job
+          image: "{{ .Values.mysql_users_init.image.repository }}:{{ .Values.mysql_users_init.image.tag }}"
+          imagePullPolicy: {{ .Values.mysql_users_init.image.pullPolicy }}
+          resources:
+{{ toYaml .Values.mysql_users_init.resources | indent 12 }}
+          env:
+            - name: LOG_LEVEL
+              value: {{ .Values.mysql_users_init.log_level }}
+            - name: MYSQL_INIT_HOST
+{{ include "mysql_users_init_secret_env" .Values.mysql_users_init.mysql.host | indent 14 }}
+            - name: MYSQL_INIT_PORT
+{{ include "mysql_users_init_secret_env" .Values.mysql_users_init.mysql.port | indent 14 }}
+            - name: MYSQL_INIT_USERNAME
+{{ include "mysql_users_init_secret_env" .Values.mysql_users_init.mysql.username | indent 14 }}
+            - name: MYSQL_INIT_PASSWORD
+{{ include "mysql_users_init_secret_env" .Values.mysql_users_init.mysql.password | indent 14 }}
+            - name: PRELOAD_PATH
+              value: "/config/preload.yml"
+          volumeMounts:
+            - name: preload-config
+              mountPath: /config
+      {{- if .Values.mysql_users_init.serviceAccount }}
+      serviceAccountName: {{ .Values.mysql_users_init.serviceAccount | quote }}
+      {{- else if .Values.rbac.create }}
+      serviceAccountName: "{{ template "fullname" . }}"
+      {{- end }}

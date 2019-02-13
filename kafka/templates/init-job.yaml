@@ -1,0 +1,49 @@
+{{- if .Values.init.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "fullname" . }}-init-job
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    component: "kafka-init-job"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+        component: kafka-init-job
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: kafka-init-job
+          image: "{{ .Values.init.image.repository }}:{{ .Values.init.image.tag }}"
+          imagePullPolicy: {{ .Values.init.image.pullPolicy }}
+          resources:
+{{ toYaml .Values.init.resources | indent 12 }}
+          env:
+            - name: KAFKA_HOST
+              value: "{{ template "fullname" . }}:9092"
+            - name: ZOOKEEPER_CONNECTION_STRING
+            {{- if .Values.zookeeper.overrideUri }}
+              value: "{{ .Values.zookeeper.overrideUri }}"
+            {{- else }}
+              value: {{ .Release.Name }}-zookeeper:2181
+            {{- end }}
+            - name: KAFKA_DELETE_TOPIC_ENABLE
+              value: "true"
+            - name: KAFKA_AUTO_CREATE_TOPICS
+              value: "false"
+            - name: JVM_MAX_HEAP_RATIO
+              value: {{ .Values.heap_ratio | quote }}
+            - name: KAFKA_STACK_SIZE
+              value: {{ .Values.stack_size | quote }}
+            {{- if .Values.init.topicConfig }}
+            - name: KAFKA_TOPIC_CONFIG
+              value: {{ .Values.init.topicConfig | quote }}
+            {{- end }}
+            - name: KAFKA_CREATE_TOPICS
+              value: {{ .Values.init.topics | join "," | quote }}
+{{- end }}

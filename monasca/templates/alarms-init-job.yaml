@@ -1,0 +1,82 @@
+{{- if .Values.alarms.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "alarms.fullname" . }}-init-job
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    component: "{{ .Values.alarms.name }}-init-job"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+        component: "{{ .Values.alarms.name }}-init-job"
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: alarms-init-job
+          image: "{{ .Values.alarms.image.repository }}:{{ .Values.alarms.image.tag }}"
+          imagePullPolicy: {{ .Values.alarms.image.pullPolicy }}
+          resources:
+{{ toYaml .Values.alarms.resources | indent 12 }}
+          env:
+            - name: KEYSTONE_DEFAULTS_ENABLED
+              value: "{{ .Values.alarms.keystone.defaults_enabled }}"
+            - name: OS_AUTH_URL
+            {{- if .Values.alarms.keystone.url }}
+            {{- if eq (kindOf .Values.alarms.keystone.url) "map" }}
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.alarms.keystone.url.secret_name }}"
+                  key: "{{ .Values.alarms.keystone.url.secret_key | default "OS_AUTH_URL" }}"
+            {{- else }}
+              value: "{{ .Values.alarms.keystone.url }}"
+            {{- end }}
+            {{- else if .Values.keystone.override.public_url }}
+              value: "{{ .Values.keystone.override.public_url }}/v3"
+            {{- else }}
+              value: "http://{{ template "keystone.fullname" . }}:{{ .Values.keystone.service.port }}/v3"
+            {{- end }}
+{{ include "monasca_keystone_env" .Values.alarms.keystone | indent 12 }}
+            - name: MONASCA_API_URL
+              value: "http://{{ template "api.fullname" . }}:{{ .Values.api.service.port }}/v2.0"
+            - name: MONASCA_WAIT_FOR_API
+              value: "{{ .Values.alarms.wait.enabled }}"
+            - name: MONASCA_API_WAIT_RETRIES
+              value: "{{ .Values.alarms.wait.retries }}"
+            - name: MONASCA_API_WAIT_DELAY
+              value: "{{ .Values.alarms.wait.delay }}"
+            {{- if .Values.alarms.notification_name }}
+            - name: NOTIFICATION_NAME
+              value: "{{ .Values.alarms.notification_name }}"
+            {{- end }}
+            {{- if .Values.alarms.notification_type }}
+            - name: NOTIFICATION_TYPE
+              value: "{{ .Values.alarms.notification_type }}"
+            {{- end }}
+            {{- if .Values.alarms.notification_address_secret }}
+            - name: NOTIFICATION_ADDRESS
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.alarms.notification_address_secret }}"
+                  key: "{{ .Values.alarms.notification_address_secret_key | default .Values.alarms.notification_address_secret }}"
+            {{- else if .Values.alarms.notification_address }}
+            - name: NOTIFICATION_ADDRESS
+              value: "{{ .Values.alarms.notification_address }}"
+            {{- end }}
+          volumeMounts:
+            - name: alarms-config
+              mountPath: /config/definitions.yml.j2
+              subPath: definitions.yml.j2
+      volumes:
+        - name: alarms-config
+          configMap:
+            name: {{ template "alarms.fullname" . }}
+            items:
+              - key: definitions.yml.j2
+                path: definitions.yml.j2
+{{- end }}

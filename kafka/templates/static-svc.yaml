@@ -1,0 +1,19 @@
+{{- if .Values.static_service.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: "{{ .Release.Service }}"
+    release: "{{ .Release.Name }}"
+  name: {{ .Values.static_service.name }}
+spec:
+  type: {{ .Values.static_service.type }}
+  ports:
+    - name: kafka
+      port: {{ .Values.static_service.port }}
+      targetPort: kafka
+  selector:
+    app: {{ template "fullname" . }}
+{{- end }}

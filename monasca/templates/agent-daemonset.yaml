@@ -1,0 +1,159 @@
+{{- if .Values.agent.daemonset_enabled }}
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: {{ template "agent.fullname" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    component: "{{ .Values.agent.name }}-daemonset"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        component: "{{ .Values.agent.name }}-daemonset"
+        app: {{ template "fullname" . }}
+    spec:
+      {{- if .Values.agent.daemonset_toleration.enabled }}
+      tolerations:
+        - operator: "{{ .Values.agent.daemonset_toleration.operator }}"
+          effect: "{{ .Values.agent.daemonset_toleration.effect }}"
+      {{- end }}
+      terminationGracePeriodSeconds: {{ .Values.agent.termination_grace_period }}
+      containers:
+        - name: collector
+          image: "{{ .Values.agent.collector.image.repository }}:{{ .Values.agent.collector.image.tag }}"
+          imagePullPolicy: {{ .Values.agent.collector.image.pullPolicy }}
+          resources:
+{{ toYaml .Values.agent.resources | indent 12 }}
+          env:
+            - name: KEYSTONE_DEFAULTS_ENABLED
+              value: "{{ .Values.agent.keystone.defaults_enabled }}"
+            - name: OS_AUTH_URL
+            {{- if .Values.agent.keystone.url }}
+            {{- if eq (kindOf .Values.agent.keystone.url) "map" }}
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.agent.keystone.url.secret_name }}"
+                  key: "{{ .Values.agent.keystone.url.secret_key | default "OS_AUTH_URL" }}"
+            {{- else }}
+              value: "{{ .Values.agent.keystone.url }}"
+            {{- end }}
+            {{- else if .Values.keystone.override.public_url }}
+              value: "{{ .Values.keystone.override.public_url }}/v3"
+            {{- else }}
+              value: "http://{{ template "keystone.fullname" . }}:{{ .Values.keystone.service.port }}/v3"
+            {{- end }}
+{{ include "monasca_keystone_env" .Values.agent.keystone | indent 12 }}
+            - name: AGENT_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: AGENT_POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: KUBERNETES
+              value: "true"
+            - name: KUBERNETES_TIMEOUT
+              value: {{ .Values.agent.kubernetes.timeout | quote }}
+            - name: KUBERNETES_LABELS
+              value: {{ .Values.agent.kubernetes.kubernetes_labels | quote }}
+            - name: PROMETHEUS
+              value: {{ .Values.agent.prometheus.auto_detect_pod_endpoints | quote }}
+            - name: PROMETHEUS_TIMEOUT
+              value: {{ .Values.agent.prometheus.timeout | quote }}
+            - name: PROMETHEUS_DETECT_METHOD
+              value: pod
+            - name: PROMETHEUS_KUBERNETES_LABELS
+              value: {{ .Values.agent.prometheus.kubernetes_labels | quote }}
+            - name: CADVISOR
+              value: {{ .Values.agent.cadvisor.enabled | quote }}
+            - name: CADVISOR_TIMEOUT
+              value: {{ .Values.agent.cadvisor.timeout | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.agent.log_level | quote }}
+            - name: HOSTNAME_FROM_KUBERNETES
+              value: "true"
+            {{- if .Values.agent.namespace_annotations }}
+            - name: KUBERNETES_NAMESPACE_ANNOTATIONS
+              value: {{ .Values.agent.namespace_annotations | quote}}
+            {{- end}}
+            {{- if .Values.agent.dimensions }}
+            - name: DIMENSIONS
+              value: {{ .Values.agent.dimensions | quote}}
+            {{- end}}
+            - name: CHECK_FREQ
+              value: {{ .Values.agent.collector.check_freq | quote }}
+            - name: NUM_COLLECTOR_THREADS
+              value: {{ .Values.agent.collector.num_collector_threads | quote }}
+            - name: POOL_FULL_MAX_TRIES
+              value: {{ .Values.agent.collector.pool_full_max_retries | quote }}
+            - name: SUB_COLLECTION_WARN
+              value: {{ .Values.agent.collector.sub_collection_warn | quote }}
+            {{- if .Values.agent.cadvisor.enable_minimum_whitelist }}
+            - name: CADVISOR_MINIMUM_WHITELIST
+              value: "true"
+            {{- end }}
+            {{- if .Values.agent.kubernetes.enable_minimum_whitelist }}
+            - name: KUBERNETES_MINIMUM_WHITELIST
+              value: "true"
+            {{- end }}
+        - name: forwarder
+          image: "{{ .Values.agent.forwarder.image.repository }}:{{ .Values.agent.forwarder.image.tag }}"
+          imagePullPolicy: {{ .Values.agent.forwarder.image.pullPolicy }}
+          resources:
+{{ toYaml .Values.agent.resources | indent 12 }}
+          env:
+            - name: KEYSTONE_DEFAULTS_ENABLED
+              value: "{{ .Values.agent.keystone.defaults_enabled }}"
+            - name: OS_AUTH_URL
+            {{- if .Values.agent.keystone.url }}
+            {{- if eq (kindOf .Values.agent.keystone.url) "map" }}
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.agent.keystone.url.secret_name }}"
+                  key: "{{ .Values.agent.keystone.url.secret_key | default "OS_AUTH_URL" }}"
+            {{- else }}
+              value: "{{ .Values.agent.keystone.url }}"
+            {{- end }}
+            {{- else if .Values.keystone.override.public_url }}
+              value: "{{ .Values.keystone.override.public_url }}/v3"
+            {{- else }}
+              value: "http://{{ template "keystone.fullname" . }}:{{ .Values.keystone.service.port }}/v3"
+            {{- end }}
+{{ include "monasca_keystone_env" .Values.agent.keystone | indent 12 }}
+            - name: AGENT_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: AGENT_POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: MONASCA_URL
+              value: "http://{{ template "api.fullname" . }}:{{ .Values.api.service.port }}/v2.0"
+            - name: LOG_LEVEL
+              value: {{ .Values.agent.log_level | quote }}
+            - name: INSECURE
+              value: {{ .Values.agent.insecure | quote }}
+            - name: MAX_BATCH_SIZE
+              value: {{ .Values.agent.forwarder.max_batch_size | quote }}
+            - name: MAX_MEASUREMENT_BUFFER_SIZE
+              value: {{ .Values.agent.forwarder.max_measurement_buffer_size | quote }}
+            - name: BACKLOG_SEND_RATE
+              value: {{ .Values.agent.forwarder.backlog_send_rate | quote }}
+            - name: HOSTNAME_FROM_KUBERNETES
+              value: "true"
+            - name: NON_LOCAL_TRAFFIC
+              value: {{ .Values.agent.forwarder.non_local_traffic | quote }}
+      {{- if .Values.agent.serviceAccount }}
+      serviceAccountName: {{ .Values.agent.serviceAccount | quote }}
+      {{- else if .Values.rbac.create }}
+      serviceAccountName: "{{ template "agent.fullname" . }}"
+      {{- end }}
+{{- end}}

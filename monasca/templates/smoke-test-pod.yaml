@@ -1,0 +1,44 @@
+{{- if .Values.smoke_tests.enabled }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ template "smoke_tests.fullname" . }}-test-pod
+  annotations:
+    "helm.sh/hook": test-success
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    component: "{{ .Values.smoke_tests.name }}-test-pod"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  restartPolicy: Never
+  containers:
+    - name: smoke-tests
+      image: "{{ .Values.smoke_tests.image.repository }}:{{ .Values.smoke_tests.image.tag }}"
+      imagePullPolicy: {{ .Values.smoke_tests.image.pullPolicy }}
+      resources:
+{{ toYaml .Values.smoke_tests.resources | indent 8 }}
+      ports:
+        - containerPort: 8080
+          name: smoke-tests
+      env:
+        - name: OS_AUTH_URL
+        {{- if .Values.smoke_tests.keystone.url }}
+        {{- if eq (kindOf .Values.smoke_tests.keystone.url) "map" }}
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Values.smoke_tests.keystone.url.secret_name }}"
+              key: "{{ .Values.smoke_tests.keystone.url.secret_key | default "OS_AUTH_URL" }}"
+        {{- else }}
+          value: "{{ .Values.smoke_tests.keystone.url }}"
+        {{- end }}
+        {{- else if .Values.keystone.override.public_url }}
+          value: "{{ .Values.keystone.override.public_url }}/v3"
+        {{- else }}
+          value: "http://{{ template "keystone.fullname" . }}:{{ .Values.keystone.service.port }}/v3"
+        {{- end }}
+{{ include "monasca_keystone_env" .Values.smoke_tests.keystone | indent 8 }}
+        - name: MONASCA_URL
+          value:  "http://{{ template "api.fullname" . }}:{{ .Values.api.service.port }}"
+{{- end }}

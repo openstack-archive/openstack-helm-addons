@@ -1,0 +1,17 @@
+{{- if .Values.notification.enabled }}
+{{- if .Values.notification.plugin_config.hipchat.template }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ template "notification.fullname" . }}-hipchat-template"
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    component: "{{ .Values.notification.name }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+data:
+  hipchat-template.yml.j2: |
+{{ .Values.notification.plugin_config.hipchat.template | indent 4 }}
+{{- end }}
+{{- end }}

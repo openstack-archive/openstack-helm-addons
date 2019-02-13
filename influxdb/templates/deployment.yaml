@@ -1,0 +1,127 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "influxdb.fullname" . }}
+  labels:
+    app: {{ template "influxdb.fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ template "influxdb.fullname" . }}
+      {{- if .Values.watcher.enabled }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "{{ .Values.watcher.port }}"
+        monasca.io/usek8slabels: "false"
+        monasca.io/whitelist: |
+          - influxdb_average_round_trip_time
+          - influxdb_dropped_message_count
+          - influxdb_max_round_trip_time
+          - influxdb_min_round_trip_time
+          - influxdb_read_failure_count
+          - influxdb_running_average_round_trip_time
+          - influxdb_watcher_status
+          - influxdb_write_failure_count
+          - go_memstats_heap_objects
+          - go_memstats_heap_inuse_bytes
+      {{- end }}
+    spec:
+      containers:
+      - name: {{ template "influxdb.fullname" . }}
+        image: "{{ .Values.image.repo }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+        ports:
+        - name: api
+          containerPort: {{ .Values.config.http.bind_address }}
+        {{ if .Values.config.admin.enabled -}}
+        - name: admin
+          containerPort: {{ .Values.config.admin.bind_address }}
+        {{- end }}
+        {{ if .Values.config.graphite.enabled -}}
+        - name: graphite
+          containerPort: {{ .Values.config.graphite.bind_address }}
+        {{- end }}
+        {{ if .Values.config.collectd.enabled -}}
+        - name: collectd
+          containerPort: {{ .Values.config.collectd.bind_address }}
+        {{- end }}
+        {{ if .Values.config.udp.enabled -}}
+        - name: udp
+          containerPort: {{ .Values.config.udp.bind_address }}
+        {{- end }}
+        {{ if .Values.config.opentsdb.enabled -}}
+        - name: opentsdb
+          containerPort: {{ .Values.config.opentsdb.bind_address }}
+        {{- end }}
+        {{- if .Values.watcher.enabled }}
+        - name: metrics
+          containerPort: {{ .Values.watcher.port }}
+        {{- end }}
+        livenessProbe:
+          httpGet:
+            path: /ping
+            port: api
+          initialDelaySeconds: {{ .Values.liveness.initial_delay_seconds }}
+          timeoutSeconds: {{ .Values.liveness.timeout_seconds }}
+        readinessProbe:
+          httpGet:
+            path: /ping
+            port: api
+          initialDelaySeconds: {{ .Values.readiness.initial_delay_seconds }}
+          timeoutSeconds: {{ .Values.readiness.timeout_seconds }}
+        volumeMounts:
+        - name: data
+          mountPath: {{ .Values.config.storage_directory }}
+        - name: config
+          mountPath: /etc/influxdb
+      {{- if .Values.watcher.enabled }}
+      - name: watcher
+        image: "{{ .Values.watcher.image.repository }}:{{ .Values.watcher.image.tag }}"
+        imagePullPolicy: {{ .Values.watcher.image.pullPolicy }}
+        resources:
+{{ toYaml .Values.watcher.resources | indent 12 }}
+        env:
+          - name: INFLUXDB_ADDRESS
+            value: {{ .Values.watcher.address | quote }}
+          - name: INFLUXDB_USERNAME
+            value: {{ .Values.watcher.username | quote }}
+          - name: INFLUXDB_PASSWORD
+            value: {{ .Values.watcher.password | quote }}
+          - name: INFLUXDB_DATABASE
+            value: {{ .Values.watcher.database | quote }}
+          - name: PROMETHEUS_ENDPOINT
+            value: "0.0.0.0:{{ .Values.watcher.port }}"
+          - name: WATCHER_PERIOD
+            value: {{ .Values.watcher.watcher_period | quote }}
+          - name: WATCHER_TIMEOUT
+            value: {{ .Values.watcher.watcher_timeout | quote }}
+          - name: STAY_ALIVE_ON_FAILURE
+            value: {{ .Values.watcher.stay_alive_on_failure | quote }}
+      {{- end }}
+      volumes:
+      - name: data
+      {{- if .Values.persistence.enabled }}
+        {{- if not (empty .Values.persistence.name) }}
+        persistentVolumeClaim:
+          claimName: {{ .Values.persistence.name }}
+        {{- else }}
+        persistentVolumeClaim:
+          claimName: {{ template "influxdb.fullname" . }}
+        {{- end }}
+      {{- else }}
+        emptyDir: {}
+      {{- end }}
+      - name: config
+        configMap:
+          name: {{ template "influxdb.fullname" . }}
+    {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+      {{- end -}}

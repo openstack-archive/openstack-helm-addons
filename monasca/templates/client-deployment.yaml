@@ -1,0 +1,48 @@
+{{- if .Values.client.enabled }}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "client.fullname" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    component: "{{ .Values.client.name }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  template:
+    metadata:
+      labels:
+        component: "{{ .Values.client.name }}-deployment"
+        app: {{ template "fullname" . }}
+    spec:
+      containers:
+        - name: client
+          image: "{{ .Values.client.image.repository }}:{{ .Values.client.image.tag }}"
+          imagePullPolicy: {{ .Values.client.image.pullPolicy }}
+          command:
+            - "sh"
+            - "-c"
+            - "while true; do sleep 86400; done"
+          resources:
+{{ toYaml .Values.client.resources | indent 12 }}
+          env:
+            - name: OS_AUTH_URL
+            {{- if .Values.client.keystone.url }}
+            {{- if eq (kindOf .Values.client.keystone.url) "map" }}
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.client.keystone.url.secret_name }}"
+                  key: "{{ .Values.client.keystone.url.secret_key | default "OS_AUTH_URL" }}"
+            {{- else }}
+              value: "{{ .Values.client.keystone.url }}"
+            {{- end }}
+            {{- else if .Values.keystone.override.public_url }}
+              value: "{{ .Values.keystone.override.public_url }}/v3"
+            {{- else }}
+              value: "http://{{ template "keystone.fullname" . }}:{{ .Values.keystone.service.port }}/v3"
+            {{- end }}
+{{ include "monasca_keystone_env" .Values.client.keystone | indent 12 }}
+            - name: MONASCA_API_URL
+              value: "http://{{ template "api.fullname" . }}:{{ .Values.api.service.port }}/v2.0"
+{{- end }}

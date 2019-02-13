@@ -1,0 +1,9 @@
+apiVersion: v1
+description: A Helm chart for adding Alarms for Monasca
+name: monasca-alarms
+version: 0.0.1
+sources:
+- https://wiki.openstack.org/wiki/Monasca
+maintainers:
+- name: Michael Hoppal
+  email: michael.jam.hoppal@hpe.com

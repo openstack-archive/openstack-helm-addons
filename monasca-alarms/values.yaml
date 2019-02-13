@@ -1,0 +1,9 @@
+kafka:
+  enabled: true
+  start_periods: 3
+  running_periods: 1
+
+zookeeper:
+  enabled: true
+  start_periods: 3
+  running_periods: 1

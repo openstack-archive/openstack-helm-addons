@@ -1,0 +1,47 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  # while not recommended, we add a random sequence to the end of the job name
+  # this job will attempt to delete itself when finished, but should it fail for
+  # some reason we don't want future upgrades to fail because of a name conflict
+  # (plus the future runs of this job will delete any previous iterations that
+  # failed to clean themselves up)
+  name: "{{ template "kafka.cleanup.fullname" . }}-job-{{ randAlphaNum 5 | lower }}"
+  labels:
+    app: {{ template "fullname" . }}
+    component: "{{ .Values.cleanup.name }}"
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+  annotations:
+    "helm.sh/hook": pre-upgrade,post-delete
+    "helm.sh/hook-weight": "-5"
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+        component: "{{ .Values.cleanup.name }}"
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        release: "{{ .Release.Name }}"
+        heritage: "{{ .Release.Service }}"
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: {{ template "name" . }}-{{ .Values.cleanup.name }}-job
+          image: "{{ .Values.cleanup.image.repository }}:{{ .Values.cleanup.image.tag }}"
+          imagePullPolicy: {{ .Values.cleanup.image.pullPolicy }}
+          resources:
+{{ toYaml .Values.cleanup.resources | indent 12 }}
+          env:
+            - name: "WAIT_RETRIES"
+              value: "{{ .Values.cleanup.wait.retries }}"
+            - name: "WAIT_DELAY"
+              value: "{{ .Values.cleanup.wait.delay }}"
+            - name: "WAIT_TIMEOUT"
+              value: "{{ .Values.cleanup.wait.timeout }}"
+      {{- if .Values.cleanup.serviceAccount }}
+      serviceAccountName: {{ .Values.cleanup.serviceAccount | quote }}
+      {{- else if .Values.rbac.create }}
+      serviceAccountName: "{{ template "kafka.cleanup.fullname" . }}"
+      {{- end }}

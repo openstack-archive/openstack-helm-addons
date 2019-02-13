@@ -1,0 +1,128 @@
+{{- if .Values.mysql_init.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-mysql-init-job
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: mysql-init-job
+          image: "{{ .Values.mysql_init.image.repository }}:{{ .Values.mysql_init.image.tag }}"
+          imagePullPolicy: {{ .Values.mysql_init.image.pullPolicy }}
+          resources:
+{{ toYaml .Values.mysql_init.resources | indent 12 }}
+          env:
+            - name: MYSQL_INIT_DISABLE_REMOTE_ROOT
+              value: {{ .Values.mysql_init.disable_remote_root | quote }}
+            - name: MYSQL_INIT_RANDOM_PASSWORD
+              value: "false"
+            - name: MYSQL_INIT_HOST
+            {{- if .Values.mysql_init.host }}
+            {{- if eq (kindOf .Values.mysql_init.host) "map" }}
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.mysql_init.host.secret_name }}"
+                  key: "{{ .Values.mysql_init.host.secret_key }}"
+            {{- else }}
+              value: "{{ .Values.mysql_init.host }}"
+            {{- end}}
+            {{- else }}
+              value: "{{ .Release.Name }}-mysql"
+            {{- end}}
+            - name: MYSQL_INIT_USERNAME
+{{- include "monasca_secret_env" .Values.mysql_init.username | indent 14 }}
+            - name: MYSQL_INIT_PASSWORD
+{{- include "monasca_secret_env" .Values.mysql_init.password | indent 14 }}
+            - name: MYSQL_INIT_PORT
+{{- include "monasca_secret_env" .Values.mysql_init.port | indent 14 }}
+            - name: CREATE_MON_USERS
+              value: {{ .Values.mysql_init.create_mon_users | quote }}
+            - name: GRAFANA_DB_ENABLED
+              value: {{ .Values.mysql_init.grafana_db_enabled | quote }}
+            - name: KEYSTONE_DB_ENABLED
+              value: {{ .Values.mysql_init.keystone_db_enabled | quote }}
+          {{- if .Values.mysql_init.keystone_db_enabled }}
+            - name: KEYSTONE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                {{- if .Values.keystone.mysql.username.secret_name }}
+                  name: "{{ .Values.keystone.mysql.username.secret_name }}"
+                {{- else }}
+                  name: "{{ .Release.Name }}-mysql-keystone-secret"
+                {{- end}}
+                  key: "{{ .Values.keystone.mysql.username.secret_key | default "username" }}"
+            - name: KEYSTONE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                {{- if .Values.keystone.mysql.password.secret_name }}
+                  name: "{{ .Values.keystone.mysql.password.secret_name }}"
+                {{- else }}
+                  name: "{{ .Release.Name }}-mysql-keystone-secret"
+                {{- end}}
+                  key: "{{ .Values.keystone.mysql.password.secret_key | default "password" }}"
+           {{- end}}
+            - name: API_USERNAME
+              valueFrom:
+                secretKeyRef:
+                {{- if .Values.api.mysql.username.secert_key }}
+                  name: "{{ .Values.api.mysql.username.secret_name }}"
+                {{- else }}
+                  name: "{{ .Release.Name }}-mysql-api-secret"
+                {{- end}}
+                  key: "{{ .Values.api.mysql.username.secret_key | default "username" }}"
+            - name: API_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                {{- if .Values.api.mysql.password.secert_key }}
+                  name: "{{ .Values.api.mysql.password.secret_name }}"
+                {{- else }}
+                  name: "{{ .Release.Name }}-mysql-api-secret"
+                {{- end}}
+                  key: "{{ .Values.api.mysql.password.secret_key | default "password" }}"
+            - name: NOTIFICATION_USERNAME
+              valueFrom:
+                secretKeyRef:
+                {{- if .Values.notification.mysql.username.secret_name }}
+                  name: "{{ .Values.notification.mysql.username.secret_name }}"
+                {{- else }}
+                  name: "{{ .Release.Name }}-mysql-notification-secret"
+                {{- end}}
+                  key: "{{ .Values.notification.mysql.username.secret_key | default "username" }}"
+            - name: NOTIFICATION_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                {{- if .Values.notification.mysql.password.secret_name }}
+                  name: "{{ .Values.notification.mysql.password.secret_name }}"
+                {{- else }}
+                  name: "{{ .Release.Name }}-mysql-notification-secret"
+                {{- end}}
+                  key: "{{ .Values.notification.mysql.password.secret_key | default "password" }}"
+            - name: THRESH_USERNAME
+              valueFrom:
+                secretKeyRef:
+                {{- if .Values.thresh.mysql.username.secret_name }}
+                  name: "{{ .Values.thresh.mysql.username.secret_name }}"
+                {{- else }}
+                  name: "{{ .Release.Name }}-mysql-thresh-secret"
+                {{- end}}
+                  key: "{{ .Values.thresh.mysql.username.secret_key | default "username" }}"
+            - name: THRESH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                {{- if .Values.thresh.mysql.password.secret_name }}
+                  name: "{{ .Values.thresh.mysql.password.secret_name }}"
+                {{- else }}
+                  name: "{{ .Release.Name }}-mysql-thresh-secret"
+                {{- end}}
+                  key: "{{ .Values.thresh.mysql.password.secret_key | default "password" }}"
+{{- end }}

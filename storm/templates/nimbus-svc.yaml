@@ -1,0 +1,20 @@
+{{- if .Values.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "storm.fullname" . }}-nimbus
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    component: "{{ .Values.name }}-nimbus"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+  - name: nimbus
+    port: {{ .Values.service.port }}
+  selector:
+    app: {{ template "fullname" . }}
+    component: "{{ .Values.name }}-nimbus"
+{{- end}}

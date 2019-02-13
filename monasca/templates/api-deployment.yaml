@@ -1,0 +1,167 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "api.fullname" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    component: "{{ .Values.api.name }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: {{ .Values.api.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+        component: "{{ .Values.api.name }}"
+      {{- if .Values.api.side_container.enabled }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "4888"
+      {{- end }}
+    spec:
+      containers:
+      - name: api
+        image: "{{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}"
+        imagePullPolicy: {{ .Values.api.image.pullPolicy }}
+        resources:
+{{ toYaml .Values.api.resources | indent 10 }}
+        ports:
+            - containerPort: 8070
+              name: client
+        env:
+            - name: LOG_LEVEL_ROOT
+              value: {{ .Values.api.logging.log_level_root | quote }}
+            - name: LOG_LEVEL_CONSOLE
+              value: {{ .Values.api.logging.log_level_console | quote }}
+            - name: KAFKA_URI
+            {{- if .Values.kafka.overrideUri }}
+              value: "{{ .Values.kafka.overrideUri }}"
+            {{- else }}
+              value: "{{ template "kafka.fullname" . }}:9092"
+            {{- end }}
+            - name: INFLUX_HOST
+              value: "{{ .Release.Name }}-influxdb"
+            - name: INFLUX_PORT
+              value: {{ .Values.influxdb.config.http.bind_address | quote }}
+            - name: INFLUX_USER
+              value: {{ .Values.api.influxdb.user | quote }}
+            - name: INFLUX_PASSWORD
+              value: {{ .Values.api.influxdb.password | quote }}
+            - name: INFLUX_DB
+              value: {{ .Values.api.influxdb.database | quote }}
+            {{- if .Values.api.mysql_disabled }}
+            - name: API_MYSQL_DISABLED
+              value: {{ .Values.api.mysql_disabled | quote }}
+            {{- end}}
+            {{- if .Values.api.mysql_disabled }}
+            - name: MYSQL_WAIT_RETRIES
+              value: {{ .Values.api.mysql_wait_retries | quote }}
+            {{- end}}
+            - name: MYSQL_HOST
+            {{- if .Values.api.mysql.host }}
+            {{- if eq (kindOf .Values.api.mysql.host) "map" }}
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.api.mysql.host.secret_name }}"
+                  key: "{{ .Values.api.mysql.host.secret_key | default "host" }}"
+            {{- else }}
+              value: "{{ .Values.api.mysql.host }}"
+            {{- end}}
+            {{- else }}
+              value: "{{ .Release.Name }}-mysql"
+            {{- end}}
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                {{- if .Values.api.mysql.username.secret_name }}
+                  name: "{{ .Values.api.mysql.username.secret_name }}"
+                {{- else }}
+                  name: "{{ .Release.Name }}-mysql-api-secret"
+                {{- end}}
+                  key: "{{ .Values.api.mysql.username.secret_key | default "username" }}"
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                {{- if .Values.api.mysql.password.secret_name }}
+                  name: "{{ .Values.api.mysql.password.secret_name }}"
+                {{- else }}
+                  name: "{{ .Release.Name }}-mysql-api-secret"
+                {{- end}}
+                  key: "{{ .Values.api.mysql.password.secret_key | default "password" }}"
+            - name: MYSQL_DB
+              value: "mon"
+            - name: MEMCACHED_URI
+            {{- if .Values.api.memcachedUri }}
+              value: "{{ .Values.api.memcachedUri }}"
+            {{- else if .Values.memcached.enabled }}
+              value: "{{ template "memcached.fullname" . }}:{{ .Values.memcached.service.port | default "11211" }}"
+            {{- else }}
+              value: ""
+            {{- end }}
+            - name: KEYSTONE_IDENTITY_URI
+            {{- if .Values.api.keystone.identity_url }}
+{{- include "monasca_secret_env" .Values.api.keystone.identity_url | indent 14 }}
+            {{- else if .Values.keystone.override.public_url }}
+              value: "{{ .Values.keystone.override.public_url }}"
+            {{- else }}
+              value: "http://{{ template "keystone.fullname" . }}:{{ .Values.keystone.service.port }}"
+            {{- end }}
+            - name: KEYSTONE_AUTH_URI
+            {{- if .Values.api.keystone.auth_url }}
+{{- include "monasca_secret_env" .Values.api.keystone.auth_url | indent 14 }}
+            {{- else if .Values.keystone.override.admin_url }}
+              value: "{{ .Values.keystone.override.admin_url }}"
+            {{- else }}
+              value: "http://{{ template "keystone.fullname" . }}:{{ .Values.keystone.service.admin_port }}"
+            {{- end }}
+            - name: KEYSTONE_ADMIN_USER
+{{- include "monasca_secret_env" .Values.api.keystone.username | indent 14 }}
+            - name: KEYSTONE_ADMIN_PASSWORD
+{{- include "monasca_secret_env" .Values.api.keystone.password | indent 14 }}
+            - name: KEYSTONE_ADMIN_TENANT
+{{- include "monasca_secret_env" .Values.api.keystone.tenant_name | indent 14 }}
+            {{- if .Values.api.auth_disabled }}
+            - name: API_AUTH_DISABLED
+              value: "true"
+            {{- end}}
+            {{- if .Values.api.authorized_roles }}
+            - name: AUTHORIZED_ROLES
+              value: {{ .Values.api.authorized_roles | quote }}
+            {{- end}}
+            {{- if .Values.api.http_proxy }}
+            - name: http_proxy
+              value: {{ .Values.api.http_proxy | quote }}
+            - name: HTTP_PROXY
+              value: {{ .Values.api.http_proxy | quote }}
+            {{- end }}
+            {{- if .Values.api.https_proxy }}
+            - name: https_proxy
+              value: {{ .Values.api.https_proxy | quote }}
+            - name: HTTPS_PROXY
+              value: {{ .Values.api.https_proxy | quote }}
+            {{- end }}
+            {{- if .Values.api.no_proxy }}
+            - name: no_proxy
+              value: {{ .Values.api.no_proxy | quote }}
+            - name: NO_PROXY
+              value: {{ .Values.api.no_proxy | quote }}
+            {{- end }}
+            {{- if .Values.api.side_container.enabled }}
+            - name: SIDECAR_URL
+              value: http://localhost:4888/v1/ingest
+            {{- end }}
+            - name: GUNICORN_WORKERS
+              value: {{ .Values.api.gunicorn_workers | quote }}
+      {{- if .Values.api.side_container.enabled }}
+      - name: sidecar
+        image: "{{ .Values.api.side_container.image.repository }}:{{ .Values.api.side_container.image.tag }}"
+        imagePullPolicy: {{ .Values.api.side_container.image.pullPolicy }}
+        resources:
+{{ toYaml .Values.api.side_container.resources | indent 10 }}
+        ports:
+          - containerPort: 4888
+            name: scrape
+      {{- end }}

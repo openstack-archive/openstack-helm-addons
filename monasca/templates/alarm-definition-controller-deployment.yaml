@@ -1,0 +1,59 @@
+{{- if .Values.alarm_definition_controller.controller_enabled }}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "alarm_definition_controller.fullname" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    component: "{{ .Values.alarm_definition_controller.name }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+        component: "{{ .Values.alarm_definition_controller.name }}"
+    spec:
+      containers:
+        - name: adc
+          image: "{{ .Values.alarm_definition_controller.image.repository }}:{{ .Values.alarm_definition_controller.image.tag }}"
+          imagePullPolicy: {{ .Values.alarm_definition_controller.image.pullPolicy }}
+          resources:
+{{ toYaml .Values.alarm_definition_controller.resources | indent 12 }}
+          env:
+            - name: OS_AUTH_URL
+            {{- if .Values.alarm_definition_controller.keystone.url }}
+            {{- if eq (kindOf .Values.alarm_definition_controller.keystone.url) "map" }}
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.alarm_definition_controller.keystone.url.secret_name }}"
+                  key: "{{ .Values.alarm_definition_controller.keystone.url.secret_key | default "OS_AUTH_URL" }}"
+            {{- else }}
+              value: "{{ .Values.alarm_definition_controller.keystone.url }}"
+            {{- end }}
+            {{- else if .Values.keystone.override.public_url }}
+              value: "{{ .Values.keystone.override.public_url }}"
+            {{- else }}
+              value: "http://{{ template "keystone.fullname" . }}:{{ .Values.keystone.service.port }}"
+            {{- end }}
+{{ include "monasca_keystone_env" .Values.alarm_definition_controller.keystone | indent 12 }}
+            - name: MONASCA_URL
+              value: "http://{{ template "api.fullname" . }}:{{ .Values.api.service.port }}/v2.0"
+            {{- if .Values.alarm_definition_controller.default_notification_name }}
+            - name: DEFAULT_NOTIFICATION
+              value: "{{ .Values.alarm_definition_controller.default_notification_name }}"
+            {{- end }}
+            - name: NAMESPACE
+            {{- if .Values.alarm_definition_controller.namespace }}
+              value: "{{ .Values.alarm_definition_controller.namespace }}"
+            {{- else }}
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            {{- end }}
+            - name: VERSION
+              value: "{{ .Values.alarm_definition_controller.version }}"
+{{- end }}

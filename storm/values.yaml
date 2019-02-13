@@ -1,0 +1,35 @@
+name: storm
+enabled: true
+image:
+  repository: monasca/storm
+  tag: 1.1.1-1.0.11
+  pullPolicy: Always
+persistence:
+  storageClass: default
+  enabled: false
+  accessMode: ReadWriteOnce
+  size: 4Gi
+service:
+  type: ClusterIP
+  port: 6627
+supervisor_ports: [ 6701, 6702 ]
+nimbus_resources:
+  requests:
+    memory: 512Mi
+    cpu: 100m
+  limits:
+    memory: 2Gi
+    cpu: 500m
+supervisor_resources:
+  requests:
+    memory: 2Gi
+    cpu: 250m
+  limits:
+    memory: 4Gi
+    cpu: 2000m
+
+thresh:
+  secretSuffix: mysql-thresh-secret
+  spout:
+    metricSpoutThreads: 2
+    metricSpoutTasks: 2

@@ -1,0 +1,45 @@
+name: zookeeper
+image:
+  repository: zookeeper
+  tag: 3.4.10
+  pullPolicy: IfNotPresent
+service:
+  type: ClusterIP
+persistence:
+  storageClass: default
+  enabled: false
+  accessMode: ReadWriteOnce
+  size: 10Gi
+  purge_interval: 1
+  snap_retain_count: 3
+resources:
+  requests:
+    memory: 256Mi
+    cpu: 100m
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+java:
+  max_ram_fraction: 2
+watcher:
+  enabled: false
+  image:
+    repository: monasca/zookeeper-watcher
+    tag: 0.0.2
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      memory: 32Mi
+      cpu: 25m
+    limits:
+      memory: 64Mi
+      cpu: 50m
+  port: 8080
+  health_check_path: zookeeper-health-check
+  watcher_period: 600
+  watcher_timeout: 60
+  stay_alive_on_failure: false
+static_service:
+  enabled: false
+  type: ClusterIP
+  name: zookeeper

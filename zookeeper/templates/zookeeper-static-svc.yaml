@@ -1,0 +1,22 @@
+{{- if .Values.static_service.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: "{{ .Release.Service }}"
+    release: "{{ .Release.Name }}"
+  name: {{ .Values.static_service.name }}
+spec:
+  type: {{ .Values.static_service.type }}
+  ports:
+    - name: client
+      port: 2181
+    - name: peer
+      port: 2888
+    - name: leader-election
+      port: 3888
+  selector:
+    app: {{ template "fullname" . }}
+{{- end }}

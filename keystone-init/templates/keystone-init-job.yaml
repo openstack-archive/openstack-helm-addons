@@ -1,0 +1,51 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "fullname" . }}-job
+  labels:
+    app: {{ template "fullname" . }}
+    component: "{{ .Values.keystone_init.name }}"
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+{{- if .Values.keystone_init.deadline }}
+  activeDeadlineSeconds: {{ .Values.keystone_init.deadline }}
+{{- end }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+        component: "{{ .Values.keystone_init.name }}"
+    spec:
+      restartPolicy: OnFailure
+      volumes:
+        - name: preload-config
+          configMap:
+            name: "{{ template "fullname" . }}-preload"
+      containers:
+        - name: {{ template "fullname" . }}-job
+          image: "{{ .Values.keystone_init.image.repository }}:{{ .Values.keystone_init.image.tag }}"
+          imagePullPolicy: {{ .Values.keystone_init.image.pullPolicy }}
+          resources:
+{{ toYaml .Values.keystone_init.resources | indent 12 }}
+          env:
+            - name: LOG_LEVEL
+              value: {{ .Values.keystone_init.log_level }}
+            - name: KEYSTONE_TIMEOUT
+              value: "{{ .Values.keystone_init.timeout }}"
+            - name: KEYSTONE_VERIFY
+              value: "{{ .Values.keystone_init.verify }}"
+            - name: KEYSTONE_CERT
+              value: "{{ .Values.keystone_init.cert }}"
+{{ include "keystone_init_keystone_env" .Values.keystone_init.auth | indent 12 }}
+            - name: PRELOAD_PATH
+              value: "/config/preload.yml"
+          volumeMounts:
+            - name: preload-config
+              mountPath: /config
+      {{- if .Values.keystone_init.serviceAccount }}
+      serviceAccountName: {{ .Values.keystone_init.serviceAccount | quote }}
+      {{- else if .Values.rbac.create }}
+      serviceAccountName: "{{ template "fullname" . }}"
+      {{- end }}

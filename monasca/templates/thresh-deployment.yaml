@@ -1,0 +1,135 @@
+{{- if .Values.thresh.enabled }}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "thresh.fullname" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    component: "{{ .Values.thresh.name }}-deployment"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+        component: "{{ .Values.thresh.name }}-deployment"
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: thresh
+          image: "{{ .Values.thresh.image.repository }}:{{ .Values.thresh.image.tag }}"
+          imagePullPolicy: {{ .Values.thresh.image.pullPolicy }}
+          resources:
+{{ toYaml .Values.thresh.resources | indent 12 }}
+          env:
+            - name: STORM_HOSTNAME_FROM_IP
+              value: "true"
+            - name: STORM_WAIT_RETRIES
+              value: "{{ .Values.thresh.wait.retries }}"
+            - name: STORM_WAIT_DELAY
+              value: "{{ .Values.thresh.wait.delay }}"
+            - name: STORM_WAIT_TIMEOUT
+              value: "{{ .Values.thresh.wait.timeout }}"
+            {{- if .Values.zookeeper.overrideUri }}
+            - name: ZOOKEEPER_SERVERS
+              value: "{{ (.Values.zookeeper.overrideUri | split ":")._0 }}"
+            - name: STORM_ZOOKEEPER_PORT
+              value: "{{ (.Values.zookeeper.overrideUri | split ":")._1 }}"
+            {{- else }}
+            - name: ZOOKEEPER_SERVERS
+              value: "{{ template "zookeeper.fullname" . }}"
+            - name: STORM_ZOOKEEPER_PORT
+              value: "2181"
+            {{- end }}
+            - name: NIMBUS_SEEDS
+              value: "{{ .Release.Name }}-nimbus"
+            - name: METRIC_SPOUT_THREADS
+              value: "{{ .Values.thresh.spout.metricSpoutThreads }}"
+            - name: METRIC_SPOUT_TASKS
+              value: "{{ .Values.thresh.spout.metricSpoutTasks }}"
+            - name: EVENT_SPOUT_THREADS
+              value: "{{ .Values.thresh.spout.eventSpoutThreads }}"
+            - name: EVENT_SPOUT_TASKS
+              value: "{{ .Values.thresh.spout.eventSpoutTasks }}"
+            - name: EVENT_BOLT_THREADS
+              value: "{{ .Values.thresh.bolt.eventBoltThreads }}"
+            - name: EVENT_BOLT_TASKS
+              value: "{{ .Values.thresh.bolt.eventBoltTasks }}"
+            - name: FILTERING_BOLT_THREADS
+              value: "{{ .Values.thresh.bolt.filteringBoltThreads }}"
+            - name: FILTERING_BOLT_TASKS
+              value: "{{ .Values.thresh.bolt.filteringBoltTasks }}"
+            - name: ALARM_CREATION_BOLT_THREADS
+              value: "{{ .Values.thresh.bolt.alarmCreationBoltThreads }}"
+            - name: ALARM_CREATION_BOLT_TASKS
+              value: "{{ .Values.thresh.bolt.alarmCreationBoltTasks }}"
+            - name: AGGREGATION_BOLT_THREADS
+              value: "{{ .Values.thresh.bolt.aggregationBoltThreads }}"
+            - name: AGGREGATION_BOLT_TASKS
+              value: "{{ .Values.thresh.bolt.aggregationBoltTasks }}"
+            - name: THRESHOLDING_BOLT_THREADS
+              value: "{{ .Values.thresh.bolt.thresholdingBoltThreads }}"
+            - name: THRESHOLDING_BOLT_TASKS
+              value: "{{ .Values.thresh.bolt.thresholdingBoltTasks }}"
+            - name: KAFKA_URI
+            {{- if .Values.kafka.overrideUri }}
+              value: "{{ .Values.kafka.overrideUri }}"
+            {{- else }}
+              value: "{{ .Release.Name }}-kafka:9092"
+            {{- end }}
+            - name: USE_SSL_ENABLED
+              value: "{{ .Values.thresh.use_ssl_enabled | default "false" }}"
+            - name: MYSQL_DB_HOST
+            {{- if .Values.thresh.mysql.host }}
+            {{- if eq (kindOf .Values.thresh.mysql.host) "map" }}
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.thresh.mysql.host.secret_name }}"
+                  key: "{{ .Values.thresh.mysql.host.secret_key | default "host" }}"
+            {{- else }}
+              value: "{{ .Values.thresh.mysql.host }}"
+            {{- end}}
+            {{- else }}
+              value: "{{ .Release.Name }}-mysql"
+            {{- end}}
+            - name: MYSQL_DB_PORT
+{{- include "monasca_secret_env" .Values.thresh.mysql.port | indent 14 }}
+            - name: MYSQL_DB_DATABASE
+              value: "mon"
+            - name: MYSQL_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                {{- if .Values.thresh.mysql.username.secret_name }}
+                  name: "{{ .Values.thresh.mysql.username.secret_name }}"
+                {{- else }}
+                  name: "{{ .Release.Name }}-mysql-thresh-secret"
+                {{- end}}
+                  key: "{{ .Values.thresh.mysql.username.secret_key | default "username" }}"
+            - name: MYSQL_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                {{- if .Values.thresh.mysql.password.secret_name }}
+                  name: "{{ .Values.thresh.mysql.password.secret_name }}"
+                {{- else }}
+                  name: "{{ .Release.Name }}-mysql-thresh-secret"
+                {{- end }}
+                  key: "{{ .Values.thresh.mysql.password.secret_key | default "password" }}"
+            - name: NO_STORM_CLUSTER
+              value: "{{ .Values.thresh.use_local }}"
+            - name: WORKER_MAX_HEAP_MB
+              value: "{{ .Values.thresh.workerMaxHeapMB }}"
+            - name: JVM_MAX_HEAP_RATIO
+              value: {{ .Values.thresh.heap_ratio | quote }}
+            - name: THRESH_STACK_SIZE
+              value: {{ .Values.thresh.stack_size | quote }}
+            - name: JVM_MAX_RATIO
+              value: {{ .Values.thresh.memory_ratio | quote }}
+            {{- if .Values.thresh.jmx.enabled }}
+            - name: LOCAL_JMX
+              value: "true"
+            - name: LOCAL_JMX_PORT
+              value: {{ .Values.thresh.jmx.port | quote }}
+            {{- end }}
+{{- end }}

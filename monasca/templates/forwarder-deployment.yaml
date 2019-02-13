@@ -1,0 +1,68 @@
+{{- if .Values.forwarder.enabled }}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "forwarder.fullname" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    component: "{{ .Values.forwarder.name }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: {{ .Values.forwarder.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+        component: "{{ .Values.forwarder.name }}"
+      annotations:
+        checksum/metric_config: {{ toYaml .Values.forwarder.metric_configuration | sha256sum }}
+    spec:
+      containers:
+      - name: forwarder
+        image: "{{ .Values.forwarder.image.repository }}:{{ .Values.forwarder.image.tag }}"
+        imagePullPolicy: {{ .Values.forwarder.image.pullPolicy }}
+        resources:
+{{ toYaml .Values.forwarder.resources | indent 10 }}
+        env:
+            - name: MONASCA_PROJECT_ID
+              value: {{ .Values.forwarder.config.monasca_project_id | quote }}
+            - name: REMOTE_API_URL
+              value: {{ .Values.forwarder.config.remote_api_url | quote }}
+            - name: DEBUG
+              value: {{ .Values.forwarder.logging.debug | quote }}
+            - name: VERBOSE
+              value: {{ .Values.forwarder.logging.verbose | quote }}
+            - name: ZOOKEEPER_URL
+            {{- if .Values.zookeeper.overrideUri }}
+              value: "{{ .Values.zookeeper.overrideUri }}"
+            {{- else }}
+              value: "{{ template "zookeeper.fullname" . }}:2181"
+            {{- end }}
+            - name: KAFKA_URI
+            {{- if .Values.kafka.overrideUri }}
+              value: "{{ .Values.kafka.overrideUri }}"
+            {{- else }}
+              value: "{{ template "kafka.fullname" . }}:9092"
+            {{- end }}
+            - name: USE_INSECURE
+              value: {{ .Values.forwarder.config.use_insecure | quote}}
+            - name: MONASCA_ROLE
+              value: {{ .Values.forwarder.config.monasca_role | quote }}
+            {{- if .Values.forwarder.metric_project_id }}
+            - name: METRIC_PROJECT_ID
+              value: {{ .Values.forwarder.config.metric_project_id | quote }}
+            {{- end }}
+        volumeMounts:
+          - name: forwarder-config
+            mountPath: /config/forwarder_metric_match.yml.j2
+            subPath: forwarder_metric_match.yml.j2
+      volumes:
+        - name: forwarder-config
+          configMap:
+            name: {{ template "forwarder.fullname" . }}
+            items:
+              - key: forwarder_metric_match.yml
+                path: forwarder_metric_match.yml.j2
+{{- end }}
