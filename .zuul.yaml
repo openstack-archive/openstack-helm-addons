@@ -19,6 +19,9 @@
               - ^.*\.rst$
               - ^doc/.*$
               - ^releasenotes/.*$
+        - openstack-helm-addons-sonobuoy:
+            files:
+              - ^sonobuoy/.*$
     gate:
       jobs:
         - openstack-helm-addons-linter
@@ -27,9 +30,9 @@
               - ^.*\.rst$
               - ^doc/.*$
               - ^releasenotes/.*$
-    experimental:
-      jobs:
-        - openstack-helm-addons-sonobuoy
+        - openstack-helm-addons-sonobuoy:
+            files:
+              - ^sonobuoy/.*$
 
 - job:
     name: openstack-helm-addons-linter
