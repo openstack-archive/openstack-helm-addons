@@ -167,6 +167,9 @@ secrets:
     rms:
       rms:
         public: rms
+    audit:
+      audit:
+        public: audit
 
 # typically overriden by environmental
 # values, but should include all endpoints
@@ -189,6 +192,7 @@ endpoints:
     name: audit
     hosts:
       default: audit-api
+      public: audit
     host_fqdn_override:
       default: null
     path:
@@ -198,6 +202,7 @@ endpoints:
     port:
       api:
         default: 7008
+        public: 80
   cms:
     name: cms
     hosts:
@@ -446,6 +451,7 @@ manifests:
   ingress_ims: true
   ingress_rds: true
   ingress_rms: true
+  ingress_audit: true
   secret_db: true
   secret_ingress_tls: true
   secret_ssh_key: true
@@ -460,6 +466,7 @@ manifests:
   service_ingress_ims: true
   service_ingress_rds: true
   service_ingress_rms: true
+  service_ingress_audit: true
   service_audit: true
   service_cms: true
   service_fms: true
