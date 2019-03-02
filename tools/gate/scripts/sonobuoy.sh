@@ -19,5 +19,12 @@ set -xe
 helm dependency update sonobuoy
 helm upgrade --install sonobuoy sonobuoy \
     --namespace=heptio-sonobuoy \
-    --set endpoints.identity.namespace=openstack
+    --set endpoints.identity.namespace=openstack \
+    --set manifests.serviceaccount_readonly=true
 helm test sonobuoy
+
+helm upgrade --install another-sonobuoy sonobuoy \
+    --namespace=sonobuoy \
+    --set endpoints.identity.namespace=openstack \
+    --set manifests.serviceaccount_readonly=true
+helm test another-sonobuoy

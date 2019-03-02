@@ -19,11 +19,13 @@ limitations under the License.
 
 {{- $serviceAccountName := "sonobuoy-serviceaccount" }}
 {{ tuple $envAll "sonobuoy" $serviceAccountName | include "helm-toolkit.snippets.kubernetes_pod_rbac_serviceaccount" }}
+
+{{ $controllerName := printf "%s-%s" .Release.Namespace $serviceAccountName }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ $serviceAccountName }}
+  name: {{ $controllerName | quote }}
 rules:
 - apiGroups:
   - '*'
@@ -35,11 +37,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ $serviceAccountName }}-heptio-sonobuoy
+  name: {{ $controllerName | quote }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ $serviceAccountName }}
+  name: {{ $controllerName | quote }}
 subjects:
 - kind: ServiceAccount
   name: {{ $serviceAccountName }}
