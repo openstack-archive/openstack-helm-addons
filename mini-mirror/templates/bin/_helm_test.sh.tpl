@@ -16,11 +16,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */}}
 
+{{- $envAll := . -}}
+
 set -xe
 
 rm /etc/apt/sources.list
 tee /etc/apt/sources.list << EOF
-deb [ allow-insecure=yes ] http://${MINI_MIRROR_ENDPOINT} squeeze main
+{{- $components := include "helm-toolkit.utils.joinListWithSpace" .Values.conf.test.components -}}
+{{ range .Values.conf.test.dists }}
+deb [ allow-insecure=yes ] {{ tuple "api" "public" "api" $envAll | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }} {{ . }} {{ $components -}}
+{{ end }}
 EOF
 
 apt-get update
