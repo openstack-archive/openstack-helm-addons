@@ -43,7 +43,7 @@ spec:
       image: {{ .Values.images.tags.scripted_test }}
       env:
         - name: RANGER_SERVICE_URL
-          value: {{ tuple "ranger_agent" "public" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }}
+          value: {{ tuple "ranger_agent" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }}
       command:
         - /tmp/ranger-agent-test.sh
       volumeMounts:
