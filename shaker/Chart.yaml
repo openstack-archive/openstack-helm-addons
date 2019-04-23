@@ -19,7 +19,7 @@ version: 0.1.0
 home: https://pyshaker.readthedocs.io/en/latest/index.html
 icon: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlnnEExfz6H9bBFFDxsDm5mVTdKWOt6Hw2_3aJ7hVkNdDdTCrimQ
 sources:
-  - https://git.openstack.org/cgit/openstack/shaker
-  - https://git.openstack.org/cgit/openstack/openstack-helm
+  - https://opendev.org/openstack/shaker
+  - https://opendev.org/openstack/openstack-helm
 maintainers:
   - name: OpenStack-Helm Authors

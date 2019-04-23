@@ -15,8 +15,8 @@ description: OpenStack-Helm Ranger Agent
 name: ranger-agent
 version: 0.1.0
 sources:
-  - https://git.openstack.org/cgit/openstack/ranger-agent
-  - https://git.openstack.org/cgit/openstack/openstack-helm
+  - https://opendev.org/openstack/ranger-agent
+  - https://opendev.org/openstack/openstack-helm
 maintainers:
   - name: OpenStack-Helm Authors
 

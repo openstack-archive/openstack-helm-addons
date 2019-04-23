@@ -14,9 +14,9 @@ apiVersion: v1
 description: OpenStack-Helm Ranger
 name: ranger
 version: 0.1.0
-icon: https://git.openstack.org/cgit/openstack/ranger/plain/public/images/logo.png
+icon: https://opendev.org/x/ranger/raw/branch/master/public/images/logo.png
 sources:
-  - https://git.openstack.org/cgit/openstack/ranger
-  - https://git.openstack.org/cgit/openstack/openstack-helm-addons
+  - https://opendev.org/openstack/ranger
+  - https://opendev.org/openstack/openstack-helm-addons
 maintainers:
   - name: OpenStack-Helm Authors
