@@ -75,9 +75,14 @@ dependencies:
           endpoint: internal
 
 pod:
-  user:
+  security_context:
     ranger:
-      uid: 1000
+      pod:
+        runAsUser: 1000
+      container:
+        ranger_services:
+          readOnlyRootFilesystem: false
+          allowPrivilegeEscalation: false
   affinity:
     anti:
       type:

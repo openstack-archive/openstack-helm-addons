@@ -40,6 +40,7 @@ spec:
         configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.utils.hash" }}
         configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.utils.hash" }}
     spec:
+{{ dict "envAll" $envAll "application" "ranger" | include "helm-toolkit.snippets.kubernetes_pod_security_context" | indent 6 }}
       serviceAccountName: {{ $serviceAccountName }}
       dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: true
@@ -55,8 +56,7 @@ spec:
           image: {{ .Values.images.tags.ranger }}
           imagePullPolicy: {{ .Values.images.pull_policy }}
 {{ tuple $envAll $envAll.Values.pod.resources.ranger | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
-          securityContext:
-            runAsUser: {{ .Values.pod.user.ranger.uid }}
+{{ dict "envAll" $envAll "application" "ranger" "container" "ranger_services" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
           env:
             - name: USER
               valueFrom:
