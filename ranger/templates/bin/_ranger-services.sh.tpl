@@ -58,7 +58,7 @@ fi
 
 function stop() {
 
-  kill -TERM 1
+  pkill -e ranger
 
 }
 
