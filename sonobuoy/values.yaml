@@ -97,10 +97,32 @@ manifests:
   pod_api: true
   secret_etc: true
   secret_keystone: true
+  secret_plugin_values: true
   serviceaccount_readonly: false
 
 conf:
   publish_results: true
+  # Injected values root used by (some of) the plugins. This `plugin_values`
+  # root is the parent for a mapping of named sections, each of which will be
+  # added as a file in the plugin-values secret.
+  #
+  # Plugins will be responsible for mounting the appropriate information,
+  # e.g. as /etc/test/<filename> to the plugin container(s) as appropriate.
+  #
+  # A default entry/file will be supplied, but is expected to be overridden by
+  # deployment.
+  #
+  # In the case of supplying this info to the plugin(s), each plugin will need
+  # to do the mounting of the secret into the correct place, similar to what is
+  # shown in this values file at conf.plugins[0].data.spec.volumeMounts, and
+  # conf.plugins[0].data.extra-volumes
+  #
+  # Each entry under plugin-values needs to be keyed by the filename for that
+  # set of values. The yaml mapped by each filename will be the contents of
+  # the file.
+  plugin_values:
+    demo:
+      placeholder: value
   swift:
     container_name: sonobuoy
     # delete objects after 1 month (60 * 60 * 24 * 30 seconds)
@@ -164,3 +186,11 @@ conf:
           - mountPath: /node
             name: root
             readOnly: false
+          - mountPath: /etc/test
+            name: configured-values
+            readOnly: true
+        extra-volumes:
+        - name: configured-values
+          secret:
+            secretName: plugin-values
+            defaultMode: 444
