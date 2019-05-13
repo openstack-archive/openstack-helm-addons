@@ -15,8 +15,8 @@
 images:
   tags:
     dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.3.1
-    ks_user: docker.io/openstackhelm/heat:ocata
-    results_publisher: docker.io/openstackhelm/heat:ocata
+    ks_user: docker.io/openstackhelm/heat:ocata-ubuntu_xenial
+    results_publisher: docker.io/openstackhelm/heat:ocata-ubuntu_xenial
     sonobuoy_api: gcr.io/heptio-images/sonobuoy:v0.11.4
     systemd_logs: gcr.io/heptio-images/sonobuoy-plugin-systemd-logs:v0.1
   pull_policy: "IfNotPresent"

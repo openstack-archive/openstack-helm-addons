@@ -15,8 +15,8 @@
 images:
   tags:
     artifactory: quay.io/attcomdev/artifactory-pro-mysql:5.11.1
-    db_drop: docker.io/openstackhelm/heat:newton
-    db_init: docker.io/openstackhelm/heat:newton
+    db_drop: docker.io/openstackhelm/heat:newton-ubuntu_xenial
+    db_init: docker.io/openstackhelm/heat:newton-ubuntu_xenial
     dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.2.1
     image_repo_sync: docker.io/docker:17.07.0
   pull_policy: "IfNotPresent"
