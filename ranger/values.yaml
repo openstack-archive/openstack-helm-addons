@@ -14,13 +14,13 @@
 
 images:
   tags:
-    db_drop: docker.io/openstackhelm/heat:newton
-    db_init: docker.io/openstackhelm/heat:newton
+    db_drop: docker.io/openstackhelm/heat:newton-ubuntu_xenial
+    db_init: docker.io/openstackhelm/heat:newton-ubuntu_xenial
     dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.3.1
     image_repo_sync: docker.io/docker:17.07.0
     ranger: quay.io/attcomdev/ranger:d376b6059733a4d9b0c47d1c8ba1edf98c8953e3
     ranger_db_sync: quay.io/attcomdev/ranger:d376b6059733a4d9b0c47d1c8ba1edf98c8953e3
-    scripted_test: docker.io/openstackhelm/heat:newton
+    scripted_test: docker.io/openstackhelm/heat:newton-ubuntu_xenial
   pull_policy: "IfNotPresent"
   local_registry:
     active: false
