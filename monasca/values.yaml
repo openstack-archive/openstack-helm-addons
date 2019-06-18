@@ -560,7 +560,7 @@ alarms:
     project_name: mini-mon
     project_domain_name: Default
   definitions_configuration:
-     definitions.yml.j2: |
+    definitions.yml.j2: |
       notifications:
         - name: "{{ NOTIFICATION_NAME | default('default') }}"
           type: "{{ NOTIFICATION_TYPE | default('email') }}"
@@ -716,7 +716,7 @@ aggregator:
       memory: 256Mi
       cpu: 250m
   metric_configuration:
-     aggregation-specifications.yaml: |
+    aggregation-specifications.yaml: |
       aggregationSpecifications:
       - aggregatedMetricName: deployment.cpu.system_time_agg
         filteredMetricName: pod.cpu.system_time
