@@ -107,6 +107,8 @@ manifests:
 
 conf:
   publish_results: true
+  # NOTE: use to store results on host; disabled by default.
+  host_results_path: null
   # Injected values root used by (some of) the plugins. This `plugin_values`
   # root is the parent for a mapping of named sections, each of which will be
   # added as a file in the plugin-values secret.

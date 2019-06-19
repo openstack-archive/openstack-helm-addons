@@ -32,3 +32,8 @@ openstack object create --name $prefixed_file_name {{ .Values.conf.swift.contain
 openstack object show {{ .Values.conf.swift.container_name }} $prefixed_file_name
 
 swift post {{ .Values.conf.swift.container_name }} $prefixed_file_name -H \"X-Delete-After:{{ .Values.conf.swift.delete_objects_after_seconds }}\"
+
+# NOTE(aw442m): Delete results after publishing to avoid collisions when using host path
+if [[ ! -z "${RESULTS_DIR}" ]]; then
+  rm "${RESULTS_DIR}"/"${file_name}"
+fi
