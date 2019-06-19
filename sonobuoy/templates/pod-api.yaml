@@ -57,7 +57,11 @@ metadata:
   name: sonobuoy
   annotations:
     "helm.sh/hook": test-success
-{{ dict "envAll" . "podName" "sonobuoy" "containerNames" (list "kube-sonobuoy" "results-publisher") | include "helm-toolkit.snippets.kubernetes_mandatory_access_control_annotation" | indent 4 }}
+{{- $containers := (list "kube-sonobuoy" ) }}
+{{- if $envAll.Values.conf.publish_results }}
+{{- $containers = append $containers "results-publisher" }}
+{{- end }}
+{{ dict "envAll" . "podName" "sonobuoy" "containerNames" $containers | include "helm-toolkit.snippets.kubernetes_mandatory_access_control_annotation" | indent 4 }}
 spec:
   nodeSelector:
     {{ .Values.labels.api.node_selector_key }}: {{ .Values.labels.api.node_selector_value}}

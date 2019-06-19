@@ -26,5 +26,6 @@ helm test sonobuoy
 helm upgrade --install another-sonobuoy sonobuoy \
     --namespace=sonobuoy \
     --set endpoints.identity.namespace=openstack \
-    --set manifests.serviceaccount_readonly=true
+    --set manifests.serviceaccount_readonly=true \
+    --set conf.publish_results=false
 helm test another-sonobuoy
