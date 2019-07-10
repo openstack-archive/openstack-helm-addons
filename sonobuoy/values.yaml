@@ -17,7 +17,7 @@ images:
     dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.3.1
     ks_user: docker.io/openstackhelm/heat:ocata-ubuntu_xenial
     results_publisher: docker.io/openstackhelm/heat:ocata-ubuntu_xenial
-    sonobuoy_api: gcr.io/heptio-images/sonobuoy:v0.11.4
+    sonobuoy_api: gcr.io/heptio-images/sonobuoy:v0.15.3
     systemd_logs: gcr.io/heptio-images/sonobuoy-plugin-systemd-logs:v0.1
   pull_policy: "IfNotPresent"
   local_registry:
@@ -152,6 +152,8 @@ conf:
       timeoutseconds: 8000
     Plugins:
       - name: systemd-logs
+    PluginSearchPath:
+      - /plugins.d
     Limits:
       PodLogs:
         SizeLimitBytes: 10000
