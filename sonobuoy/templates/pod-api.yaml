@@ -122,6 +122,12 @@ spec:
       name: sonobuoy-plugins
       defaultMode: 0444
     name: sonobuoy-plugins-volume
-  - emptyDir: {}
-    name: sonobuoy-output
+  - name: sonobuoy-output
+{{- if .Values.conf.host_results_path }}
+    hostPath:
+      path: {{ .Values.conf.host_results_path }}
+      type: DirectoryOrCreate
+{{- else }}
+    emptyDir: {}
+{{- end }}
 {{- end }}
