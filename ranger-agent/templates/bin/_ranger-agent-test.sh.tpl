@@ -19,7 +19,9 @@ limitations under the License.
 set -ex
 
 # Come up with a ranger agent payload
+region="${REGION_NAME}"
 url="${RANGER_SERVICE_URL}"
+expected_on_execution="${END_STATUS_KEY}"
 UUID=$(python -c 'import uuid; print uuid.uuid1()')
 
 PAYLOAD="{\"ord-notifier\":{
@@ -30,7 +32,7 @@ PAYLOAD="{\"ord-notifier\":{
     \"resource-template-name\":\"sanity-test.yaml\",
     \"resource-template-type\":\"hot\",
     \"operation\":\"create\",
-    \"region\":\"RegionOne\"
+    \"region\":\"$region\"
     }
 }"
 
@@ -57,24 +59,5 @@ assertContains "${expected_on_request}" "${request_submit_response}"
 # we are pulling status for testing purpose by sleeping thread for 15 sec
 sleep 15
 
-expected_on_execution="Success"
 resource_status_from_engine="$(curl -s "$url?Id=$UUID")"
 assertContains "${expected_on_execution}" "$resource_status_from_engine"
-
-# Delete Resource
-
-DELETE_REQ_UUID=$(python -c 'import uuid; print uuid.uuid1()')
-
-DELETE_PAYLOAD="{\"ord-notifier\":{
-    \"request-id\":\"$DELETE_REQ_UUID\",
-    \"resource-id\":\"$DELETE_REQ_UUID\",
-    \"resource-type\":\"flavor\",
-    \"resource-template-version\":\"1\",
-    \"resource-template-name\":\"sanity-test.yaml\",
-    \"resource-template-type\":\"hot\",
-    \"operation\":\"delete\",
-    \"region\":\"RegionOne\"
-    }
-}"
-
-curl -i -X POST -d "${DELETE_PAYLOAD}"  $url --header "Content-type:application/json"

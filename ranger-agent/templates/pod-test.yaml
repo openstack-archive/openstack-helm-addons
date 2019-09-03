@@ -43,7 +43,11 @@ spec:
       image: {{ .Values.images.tags.scripted_test }}
       env:
         - name: RANGER_SERVICE_URL
-          value: {{ tuple "ranger_agent" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }}
+          value: {{ tuple "ranger_agent" "public" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }}
+        - name: REGION_NAME
+          value: {{ .Values.endpoints.identity.auth.ranger_agent.region_name }}
+        - name: END_STATUS_KEY
+          value: {{ .Values.conf.test.expected_end_status_key }}
       command:
         - /tmp/ranger-agent-test.sh
       volumeMounts:

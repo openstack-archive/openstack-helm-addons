@@ -533,3 +533,5 @@ conf:
     ssh_key_file: ranger_agent
     ssh_key: null
     ssh_config: null
+  test:
+    expected_end_status_key: Success
