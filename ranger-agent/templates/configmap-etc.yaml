@@ -21,7 +21,7 @@ limitations under the License.
 {{- $_ := tuple "oslo_db" "internal" "ranger_agent" "mysql" . | include "helm-toolkit.endpoints.authenticated_endpoint_uri_lookup"| set .Values.conf.ranger_agent.database "connection" -}}
 {{- end -}}
 {{- if empty .Values.conf.ranger_agent.DEFAULT.transport_url -}}
-{{- $_ := tuple "oslo_messaging" "internal" "ranger-agent" "amqp" . | include "helm-toolkit.endpoints.authenticated_endpoint_uri_lookup" | set .Values.conf.ranger_agent.DEFAULT "transport_url" -}}
+{{- $_ := tuple "oslo_messaging" "internal" "ranger-agent" "amqp" . | include "helm-toolkit.endpoints.authenticated_transport_endpoint_uri_lookup" | set .Values.conf.ranger_agent.DEFAULT "transport_url" -}}
 {{- end -}}
 {{- if empty .Values.conf.ranger_agent.orm.rds_listener_endpoint -}}
 {{- $_ := tuple "ranger_rds" "public" "rds" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | set .Values.conf.ranger_agent.orm "rds_listener_endpoint" -}}
