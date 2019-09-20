@@ -14,15 +14,37 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */}}
 
+{{- define "RangerAgentApiReadinessProbeTemplate" }}
+exec:
+  command:
+    - python
+    - /tmp/health-probe.py
+    - --config-file
+    - /etc/ranger-agent/ranger-agent.conf
+    - --service-name
+    - ranger-agent-api
+{{- end }}
+{{- define "RangerAgentApiLivenessProbeTemplate" }}
+exec:
+  command:
+    - python
+    - /tmp/health-probe.py
+    - --config-file
+    - /etc/ranger-agent/ranger-agent.conf
+    - --service-name
+    - ranger-agent-api
+    - --liveness-probe
+{{- end }}
+
 {{- if .Values.manifests.deployment_ranger_agent_api }}
 {{- $envAll := . }}
 
 {{- $mounts_ranger_agent_api := .Values.pod.mounts.ranger_agent_api.ranger_agent_api }}
 {{- $mounts_ranger_agent_api_init := .Values.pod.mounts.ranger_agent_api.init_container }}
 
-
 {{- $serviceAccountName := "ranger-agent-api" }}
 {{ tuple $envAll "api" $serviceAccountName | include "helm-toolkit.snippets.kubernetes_pod_rbac_serviceaccount" }}
+
 ---
 apiVersion: apps/v1beta1
 kind: Deployment
@@ -71,16 +93,8 @@ spec:
           ports:
             - name: ranger-api
               containerPort: {{ tuple "ranger-agent" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
-          livenessProbe:
-            tcpSocket:
-              port: {{ tuple "ranger-agent" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
-          readinessProbe:
-           exec:
-            command:
-             - /tmp/health-check.sh
-             - apireadiness
-           initialDelaySeconds: 30
-           timeoutSeconds: 5
+{{ dict "envAll" $envAll "component" "api" "container" "ranger-agent-api" "type" "readiness" "probeTemplate" (include "RangerAgentApiReadinessProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" $envAll "component" "api" "container" "ranger-agent-api" "type" "liveness" "probeTemplate" (include "RangerAgentApiLivenessProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
           volumeMounts:
             - name: pod-etc-ranger-agent
               mountPath: /etc/ranger-agent
@@ -89,8 +103,8 @@ spec:
               subPath: ranger-agent-api.sh
               readOnly: true
             - name: ranger-agent-bin
-              mountPath: /tmp/health-check.sh
-              subPath: health-check.sh
+              mountPath: /tmp/health-probe.py
+              subPath: health-probe.py
               readOnly: true
             - name: ranger-agent-etc
               mountPath: /etc/ranger-agent/ranger-agent.conf

@@ -27,8 +27,8 @@ images:
     ks_service: docker.io/openstackhelm/heat:newton-ubuntu_xenial
     ks_user: docker.io/openstackhelm/heat:newton-ubuntu_xenial
     rabbit_init: docker.io/rabbitmq:3.7-management
-    ranger-agent_db_sync: quay.io/attcomdev/ranger-agent:60529ac023bf550f0e9cb9e0eb4d4eb3dbf2d5c6
-    ranger_agent: quay.io/attcomdev/ranger-agent:60529ac023bf550f0e9cb9e0eb4d4eb3dbf2d5c6
+    ranger-agent_db_sync: quay.io/attcomdev/ranger-agent:02114b616b50c24e7f1f27d9b1ab3d722b4b20b2
+    ranger_agent: quay.io/attcomdev/ranger-agent:02114b616b50c24e7f1f27d9b1ab3d722b4b20b2
     scripted_test: docker.io/openstackhelm/heat:newton-ubuntu_xenial
   pull_policy: "IfNotPresent"
   local_registry:
@@ -264,6 +264,35 @@ pod:
       limits:
         memory: "1024Mi"
         cpu: "2000m"
+  probes:
+    api:
+      ranger-agent-api:
+        readiness:
+          enabled: true
+          params:
+            initialDelaySeconds: 80
+            periodSeconds: 95
+            timeoutSeconds: 85
+        liveness:
+          enabled: true
+          params:
+            initialDelaySeconds: 120
+            periodSeconds: 95
+            timeoutSeconds: 85
+    engine:
+      ranger-agent-engine:
+        readiness:
+          enabled: true
+          params:
+            initialDelaySeconds: 80
+            periodSeconds: 95
+            timeoutSeconds: 85
+        liveness:
+          enabled: true
+          params:
+            initialDelaySeconds: 120
+            periodSeconds: 95
+            timeoutSeconds: 85
 
 # Names of secrets used  and environmental checks
 secrets:
@@ -517,6 +546,7 @@ conf:
       api_paste_config: /etc/ranger-agent/api-paste.ini
       local_repo: ranger_repo
       resource_status_check_wait: 15
+      enable_heat_health_check: true
     api:
       host: 0.0.0.0
     database:

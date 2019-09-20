@@ -38,8 +38,8 @@ data:
 {{ tuple "bin/_ranger-agent-api.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
   ranger-agent-engine.sh: |
 {{ tuple "bin/_ranger-agent-engine.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
-  health-check.sh: |+
-{{ tuple "bin/_health-check.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
+  health-probe.py: |
+{{ tuple "bin/_health-probe.py.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
   ranger-agent-test.sh: |+
 {{ tuple "bin/_ranger-agent-test.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
   rabbit-init.sh: |

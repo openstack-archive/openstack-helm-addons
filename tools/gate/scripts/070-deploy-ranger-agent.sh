@@ -7,7 +7,8 @@ tee /tmp/ranger-agent.yaml << EOF
 conf:
   ranger_agent:
     DEFAULT:
-      enable_rds_callback_check: False
+      enable_rds_callback_check: false
+      enable_heat_health_check: false
   ssh:
     ssh_key: null
     ssh_config: null

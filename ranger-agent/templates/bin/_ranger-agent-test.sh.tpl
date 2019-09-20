@@ -21,7 +21,7 @@ set -ex
 # Come up with a ranger agent payload
 region="${REGION_NAME}"
 url="${RANGER_SERVICE_URL}"
-UUID=$(python -c 'import uuid; print uuid.uuid1()')
+UUID=$(python -c 'import uuid; print(uuid.uuid1())')
 
 PAYLOAD="{\"ord-notifier\":{
     \"request-id\":\"$UUID\",
@@ -47,11 +47,11 @@ function assertContains()
        msg="$(curl -s "$url?Id=$UUID")"
      fi
      if echo "$msg" | grep -q "$expected"; then
-       echo "***TEST IS PASSED: EXPECTED=$expected is in Responce"
+       echo "***TEST IS PASSED: EXPECTED=$expected is in Response"
        break
      else
        if [ "$n" == "5" ]; then
-         echo "***FAILED: EXPECTED=$expected in Responce"
+         echo "***FAILED: EXPECTED=$expected in Response"
          exit 1
        fi
        n=$[$n+1]
