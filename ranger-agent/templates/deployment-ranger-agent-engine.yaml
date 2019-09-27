@@ -82,6 +82,7 @@ spec:
           imagePullPolicy: {{ .Values.images.pull_policy }}
 {{ tuple $envAll $envAll.Values.pod.resources.engine | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
 {{ dict "envAll" $envAll "application" "ranger_agent" "container" "ranger_agent_engine" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
+          {{- if .Values.manifests.secret_ssh_key }}
           env:
             - name: USER
               valueFrom:
@@ -108,6 +109,7 @@ spec:
                 secretKeyRef:
                   name: ranger-agent-ssh-secret
                   key: RANGER_AGENT_SSH_CONFIG
+          {{- end }}
           command:
             - /tmp/ranger-agent-engine.sh
             - start

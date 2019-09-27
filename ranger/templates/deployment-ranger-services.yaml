@@ -69,6 +69,7 @@ spec:
 {{ tuple $envAll $envAll.Values.pod.resources.ranger | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
 {{ dict "envAll" $envAll "application" "ranger" "container" "ranger_services" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
           env:
+            {{- if .Values.manifests.secret_ssh_key }}
             - name: USER
               valueFrom:
                 secretKeyRef:
@@ -102,14 +103,19 @@ spec:
               value: {{ .Values.conf.ranger.rds.repo_local_location }}
             - name: REMOTE_REPO
               value: {{ .Values.conf.ranger.rds.repo_remote_location }}
+            {{- end }}
           {{- if .Values.conf.ranger.DEFAULT.ranger_agent_https_enable }}
             - name: CERT_LOCATION
               value: {{ .Values.conf.ranger.DEFAULT.ranger_agent_client_cert_path }}
             - name: CERT_FILE
+              {{ if .Values.manifests.secret_ssh_key }}
               valueFrom:
                 secretKeyRef:
                   name: ranger-ssh-secret
                   key: CERT_FILE
+              {{ else }}
+              value: {{ .Values.conf.cert.ranger_agent_client_cert }}
+              {{ end }}
           {{- end }}
             - name: CMS_SERVICE_URL
               value: {{ tuple "cms" "public" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }}
