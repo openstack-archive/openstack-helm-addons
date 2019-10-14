@@ -14,7 +14,7 @@
 
 images:
   tags:
-    dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.3.1
+    dep_check: quay.io/airshipit/kubernetes-entrypoint:v1.0.0
     ks_user: docker.io/openstackhelm/heat:ocata-ubuntu_xenial
     results_publisher: docker.io/openstackhelm/heat:ocata-ubuntu_xenial
     sonobuoy_api: gcr.io/heptio-images/sonobuoy:v0.15.3

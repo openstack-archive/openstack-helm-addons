@@ -58,6 +58,6 @@ helm upgrade --install ceph-openstack-config ${OSH_INFRA_PATH}/ceph-provisioners
 ./tools/gate/scripts/wait-for-pods.sh openstack
 
 #NOTE: Validate Deployment info
-kubectl get -n openstack jobs --show-all
+kubectl get -n openstack jobs
 kubectl get -n openstack secrets
 kubectl get -n openstack configmaps

@@ -14,7 +14,7 @@
 
 images:
   tags:
-    dep_check: quay.io/stackanetes/kubernetes-entrypoint:v0.3.1
+    dep_check: quay.io/airshipit/kubernetes-entrypoint:v1.0.0
     helm-test: docker.io/ubuntu:18.04
     image_repo_sync: docker.io/docker:17.07.0
     mini-mirror: docker.io/openstackhelm/mini-mirror:latest-ubuntu_xenial
