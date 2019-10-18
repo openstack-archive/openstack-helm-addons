@@ -46,13 +46,16 @@ exec:
 {{ tuple $envAll "engine" $serviceAccountName | include "helm-toolkit.snippets.kubernetes_pod_rbac_serviceaccount" }}
 
 ---
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ranger-agent-engine
   annotations:
     {{ tuple $envAll | include "helm-toolkit.snippets.release_uuid" }}
 spec:
+  selector:
+    matchLabels:
+{{ tuple $envAll "ranger-agent" "engine" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 6 }}
   replicas: {{ .Values.pod.replicas.engine }}
 {{ tuple $envAll | include "helm-toolkit.snippets.kubernetes_upgrades_deployment" | indent 2 }}
   template:
