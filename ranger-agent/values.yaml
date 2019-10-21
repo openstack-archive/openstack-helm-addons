@@ -560,6 +560,8 @@ conf:
       retry_limits: 5
     oslo_messaging_notifications:
       driver: messagingv2
+    oslo_messaging_rabbit:
+      rabbit_ha_queues: true
   ssh:
     user: ranger_agent
     user_home: /home/ranger_agent
@@ -568,3 +570,16 @@ conf:
     ssh_config: null
   test:
     expected_end_status_key: Success
+  rabbitmq:
+    policies:
+      - vhost: "ranger-agent"
+        name: "ha_ttl_ranger_agent"
+        definition:
+          #mirror messges to other nodes in rmq cluster
+          ha-mode: "all"
+          ha-sync-mode: "automatic"
+          #70s
+          message-ttl: 70000
+        priority: 0
+        apply-to: all
+        pattern: '^(?!(amq\.|reply_)).*'
