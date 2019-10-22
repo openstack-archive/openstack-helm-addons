@@ -13,6 +13,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */}}
+{{- define "RangerServicesProbeTemplate" }}
+exec:
+  command:
+    - python
+    - /tmp/health-probe.py
+    - --config-file
+    - /etc/ranger/ranger.conf
+{{- end }}
+
 {{- if .Values.manifests.deployment_ranger_services }}
 {{- $envAll := . }}
 
@@ -128,20 +137,8 @@ spec:
               containerPort: {{ tuple "uuid" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
             - name: audit
               containerPort: {{ tuple "audit" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
-          livenessProbe:
-            initialDelaySeconds: 600
-            timeoutSeconds: 300
-            exec:
-              command:
-              - /tmp/health-check.sh
-              - allservicesliveness
-          readinessProbe:
-            initialDelaySeconds: 600
-            timeoutSeconds: 300
-            exec:
-              command:
-              - /tmp/health-check.sh
-              - allservicesreadiness
+{{ dict "envAll" $envAll "component" "ranger" "container" "ranger-services" "type" "readiness" "probeTemplate" (include "RangerServicesProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" $envAll "component" "ranger" "container" "ranger-services" "type" "liveness" "probeTemplate" (include "RangerServicesProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
           volumeMounts:
             - name: pod-etc-ranger
               mountPath: /etc/ranger
@@ -150,8 +147,8 @@ spec:
               subPath: ranger-services.sh
               readOnly: true
             - name: ranger-bin
-              mountPath: /tmp/health-check.sh
-              subPath: health-check.sh
+              mountPath: /tmp/health-probe.py
+              subPath: health-probe.py
               readOnly: true
             - name: ranger-etc
               mountPath: /etc/ranger/ranger.conf

@@ -150,6 +150,21 @@ pod:
       limits:
         memory: "1024Mi"
         cpu: "2000m"
+  probes:
+    ranger:
+      ranger-services:
+        readiness:
+          enabled: true
+          params:
+            initialDelaySeconds: 600
+            periodSeconds: 90
+            timeoutSeconds: 80
+        liveness:
+          enabled: true
+          params:
+            initialDelaySeconds: 660
+            periodSeconds: 90
+            timeoutSeconds: 80
 
 # Names of secrets used  and environmental checks
 secrets:
