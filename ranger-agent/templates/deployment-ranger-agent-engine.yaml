@@ -69,8 +69,6 @@ spec:
     spec:
 {{ dict "envAll" $envAll "application" "ranger_agent" | include "helm-toolkit.snippets.kubernetes_pod_security_context" | indent 6 }}
       serviceAccountName: {{ $serviceAccountName }}
-      dnsPolicy: ClusterFirstWithHostNet
-      hostNetwork: true
       affinity:
 {{ tuple $envAll "ranger-agent" "engine" | include "helm-toolkit.snippets.kubernetes_pod_anti_affinity" | indent 8 }}
       nodeSelector:
