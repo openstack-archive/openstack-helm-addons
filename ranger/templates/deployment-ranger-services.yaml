@@ -21,7 +21,6 @@ exec:
     - --config-file
     - /etc/ranger/ranger.conf
 {{- end }}
-
 {{- if .Values.manifests.deployment_ranger_services }}
 {{- $envAll := . }}
 

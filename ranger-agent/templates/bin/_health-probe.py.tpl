@@ -216,7 +216,7 @@ def test_rpc_liveness(rabbit_group, service_queue_name):
 
 
 def run_health_check():
-    oslo_messaging.set_transport_defaults(control_exchange='openstack')
+    oslo_messaging.set_transport_defaults(control_exchange='ranger-agent')
 
     rabbit_group = cfg.OptGroup(name='oslo_messaging_rabbit',
                                 title='RabbitMQ options')

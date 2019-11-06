@@ -27,8 +27,8 @@ images:
     ks_service: docker.io/openstackhelm/heat:newton-ubuntu_xenial
     ks_user: docker.io/openstackhelm/heat:newton-ubuntu_xenial
     rabbit_init: docker.io/rabbitmq:3.7-management
-    ranger-agent_db_sync: quay.io/attcomdev/ranger-agent:02114b616b50c24e7f1f27d9b1ab3d722b4b20b2
-    ranger_agent: quay.io/attcomdev/ranger-agent:02114b616b50c24e7f1f27d9b1ab3d722b4b20b2
+    ranger-agent_db_sync: quay.io/attcomdev/ranger-agent:13c19fd49dda0509f1804664e46610f77e61344b
+    ranger_agent: quay.io/attcomdev/ranger-agent:13c19fd49dda0509f1804664e46610f77e61344b
     scripted_test: docker.io/openstackhelm/heat:newton-ubuntu_xenial
   pull_policy: "IfNotPresent"
   local_registry:
