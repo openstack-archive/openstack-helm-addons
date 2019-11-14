@@ -44,16 +44,18 @@ spec:
       env:
         - name: RANGER_SERVICE_URL
           value: {{ tuple "ranger_agent" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }}
-        - name: REGION_NAME
-          value: {{ .Values.endpoints.identity.auth.ranger_agent.region_name }}
         - name: END_STATUS_KEY
           value: {{ .Values.conf.test.expected_end_status_key }}
+{{- with $env := dict "ksUserSecret" .Values.secrets.identity.ranger_agent }}
+{{- include "helm-toolkit.snippets.keystone_openrc_env_vars" $env | indent 8 }}
+{{- end }}
       command:
-        - /tmp/ranger-agent-test.sh
+        - python
+        - /tmp/ranger-agent-test.py
       volumeMounts:
         - name: ranger-agent-bin
-          mountPath: /tmp/ranger-agent-test.sh
-          subPath: ranger-agent-test.sh
+          mountPath: /tmp/ranger-agent-test.py
+          subPath: ranger-agent-test.py
           readOnly: true
 {{ if $mounts_tests.volumeMounts }}{{ toYaml $mounts_tests.volumeMounts | indent 8 }}{{ end }}
   volumes:
