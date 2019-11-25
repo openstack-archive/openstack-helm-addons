@@ -71,6 +71,14 @@ pod:
     disruption_budget:
       api:
         min_available: 0
+  security_context:
+    mini_mirror:
+      pod:
+        runAsUser: 1000
+      container:
+        mini_mirror_api:
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
   resources:
     enabled: false
     api:

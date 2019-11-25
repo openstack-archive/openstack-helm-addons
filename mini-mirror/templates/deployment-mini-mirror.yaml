@@ -40,11 +40,13 @@ spec:
         configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.utils.hash" }}
         configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.utils.hash" }}
     spec:
+{{ dict "envAll" $envAll "application" "mini_mirror" | include "helm-toolkit.snippets.kubernetes_pod_security_context" | indent 6 }}
       nodeSelector:
         {{ .Values.labels.server.node_selector_key }}: {{ .Values.labels.server.node_selector_value }}
       containers:
         - name: mini-mirror-api
 {{ tuple $envAll "mini-mirror" | include "helm-toolkit.snippets.image" | indent 10 }}
+{{ dict "envAll" $envAll "application" "mini_mirror" "container" "mini_mirror_api" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
           ports:
             - name: api
               containerPort: {{ tuple "api" "port" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
