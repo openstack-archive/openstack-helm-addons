@@ -120,6 +120,7 @@ spec:
             preStop:
               exec:
                 command:
+                  - /tmp/ranger-services.sh
                   - stop
           ports:
             - name: cms
