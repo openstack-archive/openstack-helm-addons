@@ -1,0 +1,80 @@
+---
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+- job:
+    name: osh-addons-parent
+    irrelevant-files:
+      - ^.*\.rst$
+      - ^doc/.*$
+      - ^releasenotes/.*$
+
+- job:
+    name: osh-addons-base
+    parent: osh-addons-parent
+    roles:
+      - zuul: openstack/openstack-helm-infra
+    timeout: 7200
+    vars:
+      zuul_osh_infra_relative_path: ../openstack-helm-infra/
+      zuul_osh_relative_path: ../openstack-helm/
+    pre-run:
+      - ./tools/gate/playbooks/osh-infra-upgrade-host.yaml
+      - ./tools/gate/playbooks/osh-infra-setup-firewall.yaml
+    post-run: ./tools/gate/playbooks/osh-infra-collect-logs.yaml
+    required-projects:
+      - openstack/openstack-helm-infra
+      - openstack/openstack-helm
+    nodeset: openstack-helm-single-node
+
+- job:
+    name: osh-addons-sonobuoy
+    parent: osh-addons-base
+    run: tools/gate/playbooks/osh-gate-runner.yaml
+    vars:
+      osh_params:
+        openstack_release: ocata
+        container_distro_name: ubuntu
+        container_distro_version: xenial
+      gate_scripts:
+        - ./tools/deployment/common/install-packages.sh
+        - ./tools/deployment/common/deploy-k8s.sh
+        - ./tools/deployment/common/setup-client.sh
+        - ./tools/deployment/component/common/ingress.sh
+        - ./tools/deployment/component/common/mariadb.sh
+        - ./tools/deployment/component/common/rabbitmq.sh
+        - ./tools/deployment/component/common/memcached.sh
+        - ./tools/deployment/component/ceph/ceph.sh
+        - ./tools/deployment/component/ceph/ceph-ns-activate.sh
+        - ./tools/deployment/component/keystone/keystone.sh
+        - ./tools/deployment/component/ceph/radosgateway.sh
+        - ./tools/deployment/component/sonobuoy/sonobuoy.sh
+
+- job:
+    name: osh-addons-ranger
+    parent: osh-addons-base
+    run: tools/gate/playbooks/osh-gate-runner.yaml
+    vars:
+      osh_params:
+        openstack_release: ocata
+        container_distro_name: ubuntu
+        container_distro_version: xenial
+      gate_scripts:
+        - ./tools/deployment/common/install-packages.sh
+        - ./tools/deployment/common/deploy-k8s.sh
+        - ./tools/deployment/common/setup-client.sh
+        - ./tools/deployment/component/common/ingress.sh
+        - ./tools/deployment/component/common/mariadb.sh
+        - ./tools/deployment/component/common/rabbitmq.sh
+        - ./tools/deployment/component/common/memcached.sh
+        - ./tools/deployment/component/keystone/keystone.sh
+        - ./tools/deployment/component/ranger/ranger.sh
+        - ./tools/deployment/component/ranger/ranger-agent.sh

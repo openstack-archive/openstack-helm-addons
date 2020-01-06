@@ -16,24 +16,8 @@
 
 set -xe
 
-sudo -H -E pip install "cmd2<=0.8.7"
-sudo -H -E pip install python-openstackclient python-heatclient --ignore-installed
-
-sudo -H mkdir -p /etc/openstack
-sudo -H chown -R $(id -un): /etc/openstack
-tee /etc/openstack/clouds.yaml << EOF
-clouds:
-  openstack_helm:
-    region_name: RegionOne
-    identity_api_version: 3
-    auth:
-      username: 'admin'
-      password: 'password'
-      project_name: 'admin'
-      project_domain_name: 'default'
-      user_domain_name: 'default'
-      auth_url: 'http://keystone.openstack.svc.cluster.local/v3'
-EOF
-
-#NOTE: Build charts
-make all
+CURRENT_DIR="$(pwd)"
+: ${OSH_INFRA_PATH:="../openstack-helm-infra"}
+cd ${OSH_INFRA_PATH}
+./tools/deployment/common/005-deploy-k8s.sh
+cd ${CURRENT_DIR}
