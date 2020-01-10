@@ -142,7 +142,7 @@ pod:
         runAsUser: 1000
       container:
         ranger_agent_api:
-          readOnlyRootFilesystem: true
+          readOnlyRootFilesystem: false
           allowPrivilegeEscalation: false
         ranger_agent_engine:
           readOnlyRootFilesystem: false
