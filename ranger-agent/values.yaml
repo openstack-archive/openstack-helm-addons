@@ -481,22 +481,6 @@ endpoints:
       api:
         default: 9010
         public: 80
-  ranger_rds:
-    name: rds-url
-    hosts:
-      default: rds
-      public: rds-public
-    host_fqdn_override:
-      default: null
-    path:
-      default: /v1/rds/status
-    scheme:
-      default: http
-    port:
-      rds:
-        default: 8777
-        public: 80
-
 
 manifests:
   configmap_bin: true
@@ -547,6 +531,7 @@ conf:
       local_repo: ranger_repo
       resource_status_check_wait: 15
       enable_heat_health_check: true
+      retry_limits: 5
     api:
       host: 0.0.0.0
     database:
@@ -555,6 +540,7 @@ conf:
       auth_type: password
       auth_version: v3
     orm:
+      rds_listener_endpoint: http://localhost:8777/v1/rds/status
       orm_template_repo_url: git@github.com:ranger-agent/templates.git
       repo_pull_check_wait: 2
       retry_limits: 5
