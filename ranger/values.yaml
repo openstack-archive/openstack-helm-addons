@@ -190,6 +190,9 @@ secrets:
     audit:
       audit:
         public: audit
+    uuid:
+      uuid:
+        public: uuid
 
 # typically overriden by environmental
 # values, but should include all endpoints
@@ -366,6 +369,7 @@ endpoints:
     name: uuid
     hosts:
       default: uuid-api
+      public: uuid
     host_fqdn_override:
       default: null
     path:
@@ -375,6 +379,7 @@ endpoints:
     port:
       api:
         default: 7001
+        public: 80
 
 network:
   audit:
@@ -472,6 +477,7 @@ manifests:
   ingress_rds: true
   ingress_rms: true
   ingress_audit: true
+  ingress_uuid: true
   secret_db: true
   secret_ingress_tls: true
   secret_ssh_key: true
@@ -487,6 +493,7 @@ manifests:
   service_ingress_rds: true
   service_ingress_rms: true
   service_ingress_audit: true
+  service_ingress_uuid: true
   service_audit: true
   service_cms: true
   service_fms: true
@@ -504,7 +511,7 @@ conf:
       pecan_debug: True
       ssl_verify: False
       use_handlers: console
-      ranger_agent_https_enable: False
+      ranger_agent_https_enabled: False
       ranger_agent_client_cert_path: ''
     audit:
       log: null
