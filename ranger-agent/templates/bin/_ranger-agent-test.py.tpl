@@ -90,7 +90,7 @@ def notify_ranger_agent_api(uuid):
     for i in range(5):
         time.sleep(15)
         try:
-            resp = requests.post('%s/v1/ord/ord_notifier' % (url),
+            resp = requests.post(url,
                                  files=files,
                                  headers=headers)
             if resp.status_code != 200:
@@ -126,7 +126,7 @@ def validate_resource_status(uuid):
     for i in range(5):
         time.sleep(15)
         try:
-            resp = requests.get('%s/v1/ord/ord_notifier?Id=%s' % (url, uuid))
+            resp = requests.get('%s?Id=%s' % (url, uuid))
             if resp.status_code != 200:
                 sys.stderr.write("Unexpected status code received: %s\n" %
                                  resp.status_code)
