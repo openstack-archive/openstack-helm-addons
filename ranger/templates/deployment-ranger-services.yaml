@@ -104,7 +104,7 @@ spec:
             - name: REMOTE_REPO
               value: {{ .Values.conf.ranger.rds.repo_remote_location }}
             {{- end }}
-          {{- if .Values.conf.ranger.DEFAULT.ranger_agent_https_enable }}
+          {{- if .Values.conf.ranger.DEFAULT.ranger_agent_https_enabled }}
             - name: CERT_LOCATION
               value: {{ .Values.conf.ranger.DEFAULT.ranger_agent_client_cert_path }}
             - name: CERT_FILE
