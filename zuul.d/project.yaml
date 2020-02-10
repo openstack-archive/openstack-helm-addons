@@ -17,8 +17,10 @@
         - openstack-helm-lint
         - osh-addons-sonobuoy
         - osh-addons-ranger
+        - osh-addons-mini-mirror
     gate:
       jobs:
         - openstack-helm-lint
         - osh-addons-sonobuoy
         - osh-addons-ranger
+        - osh-addons-mini-mirror

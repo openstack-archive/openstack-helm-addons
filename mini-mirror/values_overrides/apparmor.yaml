@@ -1,0 +1,5 @@
+pod:
+  mandatory_access_control:
+    type: apparmor
+    mini-mirror:
+      mini-mirror-api: runtime/default
