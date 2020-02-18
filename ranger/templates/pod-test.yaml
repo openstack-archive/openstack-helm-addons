@@ -42,14 +42,27 @@ spec:
     - name: {{.Release.Name}}-test
       image: {{ .Values.images.tags.scripted_test }}
       env:
-        - name: RANGER_SERVICE_URL
-          value: {{ tuple "cms" "public" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }}
+        - name: cms
+          value: {{ tuple "cms" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | trimSuffix .Values.endpoints.cms.path.default }}
+        - name: fms
+          value: {{ tuple "fms" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | trimSuffix .Values.endpoints.fms.path.default }}
+        - name: ims
+          value: {{ tuple "ims" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | trimSuffix .Values.endpoints.ims.path.default }}
+        - name: rms
+          value: {{ tuple "rms" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | trimSuffix .Values.endpoints.rms.path.default }}
+        - name: rds
+          value: {{ tuple "rds" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | trimSuffix .Values.endpoints.rds.path.default }}
+        - name: uuid
+          value: {{ tuple "uuid" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | trimSuffix .Values.endpoints.uuid.path.default }}
+        - name: audit
+          value: {{ tuple "audit" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | trimSuffix .Values.endpoints.audit.path.default }}
       command:
-        - /tmp/ranger-test.sh
+        - python
+        - /tmp/ranger-test.py
       volumeMounts:
         - name: ranger-bin
-          mountPath: /tmp/ranger-test.sh
-          subPath: ranger-test.sh
+          mountPath: /tmp/ranger-test.py
+          subPath: ranger-test.py
           readOnly: true
 {{ if $mounts_tests.volumeMounts }}{{ toYaml $mounts_tests.volumeMounts | indent 8 }}{{ end }}
   volumes:

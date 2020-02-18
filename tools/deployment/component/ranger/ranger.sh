@@ -35,3 +35,8 @@ helm upgrade --install ranger ./ranger \
 
 #NOTE: Wait for deploy
 ./tools/deployment/common/wait-for-pods.sh openstack
+
+helm status ranger
+kubectl delete pods -l application=ranger,release_group=ranger,component=test \
+  --namespace=openstack --ignore-not-found
+helm test ranger --timeout 900
