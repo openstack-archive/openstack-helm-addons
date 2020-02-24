@@ -77,8 +77,8 @@ pod:
         runAsUser: 1000
       container:
         mini_mirror_api:
-          readOnlyRootFilesystem: true
-          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          runAsUser: 0
   resources:
     enabled: false
     api:
