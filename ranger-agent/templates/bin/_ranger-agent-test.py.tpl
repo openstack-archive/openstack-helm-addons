@@ -42,10 +42,12 @@ def get_token():
     }
 
     try:
-        resp = requests.post(url, data=json.dumps(data), headers=headers)
+        resp = requests.post(
+            url, data=json.dumps(data), headers=headers, timeout=100)
 
         if resp.status_code != 201:
-            sys.stderr.write("Failed to get token for region\n")
+            sys.stderr.write("Failed to get token for region: %s - %s\n" %
+                             (resp.status_code, resp.text,))
             sys.exit(1)
         token = resp.headers['x-subject-token']
         return token
@@ -92,7 +94,8 @@ def notify_ranger_agent_api(uuid):
         try:
             resp = requests.post(url,
                                  files=files,
-                                 headers=headers)
+                                 headers=headers,
+                                 timeout=100)
             if resp.status_code != 200:
                 message = 'failure respond code [%d] received.' % (
                     resp.status_code)
@@ -122,11 +125,12 @@ def validate_resource_status(uuid):
     expected_code = os.environ['END_STATUS_KEY']
     exit_code = 1
 
+    url = "{}?Id={}".format(url, uuid)
     # Retry up to 5 times
     for i in range(5):
         time.sleep(15)
         try:
-            resp = requests.get('%s?Id=%s' % (url, uuid))
+            resp = requests.get(url, timeout=100)
             if resp.status_code != 200:
                 sys.stderr.write("Unexpected status code received: %s\n" %
                                  resp.status_code)

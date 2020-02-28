@@ -73,6 +73,22 @@ dependencies:
       services:
         - service: oslo_db
           endpoint: internal
+    tests:
+      services:
+        - service: cms
+          endpoint: internal
+        - service: fms
+          endpoint: internal
+        - service: ims
+          endpoint: internal
+        - service: rds
+          endpoint: internal
+        - service: rms
+          endpoint: internal
+        - service: audit
+          endpoint: internal
+        - service: uuid
+          endpoint: internal
 
 pod:
   security_context:

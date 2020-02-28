@@ -120,6 +120,14 @@ dependencies:
       services:
         - service: oslo_messaging
           endpoint: internal
+    tests:
+      services:
+        - service: identity
+          endpoint: internal
+        - service: orchestration
+          endpoint: internal
+        - service: ranger-agent
+          endpoint: internal
 
 network:
   api:
