@@ -104,8 +104,14 @@ manifests:
   secret_keystone: true
   secret_plugin_values: true
   serviceaccount_readonly: false
+  # enable Role for pod/exec in conf.exec_role_namespace for the readonly service account
+  # requires the conf.exec_role_namespace namespace to exist before installing this chart
+  serviceaccount_readonly_exec: false
 
 conf:
+  # the namespace where the readonly serviceaccount can perform pod/exec
+  # manifests.serviceaccount_readonly_exec must be set to true
+  exec_role_namespace: null
   publish_results: true
   # NOTE: use to store results on host; disabled by default.
   host_results_path: null
