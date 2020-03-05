@@ -84,9 +84,17 @@ dependencies:
           service: local_image_registry
 EOF
 
+#NOTE: Get the over-rides to use
+: ${OSH_EXTRA_HELM_ARGS_RANGER_AGENT:="$(./tools/deployment/common/get-values-overrides.sh ranger-agent)"}
+
+#NOTE: Deploy command
+: ${OSH_EXTRA_HELM_ARGS:=""}
+
 helm upgrade --install ranger-agent ./ranger-agent \
   --namespace=openstack \
-  --values=/tmp/ranger-agent.yaml
+  --values=/tmp/ranger-agent.yaml \
+    ${OSH_EXTRA_HELM_ARGS} \
+    ${OSH_EXTRA_HELM_ARGS_RANGER_AGENT}
 
 #NOTE: Wait for deploy
 ./tools/deployment/common/wait-for-pods.sh openstack
