@@ -137,7 +137,7 @@ conf:
     object_name_prefix: ""
   sonobuoy:
     Description: "sonobuoy run for scanner.heptio.com"
-    Version: v0.11.4
+    Version: v0.16.4
     ResultsDir: /tmp/resultshost
     Resources:
       - Nodes
