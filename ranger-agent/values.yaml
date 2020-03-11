@@ -128,6 +128,10 @@ dependencies:
           endpoint: internal
         - service: ranger-agent
           endpoint: internal
+    add_region:
+      services:
+        - service: ranger-agent
+          endpoint: internal
 
 network:
   api:
@@ -171,6 +175,9 @@ pod:
     ranger_agent_tests:
       init_container: null
       ranger_agent_tests:
+    ranger_agent_add_region:
+      init_container: null
+      ranger_agent_add_region:
   replicas:
     api: 1
     engine: 1
@@ -252,6 +259,13 @@ pod:
           memory: "1024Mi"
           cpu: "2000m"
       tests:
+        requests:
+          memory: "128Mi"
+          cpu: "100m"
+        limits:
+          memory: "1024Mi"
+          cpu: "2000m"
+      add_region:
         requests:
           memory: "128Mi"
           cpu: "100m"
@@ -489,6 +503,22 @@ endpoints:
       api:
         default: 9010
         public: 80
+  dashboard:
+    name: horizon
+    hosts:
+      default: horizon-int
+      public: horizon
+    host_fqdn_override:
+      default: null
+    path:
+      default: null
+    scheme:
+      default: http
+      public: https
+    port:
+      web:
+        default: 80
+        public: 443
 
 manifests:
   configmap_bin: true
@@ -496,6 +526,7 @@ manifests:
   deployment_ranger_agent_api: true
   deployment_ranger_agent_engine: true
   ingress_ranger_agent_api: true
+  job_add_region: false
   job_db_drop: false
   job_db_init: true
   job_db_sync: true
@@ -564,6 +595,13 @@ conf:
     ssh_config: null
   test:
     expected_end_status_key: Success
+  region:
+    parameters: |-
+      { "rangerAgentVersion": "1.0",
+        "OSVersion": "Ubuntu18.04"
+      }
+    rms_listener_endpoint: http://localhost:7003/v2/orm/regions
+
   rabbitmq:
     policies:
       - vhost: "ranger-agent"

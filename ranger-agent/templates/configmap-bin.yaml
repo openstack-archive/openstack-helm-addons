@@ -42,6 +42,8 @@ data:
 {{ tuple "bin/_health-probe.py.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
   ranger-agent-test.py: |+
 {{ tuple "bin/_ranger-agent-test.py.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
+  add-region.py: |
+{{ tuple "bin/_add-region.py.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
   rabbit-init.sh: |
 {{- include "helm-toolkit.scripts.rabbit_init" . | indent 4 }}
 {{- end }}

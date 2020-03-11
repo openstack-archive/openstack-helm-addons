@@ -1,0 +1,85 @@
+{{/*
+Copyright 2020 The Openstack-Helm Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/}}
+
+{{- if .Values.manifests.job_add_region }}
+{{- $envAll := . }}
+{{- $mounts_ranger_agent_add_region := $envAll.Values.pod.mounts.ranger_agent_add_region.ranger_agent_add_region }}
+{{- $mounts_ranger_agent_add_region_init := $envAll.Values.pod.mounts.ranger_agent_add_region.init_container }}
+{{- $serviceName := "ranger-agent" }}
+{{- $serviceAccountName := "ranger-agent-add-region" }}
+{{ tuple $envAll "add_region" $serviceAccountName | include "helm-toolkit.snippets.kubernetes_pod_rbac_serviceaccount" }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $serviceAccountName | quote }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation
+    {{ tuple $envAll | include "helm-toolkit.snippets.release_uuid" }}
+spec:
+  template:
+    metadata:
+      labels:
+{{ tuple $envAll $serviceName "job" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
+    spec:
+      serviceAccountName: {{ $serviceAccountName | quote }}
+      restartPolicy: Never
+      nodeSelector:
+        {{ .Values.labels.job.node_selector_key }}: {{ .Values.labels.job.node_selector_value }}
+      initContainers:
+{{ tuple $envAll "add_region" $mounts_ranger_agent_add_region_init | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
+      containers:
+        - name: {{ $serviceAccountName | quote }}
+          image: {{ .Values.images.tags.scripted_test | quote }}
+          imagePullPolicy: {{ $envAll.Values.images.pull_policy | quote }}
+{{ tuple $envAll $envAll.Values.pod.resources.jobs.add_region | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
+          env:
+            - name: PARAMETERS
+              value: {{ .Values.conf.region.parameters | quote }}
+            - name: REGION
+              value: {{ .Values.conf.ranger_agent.DEFAULT.region }}
+            - name: DASHBOARD_ENDPOINT
+              value: {{ tuple "dashboard" "public" "web" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | trimSuffix "/" }}
+            - name: IDENTITY_ENDPOINT
+              value: {{ tuple "identity" "public" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | trimSuffix .Values.endpoints.identity.path.default }}
+            - name: ORD_ENDPOINT
+              value: {{ tuple "ranger_agent" "public" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | trimSuffix .Values.endpoints.ranger_agent.path.default }}
+            - name: RMS_ENDPOINT
+              value: {{ .Values.conf.region.rms_listener_endpoint }}
+{{- with $env := dict "ksUserSecret" .Values.secrets.identity.ranger_agent }}
+{{- include "helm-toolkit.snippets.keystone_openrc_env_vars" $env | indent 12 }}
+{{- end }}
+          command:
+            - python
+            - /tmp/add-region.py
+          volumeMounts:
+            - name: ranger-agent-bin
+              mountPath: /tmp/add-region.py
+              subPath: add-region.py
+              readOnly: true
+{{ if $mounts_ranger_agent_add_region.volumeMounts }}
+{{ toYaml $mounts_ranger_agent_add_region.volumeMounts | indent 12 }}
+{{ end }}
+      volumes:
+        - name: ranger-agent-bin
+          configMap:
+            name: ranger-agent-bin
+            defaultMode: 0555
+{{ if $mounts_ranger_agent_add_region.volumes }}
+{{ toYaml $mounts_ranger_agent_add_region.volumes | indent 8 }}
+{{ end }}
+{{- end }}
