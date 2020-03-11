@@ -1,0 +1,6 @@
+pod:
+  mandatory_access_control:
+    type: apparmor
+    ranger:
+      init: runtime/default
+      ranger-services: runtime/default

@@ -29,9 +29,17 @@ conf:
     ranger_agent_client_cert: null
 EOF
 
+#NOTE: Get the over-rides to use
+: ${OSH_EXTRA_HELM_ARGS_RANGER:="$(./tools/deployment/common/get-values-overrides.sh ranger)"}
+
+#NOTE: Deploy command
+: ${OSH_EXTRA_HELM_ARGS:=""}
+
 helm upgrade --install ranger ./ranger \
   --namespace=openstack \
-  --values=/tmp/ranger.yaml
+  --values=/tmp/ranger.yaml \
+    ${OSH_EXTRA_HELM_ARGS} \
+    ${OSH_EXTRA_HELM_ARGS_RANGER}
 
 #NOTE: Wait for deploy
 ./tools/deployment/common/wait-for-pods.sh openstack
