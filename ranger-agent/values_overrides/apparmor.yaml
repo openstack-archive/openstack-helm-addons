@@ -1,0 +1,9 @@
+pod:
+  mandatory_access_control:
+    type: apparmor
+    ranger-agent-api:
+      init: runtime/default
+      ranger-agent-api: runtime/default
+    ranger-agent:
+      ranger-agent-engine: runtime/default
+
