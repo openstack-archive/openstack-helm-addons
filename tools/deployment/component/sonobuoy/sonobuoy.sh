@@ -23,9 +23,45 @@ helm upgrade --install sonobuoy sonobuoy \
     --set manifests.serviceaccount_readonly=true
 helm test sonobuoy
 
+# test that the readonly service account CANNOT perform pod/exec in any namespaces
+for namespace in $(kubectl get namespaces --no-header | awk '{print $1}'); do
+  if kubectl auth can-i create pods \
+    --subresource=exec \
+    --as=system:serviceaccount:heptio-sonobuoy:heptio-sonobuoy-sonobuoy-readonly-serviceaccount \
+    --namespace="$namespace" ; then
+    echo "ERROR: should be able to perform pods/exec in $namespace namespace" >&2
+    exit 1
+  fi
+done
+
+# exec namespace is needed to setup Role for pod/exec for readonly-serviceaccount
+kubectl create namespace exec
+
 helm upgrade --install another-sonobuoy sonobuoy \
     --namespace=sonobuoy \
     --set endpoints.identity.namespace=openstack \
     --set manifests.serviceaccount_readonly=true \
+    --set manifests.serviceaccount_readonly_exec=true \
+    --set conf.exec_role_namespace=exec \
     --set conf.publish_results=false
 helm test another-sonobuoy
+
+# test that the readonly service account can perform pod/exec in exec namespace
+if ! kubectl auth can-i create pods \
+  --subresource=exec \
+  --as=system:serviceaccount:sonobuoy:sonobuoy-sonobuoy-readonly-serviceaccount \
+  --namespace=exec ; then
+  echo "ERROR: should be able to perform pods/exec in exec namespace" >&2
+  exit 1
+fi
+
+# test that the readonly service account CANNOT perform pod/exec in other namespaces
+for namespace in $(kubectl get namespaces --no-header | awk '$1 != "default" {print $1}'); do
+  if kubectl auth can-i create pods \
+    --subresource=exec \
+    --as=system:serviceaccount:sonobuoy:sonobuoy-sonobuoy-readonly-serviceaccount \
+    --namespace="$namespace" ; then
+    echo "ERROR: should be able to perform pods/exec in $namespace namespace" >&2
+    exit 1
+  fi
+done
