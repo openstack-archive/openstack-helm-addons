@@ -50,8 +50,6 @@ spec:
           env:
             - name: PARAMETERS
               value: {{ .Values.conf.region.parameters | quote }}
-            - name: REGION
-              value: {{ .Values.conf.ranger_agent.DEFAULT.region }}
             - name: DASHBOARD_ENDPOINT
               value: {{ tuple "dashboard" "public" "web" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | trimSuffix "/" }}
             - name: IDENTITY_ENDPOINT

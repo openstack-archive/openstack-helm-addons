@@ -77,11 +77,11 @@ def build_payload():
 
         payload = json.loads(parameters)
         payload['status'] = "functional"
-        payload['id'] = os.environ['REGION']
-        payload['name'] = os.environ['REGION']
-        payload['vlcpName'] = os.environ['REGION']
+        payload['id'] = os.environ['OS_REGION_NAME']
+        payload['name'] = os.environ['OS_REGION_NAME']
+        payload['vlcpName'] = os.environ['OS_REGION_NAME']
 
-        description = "Automatic creation of Region %s" % os.environ['REGION']
+        description = "Automatic creation of Region %s" % os.environ['OS_REGION_NAME']
         payload['description'] = description
 
         payload['endpoints'] = [
