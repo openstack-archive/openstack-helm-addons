@@ -1,9 +1,0 @@
-apiVersion: v1
-description: A Helm chart for Monasca running in Kubernetes
-name: monasca
-version: 0.6.4
-sources:
-- https://wiki.openstack.org/wiki/Monasca
-maintainers:
-- name: Tim Buckley
-  email: timothy.jas.buckley@hpe.com
