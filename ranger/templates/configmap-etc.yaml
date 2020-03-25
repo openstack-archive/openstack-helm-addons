@@ -16,7 +16,7 @@ limitations under the License.
 {{- $envAll := . }}
 
 {{- if empty .Values.conf.ranger.database.connection -}}
-{{- $_ := tuple "oslo_db" "internal" "admin" "mysql" . | include "helm-toolkit.endpoints.authenticated_endpoint_uri_lookup"| set .Values.conf.ranger.database "connection" -}}
+{{- $_ := tuple "oslo_db" "internal" "ranger" "mysql" . | include "helm-toolkit.endpoints.authenticated_endpoint_uri_lookup"| set .Values.conf.ranger.database "connection" -}}
 {{- end -}}
 {{- if empty .Values.conf.ranger.keystone_authtoken.username -}}
 {{- $_ := set .Values.conf.ranger.keystone_authtoken "username" .Values.endpoints.identity.auth.ranger.username -}}
