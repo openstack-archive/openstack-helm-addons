@@ -64,7 +64,7 @@ limitations under the License.
 {{- $_ := tuple "rms" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" | set .Values.conf.ranger.rms "port" -}}
 {{- end -}}
 {{- if empty .Values.conf.ranger.rms.url -}}
-{{- $_ := tuple "rms" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | trimSuffix .Values.endpoints.rms.path.default | printf "%s/" | set .Values.conf.ranger.rms "url" -}}
+{{- $_ := tuple "rms" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | trimSuffix .Values.endpoints.rms.path.default | set .Values.conf.ranger.rms "url" -}}
 {{- end -}}
 {{- if empty .Values.conf.ranger.rds.port -}}
 {{- $_ := tuple "rds" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" | set .Values.conf.ranger.rds "port" -}}

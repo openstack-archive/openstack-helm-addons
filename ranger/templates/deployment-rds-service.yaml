@@ -11,22 +11,35 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */}}
-{{- define "RangerServicesProbeTemplate" }}
+{{- define "RangerRdsServiceReadinessProbeTemplate" }}
 exec:
   command:
     - python
     - /tmp/health-probe.py
     - --config-file
     - /etc/ranger/ranger.conf
+    - --service-name
+    - rds
+{{- end }}
+{{- define "RangerRdsServiceLivenessProbeTemplate" }}
+exec:
+  command:
+    - python
+    - /tmp/health-probe.py
+    - --config-file
+    - /etc/ranger/ranger.conf
+    - --service-name
+    - rds
+    - --liveness-probe
 {{- end }}
 {{- if .Values.manifests.deployment_ranger_services }}
 {{- $envAll := . }}
 
-{{- $mounts_ranger := .Values.pod.mounts.ranger.ranger }}
+{{- $mounts_rds := .Values.pod.mounts.ranger.rds }}
 {{- $mounts_ranger_init := .Values.pod.mounts.ranger.init_container }}
 
-{{- $serviceAccountName := "ranger-services" }}
-{{ tuple $envAll "ranger" $serviceAccountName | include "helm-toolkit.snippets.kubernetes_pod_rbac_serviceaccount" }}
+{{- $serviceAccountName := "ranger-rds-service" }}
+{{ tuple $envAll "rds" $serviceAccountName | include "helm-toolkit.snippets.kubernetes_pod_rbac_serviceaccount" }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -35,40 +48,38 @@ metadata:
   annotations:
     {{ tuple $envAll | include "helm-toolkit.snippets.release_uuid" }}
   labels:
-{{ tuple $envAll "ranger" "ranger" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 4 }}
+{{ tuple $envAll "ranger" "rds" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 4 }}
 spec:
   selector:
     matchLabels:
-{{ tuple $envAll "ranger" "ranger" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 6 }}
+{{ tuple $envAll "ranger" "rds" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 6 }}
   replicas: {{ .Values.pod.replicas.ranger }}
 {{ tuple $envAll | include "helm-toolkit.snippets.kubernetes_upgrades_deployment" | indent 2 }}
   template:
     metadata:
       labels:
-{{ tuple $envAll "ranger" "ranger" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
+{{ tuple $envAll "ranger" "rds" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
       annotations:
 {{ tuple $envAll | include "helm-toolkit.snippets.release_uuid" | indent 8 }}
         configmap-bin-hash: {{ tuple "configmap-bin.yaml" . | include "helm-toolkit.utils.hash" }}
         configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.utils.hash" }}
-{{ dict "envAll" $envAll "podName" "ranger" "containerNames" (list "init" "ranger-services") | include "helm-toolkit.snippets.kubernetes_mandatory_access_control_annotation" | indent 8 }}
+{{ dict "envAll" $envAll "podName" "ranger-rds-service" "containerNames" (list "init" "ranger-rds-service") | include "helm-toolkit.snippets.kubernetes_mandatory_access_control_annotation" | indent 8 }}
     spec:
 {{ dict "envAll" $envAll "application" "ranger" | include "helm-toolkit.snippets.kubernetes_pod_security_context" | indent 6 }}
       serviceAccountName: {{ $serviceAccountName }}
-      dnsPolicy: ClusterFirstWithHostNet
-      hostNetwork: true
       affinity:
-{{ tuple $envAll "ranger" "ranger" | include "helm-toolkit.snippets.kubernetes_pod_anti_affinity" | indent 8 }}
+{{ tuple $envAll "ranger" "rds" | include "helm-toolkit.snippets.kubernetes_pod_anti_affinity" | indent 8 }}
       nodeSelector:
-        {{ .Values.labels.ranger.node_selector_key }}: {{ .Values.labels.ranger.node_selector_value }}
+        {{ .Values.labels.rds.node_selector_key }}: {{ .Values.labels.rds.node_selector_value }}
       terminationGracePeriodSeconds: {{ .Values.pod.lifecycle.termination_grace_period.ranger.timeout | default "30" }}
       initContainers:
-{{ tuple $envAll "ranger" $mounts_ranger_init | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
+{{ tuple $envAll "rds" $mounts_ranger_init | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
       containers:
-        - name: ranger-services
+        - name: ranger-rds-service
           image: {{ .Values.images.tags.ranger }}
           imagePullPolicy: {{ .Values.images.pull_policy }}
 {{ tuple $envAll $envAll.Values.pod.resources.ranger | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
-{{ dict "envAll" $envAll "application" "ranger" "container" "ranger_services" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
+{{ dict "envAll" $envAll "application" "ranger" "container" "rds" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
           env:
             {{- if .Values.manifests.secret_ssh_key }}
             - name: USER
@@ -118,40 +129,28 @@ spec:
               value: {{ .Values.conf.cert.ranger_agent_client_cert }}
               {{ end }}
           {{- end }}
-            - name: CMS_SERVICE_URL
-              value: {{ tuple "cms" "public" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }}
+            - name: RDS_SERVICE_URL
+              value: {{ tuple "rds" "public" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }}
           command:
-            - /tmp/ranger-services.sh
+            - /tmp/ranger-rds-service.sh
             - start
           lifecycle:
             preStop:
               exec:
                 command:
-                  - /tmp/ranger-services.sh
+                  - /tmp/ranger-rds-service.sh
                   - stop
           ports:
-            - name: cms
-              containerPort: {{ tuple "cms" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
-            - name: ims
-              containerPort: {{ tuple "ims" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
-            - name: fms
-              containerPort: {{ tuple "fms" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
-            - name: rms
-              containerPort: {{ tuple "rms" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
             - name: rds
               containerPort: {{ tuple "rds" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
-            - name: uuid
-              containerPort: {{ tuple "uuid" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
-            - name: audit
-              containerPort: {{ tuple "audit" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
-{{ dict "envAll" $envAll "component" "ranger" "container" "ranger-services" "type" "readiness" "probeTemplate" (include "RangerServicesProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
-{{ dict "envAll" $envAll "component" "ranger" "container" "ranger-services" "type" "liveness" "probeTemplate" (include "RangerServicesProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" $envAll "component" "rds" "container" "ranger-rds-service" "type" "readiness" "probeTemplate" (include "RangerRdsServiceReadinessProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
+{{ dict "envAll" $envAll "component" "rds" "container" "ranger-rds-service" "type" "liveness" "probeTemplate" (include "RangerRdsServiceLivenessProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
           volumeMounts:
             - name: pod-etc-ranger
               mountPath: /etc/ranger
             - name: ranger-bin
-              mountPath: /tmp/ranger-services.sh
-              subPath: ranger-services.sh
+              mountPath: /tmp/ranger-rds-service.sh
+              subPath: ranger-rds-service.sh
               readOnly: true
             - name: ranger-bin
               mountPath: /tmp/health-probe.py
@@ -161,7 +160,7 @@ spec:
               mountPath: /etc/ranger/ranger.conf
               subPath: ranger.conf
               readOnly: true
-{{ if $mounts_ranger.volumeMounts }}{{ toYaml $mounts_ranger.volumeMounts | indent 12 }}{{ end }}
+{{ if $mounts_rds.volumeMounts }}{{ toYaml $mounts_rds.volumeMounts | indent 12 }}{{ end }}
       volumes:
         - name: pod-etc-ranger
           emptyDir: {}
@@ -173,5 +172,5 @@ spec:
           secret:
             secretName: ranger-etc
             defaultMode: 0444
-{{ if $mounts_ranger.volumes}}{{ toYaml $mounts_ranger.volumes | indent 8 }}{{ end }}
+{{ if $mounts_rds.volumes}}{{ toYaml $mounts_rds.volumes | indent 8 }}{{ end }}
 {{- end }}

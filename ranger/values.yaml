@@ -16,8 +16,8 @@ images:
     db_init: docker.io/openstackhelm/heat:newton-ubuntu_xenial
     dep_check: quay.io/airshipit/kubernetes-entrypoint:v1.0.0
     image_repo_sync: docker.io/docker:17.07.0
-    ranger: quay.io/attcomdev/ranger:d376b6059733a4d9b0c47d1c8ba1edf98c8953e3
-    ranger_db_sync: quay.io/attcomdev/ranger:d376b6059733a4d9b0c47d1c8ba1edf98c8953e3
+    ranger: quay.io/attcomdev/ranger:14173e31114f924a75e89357added5315fd7e9f7
+    ranger_db_sync: quay.io/attcomdev/ranger:14173e31114f924a75e89357added5315fd7e9f7
     scripted_test: docker.io/openstackhelm/heat:newton-ubuntu_xenial
   pull_policy: "IfNotPresent"
   local_registry:
@@ -30,7 +30,25 @@ labels:
   job:
     node_selector_key: openstack-control-plane
     node_selector_value: enabled
-  ranger:
+  uuid:
+    node_selector_key: openstack-control-plane
+    node_selector_value: enabled
+  audit:
+    node_selector_key: openstack-control-plane
+    node_selector_value: enabled
+  cms:
+    node_selector_key: openstack-control-plane
+    node_selector_value: enabled
+  fms:
+    node_selector_key: openstack-control-plane
+    node_selector_value: enabled
+  ims:
+    node_selector_key: openstack-control-plane
+    node_selector_value: enabled
+  rds:
+    node_selector_key: openstack-control-plane
+    node_selector_value: enabled
+  rms:
     node_selector_key: openstack-control-plane
     node_selector_value: enabled
   test:
@@ -65,7 +83,43 @@ dependencies:
       services:
         - service: local_image_registry
           endpoint: internal
-    ranger:
+    audit:
+      jobs:
+        - ranger-db-sync
+      services:
+        - service: oslo_db
+          endpoint: internal
+    cms:
+      jobs:
+        - ranger-db-sync
+      services:
+        - service: oslo_db
+          endpoint: internal
+    fms:
+      jobs:
+        - ranger-db-sync
+      services:
+        - service: oslo_db
+          endpoint: internal
+    ims:
+      jobs:
+        - ranger-db-sync
+      services:
+        - service: oslo_db
+          endpoint: internal
+    rds:
+      jobs:
+        - ranger-db-sync
+      services:
+        - service: oslo_db
+          endpoint: internal
+    rms:
+      jobs:
+        - ranger-db-sync
+      services:
+        - service: oslo_db
+          endpoint: internal
+    uuid:
       jobs:
         - ranger-db-sync
       services:
@@ -106,7 +160,13 @@ pod:
   mounts:
     ranger:
       init_container: null
-      ranger:
+      audit:
+      cms:
+      fms:
+      ims:
+      rds:
+      rms:
+      uuid:
     ranger_tests:
       init_container: null
       ranger_tests:
@@ -157,7 +217,49 @@ pod:
         limits:
           memory: "1024Mi"
           cpu: "2000m"
-    ranger:
+    audit:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    cms:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    fms:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    ims:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    rds:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    rms:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "1024Mi"
+        cpu: "2000m"
+    uuid:
       requests:
         memory: "128Mi"
         cpu: "100m"
@@ -165,21 +267,104 @@ pod:
         memory: "1024Mi"
         cpu: "2000m"
   probes:
-    ranger:
-      ranger-services:
+    audit:
+      ranger-audit-service:
         readiness:
           enabled: true
           params:
-            initialDelaySeconds: 600
-            periodSeconds: 90
-            timeoutSeconds: 80
+            initialDelaySeconds: 90
+            periodSeconds: 120
+            timeoutSeconds: 110
         liveness:
           enabled: true
           params:
-            initialDelaySeconds: 660
-            periodSeconds: 90
-            timeoutSeconds: 80
-
+            initialDelaySeconds: 120
+            periodSeconds: 300
+            timeoutSeconds: 280
+    cms:
+      ranger-cms-service:
+        readiness:
+          enabled: true
+          params:
+            initialDelaySeconds: 90
+            periodSeconds: 120
+            timeoutSeconds: 110
+        liveness:
+          enabled: true
+          params:
+            initialDelaySeconds: 120
+            periodSeconds: 300
+            timeoutSeconds: 280
+    fms:
+      ranger-fms-service:
+        readiness:
+          enabled: true
+          params:
+            initialDelaySeconds: 90
+            periodSeconds: 120
+            timeoutSeconds: 110
+        liveness:
+          enabled: true
+          params:
+            initialDelaySeconds: 120
+            periodSeconds: 300
+            timeoutSeconds: 280
+    ims:
+      ranger-ims-service:
+        readiness:
+          enabled: true
+          params:
+            initialDelaySeconds: 90
+            periodSeconds: 120
+            timeoutSeconds: 110
+        liveness:
+          enabled: true
+          params:
+            initialDelaySeconds: 120
+            periodSeconds: 300
+            timeoutSeconds: 280
+    rds:
+      ranger-rds-service:
+        readiness:
+          enabled: true
+          params:
+            initialDelaySeconds: 90
+            periodSeconds: 120
+            timeoutSeconds: 110
+        liveness:
+          enabled: true
+          params:
+            initialDelaySeconds: 120
+            periodSeconds: 300
+            timeoutSeconds: 280
+    rms:
+      ranger-rms-service:
+        readiness:
+          enabled: true
+          params:
+            initialDelaySeconds: 90
+            periodSeconds: 120
+            timeoutSeconds: 110
+        liveness:
+          enabled: true
+          params:
+            initialDelaySeconds: 120
+            periodSeconds: 300
+            timeoutSeconds: 280
+    uuid:
+      ranger-uuid-service:
+        readiness:
+          enabled: true
+          params:
+            initialDelaySeconds: 90
+            periodSeconds: 120
+            timeoutSeconds: 110
+        liveness:
+          enabled: true
+          params:
+            initialDelaySeconds: 120
+            periodSeconds: 300
+            timeoutSeconds: 280
 # Names of secrets used  and environmental checks
 secrets:
   oslo_db:

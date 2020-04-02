@@ -20,44 +20,28 @@ COMMAND="${@:-start}"
 
 function start () {
 
-if [ -n "${SSH_KEY}" ] && [ -n "${SSH_KEY_CONFIGURATION}" ];then
-    if [[ $(stat -c %F ${USER_HOME}/.ssh) = "directory" ]]; then
-      rm -fr ${USER_HOME}/.ssh
+    if [[ ${SERVICE_TYPE} = "uuid" ]]; then
+      exec ranger-uuidgen
     fi
-
-    mkdir -p ${USER_HOME}/.ssh
-    echo -e "${SSH_KEY}" >>${USER_HOME}/.ssh/${SSH_KEY_FILE}
-    echo -e "${SSH_KEY_CONFIGURATION}" >>${USER_HOME}/.ssh/config
-
-    chown ${USER}: ${USER_HOME}/.ssh
-    chmod 0700 -R ${USER_HOME}/.ssh
-    chmod 0644 ${USER_HOME}/.ssh/config
-    chmod 0600 ${USER_HOME}/.ssh/${SSH_KEY_FILE}
-
-    git config --global user.name ${REPO_USER}
-    git config --global user.email ${REPO_ACCOUNT}
-    git clone ${REMOTE_REPO} ${LOCAL_REPO}
-fi
-
-if [ -n "${CERT_LOCATION}" ];then
-   echo -e "${CERT_FILE}" >>${CERT_LOCATION}
-   chmod 0644 ${CERT_LOCATION}
-fi
-
-  exec ranger-uuidgen &
-  exec ranger-audit &
-  exec ranger-rms  &
-  exec ranger-rds  &
-  exec ranger-cms  &
-  exec ranger-fms  &
-  exec ranger-ims
-
+    if [[ ${SERVICE_TYPE} = "audit" ]]; then
+      exec ranger-audit
+    fi
+    if [[ ${SERVICE_TYPE} = "rms" ]]; then
+      exec ranger-rms
+    fi
+    if [[ ${SERVICE_TYPE} = "cms" ]]; then
+      exec ranger-cms
+    fi
+    if [[ ${SERVICE_TYPE} = "ims" ]]; then
+      exec ranger-ims
+    fi
+    if [[ ${SERVICE_TYPE} = "fms" ]]; then
+      exec ranger-fms
+    fi
 }
 
 function stop() {
-
-  pkill -e ranger
-
+  kill -TERM 1
 }
 
 $COMMAND

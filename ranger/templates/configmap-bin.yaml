@@ -26,8 +26,10 @@ data:
 {{ tuple "bin/_db-sync.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
   db-drop.py: |+
 {{- include "helm-toolkit.scripts.db_drop" . | indent 4 }}
-  ranger-services.sh: |
+  ranger-services.sh: |+
 {{ tuple "bin/_ranger-services.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
+  ranger-rds-service.sh: |+
+{{ tuple "bin/_ranger-rds-service.sh.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
   health-probe.py: |+
 {{ tuple "bin/_health-probe.py.tpl" . | include "helm-toolkit.utils.template" | indent 4 }}
   ranger-test.py: |+

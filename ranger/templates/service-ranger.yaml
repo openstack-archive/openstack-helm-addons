@@ -27,7 +27,7 @@ spec:
     nodePort: {{ .Values.network.cms.node_port.port }}
     {{ end }}
   selector:
-{{ tuple $envAll "ranger" "ranger" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 4 }}
+{{ tuple $envAll "ranger" "cms" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 4 }}
   {{ if .Values.network.cms.node_port.enabled }}
   type: NodePort
   {{- if .Values.network.cms.external_policy_local }}
@@ -51,7 +51,7 @@ spec:
     nodePort: {{ .Values.network.fms.node_port.port }}
     {{ end }}
   selector:
-{{ tuple $envAll "ranger" "ranger" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 4 }}
+{{ tuple $envAll "ranger" "fms" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 4 }}
   {{ if .Values.network.fms.node_port.enabled }}
   type: NodePort
   {{- if .Values.network.fms.external_policy_local }}
@@ -75,7 +75,7 @@ spec:
     nodePort: {{ .Values.network.ims.node_port.port }}
     {{ end }}
   selector:
-{{ tuple $envAll "ranger" "ranger" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 4 }}
+{{ tuple $envAll "ranger" "ims" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 4 }}
   {{ if .Values.network.ims.node_port.enabled }}
   type: NodePort
   {{- if .Values.network.ims.external_policy_local }}
@@ -98,7 +98,7 @@ spec:
     nodePort: {{ .Values.network.rms.node_port.port }}
     {{ end }}
   selector:
-{{ tuple $envAll "ranger" "ranger" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 4 }}
+{{ tuple $envAll "ranger" "rms" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 4 }}
   {{ if .Values.network.rms.node_port.enabled }}
   type: NodePort
   {{- if .Values.network.rms.external_policy_local }}
@@ -121,7 +121,7 @@ spec:
     nodePort: {{ .Values.network.rds.node_port.port }}
     {{ end }}
   selector:
-{{ tuple $envAll "ranger" "ranger" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 4 }}
+{{ tuple $envAll "ranger" "rds" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 4 }}
   {{ if .Values.network.rds.node_port.enabled }}
   type: NodePort
   {{- if .Values.network.rds.external_policy_local }}
@@ -144,7 +144,7 @@ spec:
     nodePort: {{ .Values.network.uuid.node_port.port }}
     {{ end }}
   selector:
-{{ tuple $envAll "ranger" "ranger" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 4 }}
+{{ tuple $envAll "ranger" "uuid" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 4 }}
   {{ if .Values.network.uuid.node_port.enabled }}
   type: NodePort
   {{- if .Values.network.uuid.external_policy_local }}
@@ -167,7 +167,7 @@ spec:
     nodePort: {{ .Values.network.audit.node_port.port }}
     {{ end }}
   selector:
-{{ tuple $envAll "ranger" "ranger" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 4 }}
+{{ tuple $envAll "ranger" "audit" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 4 }}
   {{ if .Values.network.audit.node_port.enabled }}
   type: NodePort
   {{- if .Values.network.audit.external_policy_local }}
