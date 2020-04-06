@@ -45,23 +45,44 @@ limitations under the License.
 {{- if empty .Values.conf.ranger.cms.port -}}
 {{- $_ := tuple "cms" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" | set .Values.conf.ranger.cms "port" -}}
 {{- end -}}
+{{- if empty .Values.conf.ranger.cms.url -}}
+{{- $_ := tuple "cms" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | trimSuffix .Values.endpoints.cms.path.default | printf "%s/" | set .Values.conf.ranger.cms "url" -}}
+{{- end -}}
 {{- if empty .Values.conf.ranger.fms.port -}}
 {{- $_ := tuple "fms" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" | set .Values.conf.ranger.fms "port" -}}
+{{- end -}}
+{{- if empty .Values.conf.ranger.fms.url -}}
+{{- $_ := tuple "fms" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | trimSuffix .Values.endpoints.fms.path.default | printf "%s/" | set .Values.conf.ranger.fms "url" -}}
 {{- end -}}
 {{- if empty .Values.conf.ranger.ims.port -}}
 {{- $_ := tuple "ims" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" | set .Values.conf.ranger.ims "port" -}}
 {{- end -}}
+{{- if empty .Values.conf.ranger.ims.url -}}
+{{- $_ := tuple "ims" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | trimSuffix .Values.endpoints.ims.path.default | printf "%s/" | set .Values.conf.ranger.ims "url" -}}
+{{- end -}}
 {{- if empty .Values.conf.ranger.rms.port -}}
 {{- $_ := tuple "rms" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" | set .Values.conf.ranger.rms "port" -}}
+{{- end -}}
+{{- if empty .Values.conf.ranger.rms.url -}}
+{{- $_ := tuple "rms" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | trimSuffix .Values.endpoints.rms.path.default | printf "%s/" | set .Values.conf.ranger.rms "url" -}}
 {{- end -}}
 {{- if empty .Values.conf.ranger.rds.port -}}
 {{- $_ := tuple "rds" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" | set .Values.conf.ranger.rds "port" -}}
 {{- end -}}
+{{- if empty .Values.conf.ranger.rds.url -}}
+{{- $_ := tuple "rds" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | trimSuffix .Values.endpoints.rds.path.default | printf "%s/" | set .Values.conf.ranger.rds "url" -}}
+{{- end -}}
 {{- if empty .Values.conf.ranger.uuid.port -}}
 {{- $_ := tuple "uuid" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" | set .Values.conf.ranger.uuid "port" -}}
 {{- end -}}
+{{- if empty .Values.conf.ranger.uuid.url -}}
+{{- $_ := tuple "uuid" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | trimSuffix .Values.endpoints.uuid.path.default | printf "%s/" | set .Values.conf.ranger.uuid "url" -}}
+{{- end -}}
 {{- if empty .Values.conf.ranger.audit.port -}}
 {{- $_ := tuple "audit" "internal" "api" . | include "helm-toolkit.endpoints.endpoint_port_lookup" | set .Values.conf.ranger.audit "port" -}}
+{{- end -}}
+{{- if empty .Values.conf.ranger.audit.url -}}
+{{- $_ := tuple "audit" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | trimSuffix .Values.endpoints.audit.path.default | printf "%s/" | set .Values.conf.ranger.audit "url" -}}
 {{- end -}}
 ---
 apiVersion: v1
