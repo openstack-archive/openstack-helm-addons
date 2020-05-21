@@ -605,10 +605,10 @@ conf:
       - vhost: "ranger-agent"
         name: "ha_ttl_ranger_agent"
         definition:
-          #mirror messges to other nodes in rmq cluster
+          # mirror messges to other nodes in rmq cluster
           ha-mode: "all"
           ha-sync-mode: "automatic"
-          #70s
+          # 70s
           message-ttl: 70000
         priority: 0
         apply-to: all
