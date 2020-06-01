@@ -10,6 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+---
 images:
   tags:
     db_drop: docker.io/openstackhelm/heat:newton-ubuntu_xenial
@@ -745,3 +746,4 @@ conf:
     ssh_config: null
   cert:
     ranger_agent_client_cert: null
+...

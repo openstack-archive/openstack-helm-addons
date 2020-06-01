@@ -10,6 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+---
 images:
   tags:
     artifactory: quay.io/attcomdev/artifactory-pro-mysql:5.11.1
@@ -168,3 +169,4 @@ conf:
   artifactory:
     env:
       java_opts: "-Xms512m -Xmx2g"
+...

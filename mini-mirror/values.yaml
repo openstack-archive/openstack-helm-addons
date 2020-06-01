@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+---
 images:
   tags:
     dep_check: quay.io/airshipit/kubernetes-entrypoint:v1.0.0
@@ -182,3 +183,4 @@ conf:
       - squeeze
     components:
       - main
+...
