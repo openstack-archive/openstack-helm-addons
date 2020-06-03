@@ -50,6 +50,18 @@ spec:
           env:
             - name: PARAMETERS
               value: {{ .Values.conf.region.parameters | quote }}
+            - name: LOCATION_ADDRESS
+              value: {{ default "TBD" .Values.conf.region.location.address | quote }}
+            - name: LOCATION_NAME
+              value: {{ default "TBD" .Values.conf.region.location.name | quote }}
+            - name: LOCATION_STATE
+              value: {{ default "TBD" .Values.conf.region.location.state | quote }}
+            - name: LOCATION_ZIP
+              value: {{ default "TBD" .Values.conf.region.location.zip | quote }}
+            - name: LOCATION_COUNTRY
+              value: {{ default "TBD" .Values.conf.region.location.country | quote }}
+            - name: LOCATION_ID
+              value: {{ default "TBD" .Values.conf.region.location.location_physical_location_id | quote }}
             - name: DASHBOARD_ENDPOINT
               value: {{ tuple "dashboard" "public" "web" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | trimSuffix "/" }}
             - name: IDENTITY_ENDPOINT

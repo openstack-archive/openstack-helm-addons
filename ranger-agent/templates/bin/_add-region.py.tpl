@@ -81,6 +81,16 @@ def build_payload():
         payload['name'] = os.environ['OS_REGION_NAME']
         payload['vlcpName'] = os.environ['OS_REGION_NAME']
 
+        payload['address'] = {
+            "street": os.environ['LOCATION_ADDRESS'],
+            "city": os.environ['LOCATION_NAME'],
+            "state": os.environ['LOCATION_STATE'],
+            "zip": os.environ['LOCATION_ZIP'],
+            "country": os.environ['LOCATION_COUNTRY']}
+
+        payload['CLLI'] = os.environ['LOCATION_ID']
+        payload['locationType'] = os.environ['LOCATION_ID']
+
         description = "Automatic creation of Region %s" % os.environ['OS_REGION_NAME']
         payload['description'] = description
 

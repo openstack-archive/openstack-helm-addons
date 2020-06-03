@@ -595,8 +595,8 @@ conf:
     expected_end_status_key: Success
   region:
     parameters: |-
-      { "rangerAgentVersion": "1.0",
-        "OSVersion": "Ubuntu18.04"
+      { "rangerAgentVersion": "2.0",
+        "OSVersion": "Stein"
       }
     rms_listener_endpoint: http://localhost:7003/v2/orm/regions
 
