@@ -51,15 +51,15 @@ spec:
             - name: PARAMETERS
               value: {{ .Values.conf.region.parameters | quote }}
             - name: LOCATION_ADDRESS
-              value: {{ default "TBD" .Values.conf.region.location.address | quote }}
+              value: {{ default "TBD" .Values.conf.region.location.location_address | quote }}
             - name: LOCATION_NAME
-              value: {{ default "TBD" .Values.conf.region.location.name | quote }}
+              value: {{ default "TBD" .Values.conf.region.location.location_name | quote }}
             - name: LOCATION_STATE
-              value: {{ default "TBD" .Values.conf.region.location.state | quote }}
+              value: {{ default "TBD" .Values.conf.region.location.location_state | quote }}
             - name: LOCATION_ZIP
-              value: {{ default "TBD" .Values.conf.region.location.zip | quote }}
+              value: {{ default "TBD" .Values.conf.region.location.location_zip | quote }}
             - name: LOCATION_COUNTRY
-              value: {{ default "TBD" .Values.conf.region.location.country | quote }}
+              value: {{ default "TBD" .Values.conf.region.location.location_country | quote }}
             - name: LOCATION_ID
               value: {{ default "TBD" .Values.conf.region.location.location_physical_location_id | quote }}
             - name: DASHBOARD_ENDPOINT
