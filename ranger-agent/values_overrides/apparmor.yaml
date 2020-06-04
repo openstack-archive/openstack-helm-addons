@@ -5,7 +5,10 @@ pod:
     ranger-agent-api:
       init: runtime/default
       ranger-agent-api: runtime/default
-    ranger-agent:
+    ranger-agent-engine:
       ranger-agent-engine: runtime/default
-
+      init: runtime/default
+    ranger-agent-test:
+      ranger-agent-test: runtime/default
+      init: runtime/default
 ...

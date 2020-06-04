@@ -19,4 +19,5 @@ sudo apt-get install --no-install-recommends -y \
   nmap \
   curl \
   uuid-runtime \
-  bc
+  bc \
+  python3-pip

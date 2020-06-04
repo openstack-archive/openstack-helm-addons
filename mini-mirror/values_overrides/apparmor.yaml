@@ -4,4 +4,6 @@ pod:
     type: apparmor
     mini-mirror:
       mini-mirror-api: runtime/default
+    mini-mirror-test:
+      mini-mirror-helm-test: runtime/default
 ...

@@ -39,11 +39,6 @@ dependencies:
       - sonobuoy-ks-user
 
 pod:
-  mandatory_access_control:
-    type: apparmor
-    sonobuoy:
-      kube-sonobuoy: localhost/docker-default
-      results-publisher: localhost/docker-default
   resources:
     enabled: false
     jobs:

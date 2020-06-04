@@ -1,0 +1,9 @@
+---
+pod:
+  mandatory_access_control:
+    type: apparmor
+    sonobuoy:
+      kube-sonobuoy: runtime/default
+      results-publisher: runtime/default
+      init: runtime/default
+...

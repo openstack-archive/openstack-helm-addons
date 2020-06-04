@@ -55,7 +55,7 @@ metadata:
   name: sonobuoy
   annotations:
     "helm.sh/hook": test-success
-{{- $containers := (list "kube-sonobuoy" ) }}
+{{- $containers := (list "kube-sonobuoy" "init" ) }}
 {{- if $envAll.Values.conf.publish_results }}
 {{- $containers = append $containers "results-publisher" }}
 {{- end }}

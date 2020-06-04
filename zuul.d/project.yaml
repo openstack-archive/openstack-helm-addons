@@ -24,3 +24,7 @@
         - osh-addons-sonobuoy
         - osh-addons-ranger
         - osh-addons-mini-mirror
+    experimental:
+      jobs:
+        - osh-addons-sonobuoy-apparmor
+        - osh-addons-minimirror-ranger-apparmor

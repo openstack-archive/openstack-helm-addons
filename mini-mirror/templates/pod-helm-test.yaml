@@ -26,6 +26,7 @@ metadata:
   annotations:
     "helm.sh/hook": test-success
     {{ tuple $envAll | include "helm-toolkit.snippets.release_uuid" }}
+{{ dict "envAll" $envAll "podName" "mini-mirror-test" "containerNames" (list "mini-mirror-helm-test") | include "helm-toolkit.snippets.kubernetes_mandatory_access_control_annotation" | indent 4 }}
 spec:
   nodeSelector:
     {{ .Values.labels.test.node_selector_key }}: {{ .Values.labels.test.node_selector_value }}
@@ -50,4 +51,3 @@ spec:
         name: mini-mirror-bin
         defaultMode: 0555
 {{- end }}
-

@@ -14,11 +14,15 @@
 
 set -xe
 
+#NOTE: Get the overrides to use
+: ${OSH_EXTRA_HELM_ARGS_SONOBUOY:="$(./tools/deployment/common/get-values-overrides.sh sonobuoy)"}
+
 helm dependency update sonobuoy
 helm upgrade --install sonobuoy sonobuoy \
     --namespace=heptio-sonobuoy \
     --set endpoints.identity.namespace=openstack \
-    --set manifests.serviceaccount_readonly=true
+    --set manifests.serviceaccount_readonly=true \
+    ${OSH_EXTRA_HELM_ARGS_SONOBUOY}
 helm test sonobuoy
 
 # test that the readonly service account CANNOT perform pod/exec in any namespaces
@@ -41,7 +45,8 @@ helm upgrade --install another-sonobuoy sonobuoy \
     --set manifests.serviceaccount_readonly=true \
     --set manifests.serviceaccount_readonly_exec=true \
     --set conf.exec_role_namespace=exec \
-    --set conf.publish_results=false
+    --set conf.publish_results=false \
+    ${OSH_EXTRA_HELM_ARGS_SONOBUOY}
 helm test another-sonobuoy
 
 # test that the readonly service account can perform pod/exec in exec namespace
