@@ -15,6 +15,7 @@
 # Declare name/value pairs to be passed into your templates.
 # name: value
 
+---
 labels:
   job:
     node_selector_key: openstack-control-plane
@@ -247,3 +248,4 @@ manifests:
   pod_shaker_test: true
   service_shaker: true
   secret_keystone: true
+...
