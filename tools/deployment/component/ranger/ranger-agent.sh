@@ -98,3 +98,6 @@ helm upgrade --install ranger-agent ./ranger-agent \
 
 #NOTE: Wait for deploy
 ./tools/deployment/common/wait-for-pods.sh openstack
+
+helm status ranger-agent
+helm test ranger-agent --timeout 900

@@ -18,16 +18,16 @@
 ---
 images:
   tags:
-    db_drop: docker.io/openstackhelm/heat:newton-ubuntu_xenial
-    db_init: docker.io/openstackhelm/heat:newton-ubuntu_xenial
+    db_drop: docker.io/openstackhelm/heat:stein-ubuntu_bionic
+    db_init: docker.io/openstackhelm/heat:stein-ubuntu_bionic
     dep_check: quay.io/airshipit/kubernetes-entrypoint:v1.0.0
     image_repo_sync: docker.io/docker:17.07.0
-    ks_endpoints: docker.io/openstackhelm/heat:newton-ubuntu_xenial
-    ks_service: docker.io/openstackhelm/heat:newton-ubuntu_xenial
-    ks_user: docker.io/openstackhelm/heat:newton-ubuntu_xenial
+    ks_endpoints: docker.io/openstackhelm/heat:stein-ubuntu_bionic
+    ks_service: docker.io/openstackhelm/heat:stein-ubuntu_bionic
+    ks_user: docker.io/openstackhelm/heat:stein-ubuntu_bionic
     rabbit_init: docker.io/rabbitmq:3.7-management
-    ranger-agent_db_sync: quay.io/attcomdev/ranger-agent:13c19fd49dda0509f1804664e46610f77e61344b
-    ranger_agent: quay.io/attcomdev/ranger-agent:13c19fd49dda0509f1804664e46610f77e61344b
+    ranger-agent_db_sync: quay.io/attcomdev/ranger-agent:cbfd19b550b722a605f799523e51c108a8f1311a
+    ranger_agent: quay.io/attcomdev/ranger-agent:cbfd19b550b722a605f799523e51c108a8f1311a
     scripted_test: docker.io/openstackhelm/heat:newton-ubuntu_xenial
   pull_policy: "IfNotPresent"
   local_registry:
@@ -593,7 +593,7 @@ conf:
     ssh_key: null
     ssh_config: null
   test:
-    expected_end_status_key: Success
+    expected_end_status_key: "ORD_000"
   region:
     parameters: |-
       { "rangerAgentVersion": "2.0",

@@ -27,4 +27,5 @@
     experimental:
       jobs:
         - osh-addons-sonobuoy-apparmor
-        - osh-addons-minimirror-ranger-apparmor
+        - osh-addons-ranger-apparmor
+        - osh-addons-mini-mirror-apparmor
