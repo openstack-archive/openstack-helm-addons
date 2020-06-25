@@ -11,4 +11,13 @@ pod:
     ranger-agent-test:
       ranger-agent-test: runtime/default
       init: runtime/default
+    ranger-agent-add-region:
+      ranger-agent-add-region: runtime/default
+      init: runtime/default
+conf:
+  region:
+    location:
+      "TBD"
+manifests:
+  job_add_region: true
 ...

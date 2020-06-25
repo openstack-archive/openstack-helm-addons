@@ -25,7 +25,7 @@ limitations under the License.
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ $serviceAccountName | quote }}
+  name: ranger-agent-add-region
   annotations:
     "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-delete-policy": before-hook-creation
@@ -35,6 +35,8 @@ spec:
     metadata:
       labels:
 {{ tuple $envAll $serviceName "job" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 8 }}
+      annotations:
+{{ dict "envAll" $envAll "podName" "ranger-agent-add-region" "containerNames" (list "init" "ranger-agent-add-region" ) | include "helm-toolkit.snippets.kubernetes_mandatory_access_control_annotation" | indent 8 }}
     spec:
       serviceAccountName: {{ $serviceAccountName | quote }}
       restartPolicy: Never
@@ -43,7 +45,7 @@ spec:
       initContainers:
 {{ tuple $envAll "add_region" $mounts_ranger_agent_add_region_init | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 8 }}
       containers:
-        - name: {{ $serviceAccountName | quote }}
+        - name: ranger-agent-add-region
           image: {{ .Values.images.tags.scripted_test | quote }}
           imagePullPolicy: {{ $envAll.Values.images.pull_policy | quote }}
 {{ tuple $envAll $envAll.Values.pod.resources.jobs.add_region | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
