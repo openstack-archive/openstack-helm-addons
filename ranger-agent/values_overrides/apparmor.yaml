@@ -17,7 +17,11 @@ pod:
 conf:
   region:
     location:
-      "TBD"
+      location_adress: '123 Elm Street'
+      location_name: 'work'
+      location_state: 'Plano'
+      location_zip: '75024'
+      location_country: 'USA'
 manifests:
   job_add_region: true
 ...
