@@ -14,5 +14,8 @@ limitations under the License.
 
 {{- if .Values.manifests.job_ks_endpoints }}
 {{- $ksServiceJob := dict "envAll" . "serviceName" "ranger-agent" "serviceTypes" ( tuple "ranger-agent" ) -}}
+{{- if .Values.manifests.certificates -}}
+{{- $_ := set $ksServiceJob "tlsSecret" .Values.secrets.tls.ranger_agent.api.internal -}}
+{{- end -}}
 {{ $ksServiceJob | include "helm-toolkit.manifests.job_ks_endpoints" }}
 {{- end }}

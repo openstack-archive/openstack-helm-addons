@@ -42,8 +42,10 @@ def get_token():
     }
 
     try:
+        verify = os.environ['CAFILE'] or False
         resp = requests.post(
-            url, data=json.dumps(data), headers=headers, timeout=100)
+            url, data=json.dumps(data), headers=headers,
+            verify=verify, timeout=100)
 
         if resp.status_code != 201:
             sys.stderr.write("Failed to get token for region: %s - %s\n" %

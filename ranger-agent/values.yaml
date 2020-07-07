@@ -26,8 +26,8 @@ images:
     ks_service: docker.io/openstackhelm/heat:stein-ubuntu_bionic
     ks_user: docker.io/openstackhelm/heat:stein-ubuntu_bionic
     rabbit_init: docker.io/rabbitmq:3.7-management
-    ranger-agent_db_sync: quay.io/attcomdev/ranger-agent:cbfd19b550b722a605f799523e51c108a8f1311a
-    ranger_agent: quay.io/attcomdev/ranger-agent:cbfd19b550b722a605f799523e51c108a8f1311a
+    ranger-agent_db_sync: quay.io/attcomdev/ranger-agent:7a994622705a949953d5d1552e4186c576fdcff9
+    ranger_agent: quay.io/attcomdev/ranger-agent:7a994622705a949953d5d1552e4186c576fdcff9
     scripted_test: docker.io/openstackhelm/heat:newton-ubuntu_xenial
   pull_policy: "IfNotPresent"
   local_registry:
@@ -346,6 +346,10 @@ secrets:
     ranger_agent:
       api:
         public: ranger-agent
+        internal: ranger-agent-tls-api
+        # ranger_agent_engine:
+        #   engine:
+        #     internal: ranger-agent-tls-engine
 
 # typically overridden by environmental
 # values, but should include all endpoints
@@ -460,6 +464,9 @@ endpoints:
       admin:
         username: root
         password: password
+        secret:
+          tls:
+            internal: mariadb-tls-direct
       ranger_agent:
         username: ranger-agent
         password: password
@@ -534,6 +541,7 @@ endpoints:
         public: 443
 
 manifests:
+  certificates: false
   configmap_bin: true
   configmap_etc: true
   deployment_ranger_agent_api: true
