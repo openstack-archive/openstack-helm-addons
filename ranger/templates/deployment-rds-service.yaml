@@ -65,7 +65,7 @@ spec:
         configmap-etc-hash: {{ tuple "configmap-etc.yaml" . | include "helm-toolkit.utils.hash" }}
 {{ dict "envAll" $envAll "podName" "ranger-rds-service" "containerNames" (list "init" "ranger-rds-service") | include "helm-toolkit.snippets.kubernetes_mandatory_access_control_annotation" | indent 8 }}
     spec:
-{{ dict "envAll" $envAll "application" "ranger" | include "helm-toolkit.snippets.kubernetes_pod_security_context" | indent 6 }}
+{{ dict "envAll" $envAll "application" "rds" | include "helm-toolkit.snippets.kubernetes_pod_security_context" | indent 6 }}
       serviceAccountName: {{ $serviceAccountName }}
       affinity:
 {{ tuple $envAll "ranger" "rds" | include "helm-toolkit.snippets.kubernetes_pod_anti_affinity" | indent 8 }}
@@ -79,7 +79,7 @@ spec:
           image: {{ .Values.images.tags.ranger }}
           imagePullPolicy: {{ .Values.images.pull_policy }}
 {{ tuple $envAll $envAll.Values.pod.resources.ranger | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
-{{ dict "envAll" $envAll "application" "ranger" "container" "rds" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
+{{ dict "envAll" $envAll "application" "rds" "container" "ranger_rds_service" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
           env:
             {{- if .Values.manifests.secret_ssh_key }}
             - name: USER
@@ -146,6 +146,8 @@ spec:
 {{ dict "envAll" $envAll "component" "rds" "container" "ranger-rds-service" "type" "readiness" "probeTemplate" (include "RangerRdsServiceReadinessProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
 {{ dict "envAll" $envAll "component" "rds" "container" "ranger-rds-service" "type" "liveness" "probeTemplate" (include "RangerRdsServiceLivenessProbeTemplate" $envAll | fromYaml) | include "helm-toolkit.snippets.kubernetes_probe" | indent 10 }}
           volumeMounts:
+            - name: pod-tmp
+              mountPath: /tmp
             - name: pod-etc-ranger
               mountPath: /etc/ranger
             - name: ranger-bin
@@ -162,6 +164,8 @@ spec:
               readOnly: true
 {{ if $mounts_rds.volumeMounts }}{{ toYaml $mounts_rds.volumeMounts | indent 12 }}{{ end }}
       volumes:
+        - name: pod-tmp
+          emptyDir: {}
         - name: pod-etc-ranger
           emptyDir: {}
         - name: ranger-bin

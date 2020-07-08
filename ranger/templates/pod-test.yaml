@@ -32,6 +32,7 @@ metadata:
 {{ tuple $envAll "ranger" "test" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 4 }}
 spec:
   serviceAccountName: {{ $serviceAccountName }}
+{{ dict "envAll" $envAll "application" "test" | include "helm-toolkit.snippets.kubernetes_pod_security_context" | indent 2 }}
   nodeSelector:
     {{ .Values.labels.test.node_selector_key }}: {{ .Values.labels.test.node_selector_value }}
   restartPolicy: Never
@@ -40,6 +41,7 @@ spec:
   containers:
     - name: {{.Release.Name}}-test
       image: {{ .Values.images.tags.scripted_test }}
+{{ dict "envAll" $envAll "application" "test" "container" "ranger_test" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 6 }}
       env:
         - name: cms
           value: {{ tuple "cms" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | trimSuffix .Values.endpoints.cms.path.default }}

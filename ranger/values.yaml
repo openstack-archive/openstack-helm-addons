@@ -145,12 +145,61 @@ dependencies:
 
 pod:
   security_context:
-    ranger:
+    audit:
       pod:
         runAsUser: 1000
       container:
-        ranger_services:
-          readOnlyRootFilesystem: false
+        ranger_audit_service:
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+    cms:
+      pod:
+        runAsUser: 1000
+      container:
+        ranger_cms_service:
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+    fms:
+      pod:
+        runAsUser: 1000
+      container:
+        ranger_fms_service:
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+    ims:
+      pod:
+        runAsUser: 1000
+      container:
+        ranger_ims_service:
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+    rds:
+      pod:
+        runAsUser: 1000
+      container:
+        ranger_rds_service:
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+    rms:
+      pod:
+        runAsUser: 1000
+      container:
+        ranger_rms_service:
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+    uuid:
+      pod:
+        runAsUser: 1000
+      container:
+        ranger_uuid_service:
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+    test:
+      pod:
+        runAsUser: 1000
+      container:
+        ranger_test:
+          readOnlyRootFilesystem: true
           allowPrivilegeEscalation: false
   affinity:
     anti:
