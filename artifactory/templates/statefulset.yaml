@@ -80,7 +80,7 @@ spec:
   - metadata:
       name: artifactory-data
     spec:
-      accessModes: [ "ReadWriteOnce" ]
+      accessModes: ["ReadWriteOnce"]
       resources:
         requests:
           storage: {{ .Values.storage.requests.storage }}

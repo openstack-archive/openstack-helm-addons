@@ -21,6 +21,6 @@ metadata:
   name: sonobuoy-plugins
 data:
   {{ range .Values.conf.plugins }}
-{{- include "helm-toolkit.snippets.values_template_renderer" ( dict "envAll" $envAll "template" .data "key" .name ) | indent 4 }}
+{{- include "helm-toolkit.snippets.values_template_renderer" ( dict "envAll" $envAll "template" .data "key" .name ) | indent 2 }}
   {{ end }}
 {{- end }}
