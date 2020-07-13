@@ -39,6 +39,7 @@ spec:
 {{ dict "envAll" $envAll "podName" "ranger-agent-add-region" "containerNames" (list "init" "ranger-agent-add-region" ) | include "helm-toolkit.snippets.kubernetes_mandatory_access_control_annotation" | indent 8 }}
     spec:
       serviceAccountName: {{ $serviceAccountName | quote }}
+{{ dict "envAll" $envAll "application" "add_region" | include "helm-toolkit.snippets.kubernetes_pod_security_context" | indent 6 }}
       restartPolicy: Never
       nodeSelector:
         {{ .Values.labels.job.node_selector_key }}: {{ .Values.labels.job.node_selector_value }}
@@ -49,6 +50,7 @@ spec:
           image: {{ .Values.images.tags.scripted_test | quote }}
           imagePullPolicy: {{ $envAll.Values.images.pull_policy | quote }}
 {{ tuple $envAll $envAll.Values.pod.resources.jobs.add_region | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
+{{ dict "envAll" $envAll "application" "add_region" "container" "ranger_agent_add_region" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
           env:
             - name: PARAMETERS
               value: {{ .Values.conf.region.parameters | quote }}

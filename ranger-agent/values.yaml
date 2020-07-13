@@ -158,6 +158,20 @@ pod:
         ranger_agent_engine:
           readOnlyRootFilesystem: false
           allowPrivilegeEscalation: false
+    add_region:
+      pod:
+        runAsUser: 1000
+      container:
+        ranger_agent_add_region:
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+    test:
+      pod:
+        runAsUser: 1000
+      container:
+        ranger_agent_test:
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
   affinity:
     anti:
       type:
