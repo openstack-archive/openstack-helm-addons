@@ -63,6 +63,7 @@ metadata:
 spec:
   nodeSelector:
     {{ .Values.labels.api.node_selector_key }}: {{ .Values.labels.api.node_selector_value}}
+{{ dict "envAll" $envAll "application" "sonobuoy" | include "helm-toolkit.snippets.kubernetes_pod_security_context" | indent 2 }}
   initContainers:
 {{ tuple $envAll "sonobuoy" list | include "helm-toolkit.snippets.kubernetes_entrypoint_init_container" | indent 4 }}
   containers:
@@ -73,6 +74,7 @@ spec:
         fieldRef:
           fieldPath: status.podIP
 {{ tuple $envAll "sonobuoy_api" | include "helm-toolkit.snippets.image" | indent 4 }}
+{{ dict "envAll" $envAll "application" "sonobuoy" "container" "kube_sonobuoy" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 4 }}
     command:
       - /run_master.sh
     volumeMounts:

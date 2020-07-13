@@ -39,6 +39,14 @@ dependencies:
       - sonobuoy-ks-user
 
 pod:
+  security_context:
+    sonobuoy:
+      pod:
+        runAsUser: 1000
+      container:
+        kube_sonobuoy:
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
   resources:
     enabled: false
     jobs:
