@@ -12,6 +12,9 @@
 
 - hosts: primary
   tasks:
+    - name: Ensure pip
+      include_role:
+        name: ensure-pip
     - name: Run gate scripts
       include_role:
         name: osh-run-script
