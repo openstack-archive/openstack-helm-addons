@@ -21,10 +21,11 @@
 set -e
 HELM_CHART="$1"
 : "${HELM_CHART_ROOT_PATH:="../openstack-helm-addons"}"
+: "${OPENSTACK_RELEASE:="ocata"}"
 : "${CONTAINER_DISTRO_NAME:="ubuntu"}"
 : "${CONTAINER_DISTRO_VERSION:="xenial"}"
 : "${FEATURE_GATES:=""}"
-OSH_FEATURE_MIX="${FEATURE_GATES},${CONTAINER_DISTRO_NAME}_${CONTAINER_DISTRO_VERSION},${CONTAINER_DISTRO_NAME}"
+OSH_FEATURE_MIX="${FEATURE_GATES},${OPENSTACK_RELEASE},${CONTAINER_DISTRO_NAME}_${CONTAINER_DISTRO_VERSION},${CONTAINER_DISTRO_NAME}"
 
 function echoerr () {
   echo "$@" 1>&2;
@@ -72,6 +73,6 @@ function override_file_args () {
     echo "${OVERRIDE_ARGS}"
 }
 
-echoerr "We are going to deploy the service ${HELM_CHART}, using ${CONTAINER_DISTRO_NAME} (${CONTAINER_DISTRO_VERSION}) distribution containers."
+echoerr "We are going to deploy the service ${HELM_CHART} for the OpenStack ${OPENSTACK_RELEASE} release, using ${CONTAINER_DISTRO_NAME} (${CONTAINER_DISTRO_VERSION}) distribution containers."
 source ${HELM_CHART_ROOT_PATH}/tools/deployment/common/env-variables.sh
 override_file_args "${OSH_FEATURE_MIX}"

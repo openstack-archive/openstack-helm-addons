@@ -1,0 +1,62 @@
+---
+pod:
+  security_context:
+    ranger_agent:
+      container:
+        ranger_agent_api:
+          runAsUser: 0
+          readOnlyRootFilesystem: false
+        ranger_agent_engine:
+          runAsUser: 0
+          readOnlyRootFilesystem: false
+conf:
+  ranger_agent:
+    keystone_authtoken:
+      https_cacert: /etc/ranger-agent/certs/ca.crt
+endpoints:
+  identity:
+    auth:
+      admin:
+        cacert: /etc/ssl/certs/openstack-helm.crt
+    scheme:
+      default: https
+    port:
+      api:
+        default: 443
+  orchestration:
+    scheme:
+      default: https
+    port:
+      api:
+        public: 443
+  image:
+    scheme:
+      default: https
+    port:
+      api:
+        public: 443
+  ranger_agent:
+    host_fqdn_override:
+      default:
+        tls:
+          secretName: ranger-agent-tls-api
+          issuerRef:
+            name: ca-issuer
+            # Needed in TLS phase 2 to terminate call from Ranger
+            # scheme:
+            #   default: https
+            # port:
+            #   api:
+            #     public: 443
+            #
+            # TBD - only need below if separate cert for engine pod
+            # ranger_agent_engine:
+            #   host_fqdn_override:
+            #     default:
+            #       tls:
+            #         secretName: ranger-agent-tls-engine
+            #         issuerRef:
+            #           name: ca-issuer
+manifests:
+  certificates: true
+...

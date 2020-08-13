@@ -36,3 +36,8 @@ helm status keystone
 export OS_CLOUD=openstack_helm
 sleep 30 #NOTE(portdirect): Wait for ingress controller to update rules and restart Nginx
 openstack endpoint list
+
+FEATURE_GATE="tls"; if [[ ${FEATURE_GATES//,/ } =~ (^|[[:space:]])${FEATURE_GATE}($|[[:space:]]) ]]; then
+  curl --cacert /etc/openstack-helm/certs/ca/ca.pem -L https://keystone.openstack.svc.cluster.local
+  curl --cacert /etc/openstack-helm/certs/ca/ca.pem -L https://keystone-api.openstack.svc.cluster.local:5000
+fi

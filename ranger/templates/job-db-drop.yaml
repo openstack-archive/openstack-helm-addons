@@ -13,6 +13,9 @@ limitations under the License.
 */}}
 
 {{- if .Values.manifests.job_db_drop }}
-{{- $dbInitJob := dict "envAll" . "serviceName" "ranger" -}}
-{{ $dbInitJob | include "helm-toolkit.manifests.job_db_drop_mysql" }}
+{{- $dbDropJob := dict "envAll" . "serviceName" "ranger" -}}
+{{- if .Values.manifests.certificates -}}
+{{- $_ := set $dbDropJob "dbAdminTlsSecret" .Values.endpoints.oslo_db.auth.admin.secret.tls.internal -}}
+{{- end -}}
+{{ $dbDropJob | include "helm-toolkit.manifests.job_db_drop_mysql" }}
 {{- end }}

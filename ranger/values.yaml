@@ -572,6 +572,9 @@ endpoints:
       admin:
         username: root
         password: password
+        secret:
+          tls:
+            internal: mariadb-tls-direct
       ranger:
         username: ranger
         password: password
@@ -717,6 +720,7 @@ network:
       port: 38090
 
 manifests:
+  certificates: false
   configmap_bin: true
   configmap_etc: true
   deployment_ranger_services: true

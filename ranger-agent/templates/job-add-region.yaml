@@ -74,6 +74,8 @@ spec:
               value: {{ tuple "ranger_agent" "public" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | trimSuffix .Values.endpoints.ranger_agent.path.default }}
             - name: RMS_ENDPOINT
               value: {{ .Values.conf.region.rms_listener_endpoint }}
+            - name: CAFILE
+              value: {{ default "" .Values.conf.ranger_agent.keystone_authtoken.https_cacert }}
 {{- with $env := dict "ksUserSecret" .Values.secrets.identity.ranger_agent }}
 {{- include "helm-toolkit.snippets.keystone_openrc_env_vars" $env | indent 12 }}
 {{- end }}
@@ -85,6 +87,7 @@ spec:
               mountPath: /tmp/add-region.py
               subPath: add-region.py
               readOnly: true
+{{- dict "enabled" .Values.manifests.certificates "name" .Values.secrets.tls.ranger_agent.api.internal "path" "/etc/ranger-agent/certs" | include "helm-toolkit.snippets.tls_volume_mount" | indent 12 }}
 {{ if $mounts_ranger_agent_add_region.volumeMounts }}
 {{ toYaml $mounts_ranger_agent_add_region.volumeMounts | indent 12 }}
 {{ end }}
@@ -93,6 +96,7 @@ spec:
           configMap:
             name: ranger-agent-bin
             defaultMode: 0555
+{{- dict "enabled" .Values.manifests.certificates "name" .Values.secrets.tls.ranger_agent.api.internal | include "helm-toolkit.snippets.tls_volume" | indent 8 }}
 {{ if $mounts_ranger_agent_add_region.volumes }}
 {{ toYaml $mounts_ranger_agent_add_region.volumes | indent 8 }}
 {{ end }}

@@ -16,13 +16,21 @@ limitations under the License.
 {{- $envAll := . }}
 
 {{- if empty .Values.conf.ranger_agent.database.connection -}}
-{{- $_ := tuple "oslo_db" "internal" "ranger_agent" "mysql" . | include "helm-toolkit.endpoints.authenticated_endpoint_uri_lookup"| set .Values.conf.ranger_agent.database "connection" -}}
+{{- $connection := tuple "oslo_db" "internal" "ranger_agent" "mysql" . | include "helm-toolkit.endpoints.authenticated_endpoint_uri_lookup" -}}
+{{- if .Values.manifests.certificates -}}
+{{- $_ := (printf "%s?charset=utf8&ssl_ca=/etc/mysql/certs/ca.crt&ssl_key=/etc/mysql/certs/tls.key&ssl_cert=/etc/mysql/certs/tls.crt&ssl_verify_cert" $connection ) | set .Values.conf.ranger_agent.database "connection" -}}
+{{- else -}}
+{{- $_ := set .Values.conf.ranger_agent.database "connection" $connection -}}
+{{- end -}}
 {{- end -}}
 {{- if empty .Values.conf.ranger_agent.DEFAULT.transport_url -}}
 {{- $_ := tuple "oslo_messaging" "internal" "ranger-agent" "amqp" . | include "helm-toolkit.endpoints.authenticated_transport_endpoint_uri_lookup" | set .Values.conf.ranger_agent.DEFAULT "transport_url" -}}
 {{- end -}}
 {{- if empty .Values.conf.ranger_agent.DEFAULT.ord_server_url -}}
 {{- $_ := tuple "ranger_agent" "public" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | trimSuffix .Values.endpoints.ranger_agent.path.default | set .Values.conf.ranger_agent.DEFAULT "ord_server_url" -}}
+{{- end -}}
+{{- if empty .Values.conf.ranger_agent.DEFAULT.glance_api_url -}}
+{{- $_ := tuple "image" "internal" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | set .Values.conf.ranger_agent.DEFAULT "glance_api_url" -}}
 {{- end -}}
 {{- if empty .Values.conf.ranger_agent.keystone_authtoken.username -}}
 {{- $_ := set .Values.conf.ranger_agent.keystone_authtoken "username" .Values.endpoints.identity.auth.ranger_agent.username -}}
