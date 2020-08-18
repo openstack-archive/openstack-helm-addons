@@ -75,6 +75,7 @@ endpoints:
         project_name: admin
         user_domain_name: default
         project_domain_name: default
+        interface: public
       sonobuoy:
         role: admin
         region_name: RegionOne
@@ -83,6 +84,7 @@ endpoints:
         project_name: sonobuoy
         user_domain_name: sonobuoy
         project_domain_name: sonobuoy
+        interface: public
     hosts:
       default: keystone
       internal: keystone-api
