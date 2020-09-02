@@ -66,10 +66,13 @@ def run_health_check():
 
     except requests.exceptions.ConnectionError as ce:
         sys.stderr.write("Health probe ConnectionError Exp:%s\n" % str(ce))
+        sys.exit(1)
     except requests.exceptions.ReadTimeout as to:
         sys.stderr.write("Health probe ReadTimeout Exp:%s\n" % str(to))
+        sys.exit(1)
     except Exception as ex:
         sys.stderr.write("Health probe UnExpected Exp:%s\n" % str(ex))
+        sys.exit(1)
 
 
 def check_pid_running(pid):
