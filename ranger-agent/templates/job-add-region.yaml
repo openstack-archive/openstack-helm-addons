@@ -74,6 +74,10 @@ spec:
               value: {{ tuple "ranger_agent" "public" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" | trimSuffix .Values.endpoints.ranger_agent.path.default }}
             - name: RMS_ENDPOINT
               value: {{ .Values.conf.region.rms_listener_endpoint }}
+            - name: RETRY_DURATION_MINUTES
+              value: {{ .Values.conf.region.retry_duration_minutes | quote }}
+            - name: RETRY_INTERVAL_MINUTES
+              value: {{ .Values.conf.region.retry_interval_minutes | quote }}
             - name: CAFILE
               value: {{ default "" .Values.conf.ranger_agent.keystone_authtoken.https_cacert }}
 {{- with $env := dict "ksUserSecret" .Values.secrets.identity.ranger_agent }}

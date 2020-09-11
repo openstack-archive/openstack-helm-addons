@@ -622,6 +622,8 @@ conf:
         "OSVersion": "Stein"
       }
     rms_listener_endpoint: http://localhost:7003/v2/orm/regions
+    retry_duration_minutes: 660
+    retry_interval_minutes: 15
 
   rabbitmq:
     policies:

@@ -104,10 +104,7 @@ def build_payload():
             {"publicURL": os.environ['ORD_ENDPOINT'],
              "type": "ord"}]
 
-        payload = json.dumps(payload)
-        sys.stdout.write("Json dumps: %s\n" % payload)
-
-        return payload
+        return json.dumps(payload)
 
     except Exception as exp:
         sys.stderr.write("Exp: Error building payload: %s\n" % str(exp))
@@ -122,19 +119,22 @@ def notify_ranger_create_region(payload):
 
     url = os.environ['RMS_ENDPOINT']
 
-    # Retry up to 5 times
-    for i in range(5):
-        time.sleep(15)
+    done = False
+    # Retry up to 3 times
+    for i in range(3):
+        time.sleep(15) if i != 0 else None
         try:
             resp = requests.post(
                 url, data=payload, headers=headers, timeout=120)
 
             if resp.status_code == 409:
                 sys.stdout.write("Region already existed\n")
+                done = True
                 break
             elif resp.status_code == 201:
                 result = resp.json()
                 sys.stdout.write("Region created successfully: %s\n" % result)
+                done = True
                 break
             else:
                 sys.stderr.write("Failed to create region: %s - %s\n" %
@@ -151,7 +151,21 @@ def notify_ranger_create_region(payload):
             sys.stderr.write("Unknown Exp: %s\n" % str(ex))
             continue
 
+    return done
+
 
 if __name__ == "__main__":
     payload = build_payload()
-    notify_ranger_create_region(payload)
+    sys.stdout.write("Json dumps: %s\n" % payload)
+    sys.stdout.flush()
+
+    duration = int(os.environ['RETRY_DURATION_MINUTES'])
+    interval = int(os.environ['RETRY_INTERVAL_MINUTES'])
+    retries = duration//interval
+
+    for retry in range(retries):
+        if notify_ranger_create_region(payload):
+            break
+        else:
+            sys.stderr.flush()
+            time.sleep(interval*60)
