@@ -11,7 +11,9 @@
 # limitations under the License.
 
 apiVersion: v1
+appVersion: v1.0.0
 description: OpenStack-Helm Ranger
+home: https://opendev.org/x/ranger
 name: ranger
 version: 0.1.0
 icon: https://opendev.org/x/ranger/raw/branch/master/public/images/logo.png
