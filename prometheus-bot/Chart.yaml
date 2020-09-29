@@ -15,7 +15,7 @@ appVersion: v1.0.0
 description: A helm chart to deploy prometheus-bot that sends prometheus alerts to telegram.
 home: https://github.com/inCaller/prometheus_bot
 name: prometheus-bot
-version: 0.1.0
+version: 0.1.1
 sources:
   - https://github.com/inCaller/prometheus_bot
   - https://git.openstack.org/openstack/openstack-helm-addons

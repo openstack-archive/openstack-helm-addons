@@ -15,7 +15,7 @@ appVersion: v0.16.4
 description: OpenStack-Helm Sonobuoy
 home: https://sonobuoy.io/
 name: sonobuoy
-version: 0.1.0
+version: 0.1.1
 sources:
   - https://opendev.org/openstack/openstack-helm-addons
 maintainers:

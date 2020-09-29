@@ -15,7 +15,7 @@ appVersion: v1.0.0
 description: OpenStack-Helm Ranger
 home: https://opendev.org/x/ranger
 name: ranger
-version: 0.1.1
+version: 0.1.2
 icon: https://opendev.org/x/ranger/raw/branch/master/public/images/logo.png
 sources:
   - https://opendev.org/openstack/ranger
