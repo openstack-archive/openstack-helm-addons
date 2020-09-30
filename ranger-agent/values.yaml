@@ -587,8 +587,8 @@ conf:
       verbose: true
       pecan_debug: true
       repo_connection_timeout: 120
-      resource_creation_timeout_min: 1200
-      resource_creation_timeout_max: 14400
+      resource_creation_timeout_min: 100
+      resource_creation_timeout_max: 300
       use_stderr: true
       api_paste_config: /etc/ranger-agent/api-paste.ini
       local_repo: ranger_repo
