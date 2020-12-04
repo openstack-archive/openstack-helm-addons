@@ -40,6 +40,10 @@ lint-%: init-%
 build-%: lint-%
 	if [ -d $* ]; then $(HELM) package $*; fi
 
+# This is used exclusively with helm3 building in the gate to publish
+package-%: init-%
+	if [ -d $* ]; then $(HELM) package $*; fi
+
 clean:
 	@echo "Removed .b64, _partials.tpl, and _globals.tpl files"
 	rm -f helm-toolkit/secrets/*.b64

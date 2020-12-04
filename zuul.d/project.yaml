@@ -24,6 +24,9 @@
         - osh-addons-sonobuoy
         - osh-addons-ranger
         - osh-addons-mini-mirror
+    promote:
+      jobs:
+        - publish-openstack-helm-charts
     experimental:
       jobs:
         - osh-addons-sonobuoy-apparmor
