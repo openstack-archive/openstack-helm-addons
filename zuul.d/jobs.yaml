@@ -36,6 +36,17 @@
     nodeset: openstack-helm-single-node
 
 - job:
+    name: osh-helm3-linter
+    nodeset: ubuntu-focal
+    run: tools/gate/playbooks/helm3-linter.yaml
+    required-projects:
+      - openstack/openstack-helm-infra
+    irrelevant-files:
+      - ^.*\.rst$
+      - ^doc/.*$
+      - ^releasenotes/.*$
+
+- job:
     name: osh-addons-sonobuoy
     parent: osh-addons-base
     run: tools/gate/playbooks/osh-gate-runner.yaml
