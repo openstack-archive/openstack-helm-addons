@@ -32,9 +32,6 @@ limitations under the License.
 {{- if empty .Values.conf.ranger.DEFAULT.ranger_base -}}
 {{- $_ := set .Values.conf.ranger.DEFAULT "ranger_base" (print .Values.conf.ssh.user_home "/ranger" ) -}}
 {{- end -}}
-{{- if and (.Values.manifests.secret_ssh_key) (empty .Values.conf.ranger.rds.repo_local_location) -}}
-{{- $_ := set .Values.conf.ranger.rds "repo_local_location" (print .Values.conf.ssh.user_home "/git_repo" ) -}}
-{{- end -}}
 {{- if empty .Values.conf.ranger.keystone_authtoken.project_name -}}
 {{- $_ := set .Values.conf.ranger.keystone_authtoken "project_name" .Values.endpoints.identity.auth.ranger.project_name -}}
 {{- end -}}

@@ -107,14 +107,6 @@ spec:
                 secretKeyRef:
                   name: ranger-ssh-secret
                   key: RANGER_SSH_CONFIG
-            - name: REPO_USER
-              value: {{ .Values.conf.ranger.rds.repo_user }}
-            - name: REPO_ACCOUNT
-              value: {{ .Values.conf.ranger.rds.repo_email }}
-            - name: LOCAL_REPO
-              value: {{ .Values.conf.ranger.rds.repo_local_location }}
-            - name: REMOTE_REPO
-              value: {{ .Values.conf.ranger.rds.repo_remote_location }}
             {{- end }}
           {{- if .Values.conf.ranger.DEFAULT.ranger_agent_https_enabled }}
             - name: CERT_LOCATION

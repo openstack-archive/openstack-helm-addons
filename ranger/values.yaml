@@ -787,9 +787,6 @@ conf:
       auth_enabled: False
     rds:
       log: null
-      repo_remote_location: git@127.0.0.1:/home/repo/ORM.git
-      repo_user: orm
-      repo_email: orm@test.com
     rms:
       log: null
     uuid:
@@ -798,8 +795,8 @@ conf:
     user: ranger
     user_home: /home/ranger
     ssh_key_file: ranger
-    ssh_key: null
-    ssh_config: null
+    ssh_key:
+    ssh_config:
   cert:
-    ranger_agent_client_cert: null
+    ranger_agent_client_cert:
 ...
