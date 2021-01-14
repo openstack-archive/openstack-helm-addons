@@ -615,8 +615,8 @@ conf:
     user: ranger_agent
     user_home: /home/ranger_agent
     ssh_key_file: ranger_agent
-    ssh_key: null
-    ssh_config: null
+    ssh_key:
+    ssh_config:
   test:
     expected_end_status_key: "ORD_000"
   region:

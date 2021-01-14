@@ -23,10 +23,10 @@ conf:
       ranger_agent_https_enable: true
       ranger_agent_client_cert_path: '/home/ranger/ord.cert'
   ssh:
-    ssh_key: null
-    ssh_config: null
+    ssh_key:
+    ssh_config:
   cert:
-    ranger_agent_client_cert: null
+    ranger_agent_client_cert:
 EOF
 
 #NOTE: Get the over-rides to use

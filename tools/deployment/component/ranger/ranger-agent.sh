@@ -23,8 +23,8 @@ conf:
       enable_rds_callback_check: false
       enable_heat_health_check: false
   ssh:
-    ssh_key: null
-    ssh_config: null
+    ssh_key:
+    ssh_config:
 dependencies:
   static:
     api:
