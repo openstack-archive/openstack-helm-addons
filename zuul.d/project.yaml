@@ -12,6 +12,8 @@
 # limitations under the License.
 
 - project:
+    templates:
+      - release-notes-jobs-python3
     check:
       jobs:
         - openstack-helm-lint

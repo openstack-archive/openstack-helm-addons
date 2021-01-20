@@ -18,7 +18,7 @@ TASK := build
 
 EXCLUDES := helm-toolkit doc tests tools logs tmp influxdb kafka \
 	keystone-init monasca-agent monasca-alarms monasca mysql-users-init storm \
-	zookeeper zuul.d
+	zookeeper zuul.d releasenotes
 CHARTS := helm-toolkit $(filter-out $(EXCLUDES), $(patsubst %/.,%,$(wildcard */.)))
 
 .PHONY: $(EXCLUDES) $(CHARTS)

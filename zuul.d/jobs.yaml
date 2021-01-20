@@ -79,7 +79,6 @@
         openstack_release: stein
         container_distro_name: ubuntu
         container_distro_version: bionic
-        feature_gates: tls
       gate_scripts_relative_path: ../openstack-helm-addons
       gate_scripts:
         - ./tools/deployment/common/install-packages.sh

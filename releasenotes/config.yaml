@@ -1,0 +1,18 @@
+---
+branch: master
+collapse_pre_releases: false
+stop_at_branch_base: true
+sections:
+  - [artifactory, artifactory Chart]
+  - [mini-mirror, mini-mirror Chart]
+  - [prometheus-bot, prometheus-bot Chart]
+  - [ranger-agent, ranger-agent Chart]
+  - [ranger, ranger Chart]
+  - [shaker, shaker Chart]
+  - [sonobuoy, sonobuoy Chart]
+  - [features, New Features]
+  - [issues, Known Issues]
+  - [upgrade, Upgrade Notes]
+  - [api, API Changes]
+  - [security, Security Issues]
+  - [fixes, Bug Fixes]
