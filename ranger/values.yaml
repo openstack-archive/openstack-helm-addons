@@ -791,12 +791,7 @@ conf:
       log: null
     uuid:
       log: null
-  ssh:
-    user: ranger
-    user_home: /home/ranger
-    ssh_key_file: ranger
-    ssh_key:
-    ssh_config:
+  ranger_base: '/home/ranger'
   cert:
     ranger_agent_client_cert:
 ...

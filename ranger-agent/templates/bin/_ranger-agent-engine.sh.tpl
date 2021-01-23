@@ -20,21 +20,6 @@ COMMAND="${@:-start}"
 
 function start () {
 
-if [ -n "${SSH_KEY}" ] && [ -n "${SSH_KEY_CONFIGURATION}" ];then
-    if [[ $(stat -c %F ${USER_HOME}/.ssh) = "directory" ]]; then
-      rm -fr ${USER_HOME}/.ssh
-    fi
-
-    mkdir -p ${USER_HOME}/.ssh
-    echo -e "${SSH_KEY}" >>${USER_HOME}/.ssh/${SSH_KEY_FILE}
-    echo -e "${SSH_KEY_CONFIGURATION}" >>${USER_HOME}/.ssh/config
-
-    chown ${USER}: ${USER_HOME}/.ssh
-    chmod 0700 -R ${USER_HOME}/.ssh
-    chmod 0644 ${USER_HOME}/.ssh/config
-    chmod 0600 ${USER_HOME}/.ssh/${SSH_KEY_FILE}
-fi
-
   exec ranger-agent-engine \
         --config-file /etc/ranger-agent/ranger-agent.conf
 }

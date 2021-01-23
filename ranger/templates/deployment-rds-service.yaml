@@ -81,56 +81,18 @@ spec:
 {{ tuple $envAll $envAll.Values.pod.resources.ranger | include "helm-toolkit.snippets.kubernetes_resources" | indent 10 }}
 {{ dict "envAll" $envAll "application" "rds" "container" "ranger_rds_service" | include "helm-toolkit.snippets.kubernetes_container_security_context" | indent 10 }}
           env:
-            {{- if .Values.manifests.secret_ssh_key }}
-            - name: USER
-              valueFrom:
-                secretKeyRef:
-                  name: ranger-ssh-secret
-                  key: USER
-            - name: USER_HOME
-              valueFrom:
-                secretKeyRef:
-                  name: ranger-ssh-secret
-                  key: USER_HOME
-            - name: SSH_KEY_FILE
-              valueFrom:
-                secretKeyRef:
-                  name: ranger-ssh-secret
-                  key: SSH_KEY_FILE
-            - name: SSH_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: ranger-ssh-secret
-                  key: RANGER_PRIVATE_KEY
-            - name: SSH_KEY_CONFIGURATION
-              valueFrom:
-                secretKeyRef:
-                  name: ranger-ssh-secret
-                  key: RANGER_SSH_CONFIG
-            {{- end }}
-          {{- if .Values.conf.ranger.DEFAULT.ranger_agent_https_enabled }}
-            - name: CERT_LOCATION
-              value: {{ .Values.conf.ranger.DEFAULT.ranger_agent_client_cert_path }}
-            - name: CERT_FILE
-              {{ if .Values.manifests.secret_ssh_key }}
-              valueFrom:
-                secretKeyRef:
-                  name: ranger-ssh-secret
-                  key: CERT_FILE
-              {{ else }}
-              value: {{ .Values.conf.cert.ranger_agent_client_cert }}
-              {{ end }}
-          {{- end }}
+            - name: SERVICE_TYPE
+              value: "rds"
             - name: RDS_SERVICE_URL
               value: {{ tuple "rds" "public" "api" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }}
           command:
-            - /tmp/ranger-rds-service.sh
+            - /tmp/ranger-services.sh
             - start
           lifecycle:
             preStop:
               exec:
                 command:
-                  - /tmp/ranger-rds-service.sh
+                  - /tmp/ranger-services.sh
                   - stop
           ports:
             - name: rds
@@ -143,8 +105,8 @@ spec:
             - name: pod-etc-ranger
               mountPath: /etc/ranger
             - name: ranger-bin
-              mountPath: /tmp/ranger-rds-service.sh
-              subPath: ranger-rds-service.sh
+              mountPath: /tmp/ranger-services.sh
+              subPath: ranger-services.sh
               readOnly: true
             - name: ranger-bin
               mountPath: /tmp/health-probe.py

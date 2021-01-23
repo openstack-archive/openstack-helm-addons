@@ -21,10 +21,7 @@ conf:
   ranger:
     DEFAULT:
       ranger_agent_https_enable: true
-      ranger_agent_client_cert_path: '/home/ranger/ord.cert'
-  ssh:
-    ssh_key:
-    ssh_config:
+      ranger_agent_client_cert_path: '/home/ranger'
   cert:
     ranger_agent_client_cert:
 EOF

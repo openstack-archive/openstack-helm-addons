@@ -566,7 +566,6 @@ manifests:
   secret_ingress_tls: true
   secret_keystone: true
   secret_rabbitmq: true
-  secret_ssh_key: true
   service_ingress_ranger_agent_api: true
   service_ranger_agent_api: true
 
@@ -604,19 +603,11 @@ conf:
       auth_version: v3
     orm:
       rds_listener_endpoint: http://localhost:8777/v1/rds/status
-      orm_template_repo_url: git@github.com:ranger-agent/templates.git
-      repo_pull_check_wait: 2
       retry_limits: 5
     oslo_messaging_notifications:
       driver: messagingv2
     oslo_messaging_rabbit:
       rabbit_ha_queues: true
-  ssh:
-    user: ranger_agent
-    user_home: /home/ranger_agent
-    ssh_key_file: ranger_agent
-    ssh_key:
-    ssh_config:
   test:
     expected_end_status_key: "ORD_000"
   region:

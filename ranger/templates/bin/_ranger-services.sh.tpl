@@ -38,6 +38,13 @@ function start () {
     if [[ ${SERVICE_TYPE} = "fms" ]]; then
       exec ranger-fms
     fi
+    if [[ ${SERVICE_TYPE} = "rds" ]]; then
+      if [ -n "${CERT_LOCATION}" ];then
+        echo -e "${CERT_FILE}" >>${CERT_LOCATION}
+        chmod 0644 ${CERT_LOCATION}
+      fi
+      exec ranger-rds
+    fi
 }
 
 function stop() {

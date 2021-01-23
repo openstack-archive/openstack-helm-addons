@@ -22,9 +22,6 @@ conf:
     DEFAULT:
       enable_rds_callback_check: false
       enable_heat_health_check: false
-  ssh:
-    ssh_key:
-    ssh_config:
 dependencies:
   static:
     api:

@@ -15,7 +15,7 @@ appVersion: v1.0.0
 description: OpenStack-Helm Ranger Agent
 home: https://opendev.org/x/ranger-agent
 name: ranger-agent
-version: 0.1.6
+version: 0.1.7
 sources:
   - https://opendev.org/openstack/ranger-agent
   - https://opendev.org/openstack/openstack-helm-addons
