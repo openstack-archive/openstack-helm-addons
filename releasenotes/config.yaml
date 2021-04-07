@@ -9,7 +9,6 @@ sections:
   - [ranger-agent, ranger-agent Chart]
   - [ranger, ranger Chart]
   - [shaker, shaker Chart]
-  - [sonobuoy, sonobuoy Chart]
   - [features, New Features]
   - [issues, Known Issues]
   - [upgrade, Upgrade Notes]
