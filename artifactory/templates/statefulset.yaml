@@ -15,7 +15,7 @@ limitations under the License.
 {{- if .Values.manifests.statefulset }}
 {{- $envAll := . }}
 ---
-apiVersion: apps/v1beta1
+apiVersion: v1
 kind: StatefulSet
 metadata:
   name: artifactory

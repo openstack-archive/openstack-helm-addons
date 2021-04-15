@@ -15,7 +15,7 @@ appVersion: 5.11.1
 description: OpenStack-Helm Artifactory
 home: https://opendev.org/openstack/openstack-helm-addons
 name: artifactory
-version: 0.1.1
+version: 0.1.2
 sources:
   - https://opendev.org/openstack/openstack-helm-addons
 maintainers:

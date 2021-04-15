@@ -44,7 +44,6 @@
     irrelevant-files:
       - ^.*\.rst$
       - ^doc/.*$
-      - ^releasenotes/.*$
 
 - job:
     name: osh-addons-sonobuoy

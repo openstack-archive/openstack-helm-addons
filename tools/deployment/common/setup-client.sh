@@ -15,6 +15,9 @@
 
 set -xe
 
+# NOTE: Needs this version at least to fix a dependency on rust
+sudo -H -E pip3 install --upgrade pip==21.0.1
+
 sudo -H -E pip3 install \
   -c${UPPER_CONSTRAINTS_FILE:=https://releases.openstack.org/constraints/upper/master} \
   cmd2 python-openstackclient python-heatclient --ignore-installed
