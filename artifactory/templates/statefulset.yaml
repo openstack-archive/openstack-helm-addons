@@ -22,6 +22,9 @@ metadata:
 spec:
   serviceName: artifactory
   replicas: 1
+  selector:
+    matchLabels:
+{{ tuple $envAll "artifactory" "server" | include "helm-toolkit.snippets.kubernetes_metadata_labels" | indent 6 }}
   template:
     metadata:
       labels:

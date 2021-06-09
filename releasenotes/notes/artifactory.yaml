@@ -3,3 +3,4 @@ artifactory:
   - 0.1.0 Initial Chart
   - 0.1.1 Change helm-toolkit dependency version to ">= 0.1.0"
   - 0.1.2 Fix helm3 linting issue
+  - 0.1.3 Fix problem of lack of matchlabels
