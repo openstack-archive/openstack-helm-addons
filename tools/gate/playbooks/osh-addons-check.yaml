@@ -58,15 +58,3 @@
         ./tools/gate/scripts/050-deploy-keystone.sh
       args:
         chdir: "{{ zuul_osh_addons_relative_path | default(zuul.project.src_dir) }}"
-    - name: Deploy Ranger Charts
-      shell: |
-        set -xe;
-        ./tools/gate/scripts/060-deploy-ranger.sh
-      args:
-        chdir: "{{ zuul_osh_addons_relative_path | default(zuul.project.src_dir) }}"
-    - name: Deploy Ranger Agent Charts
-      shell: |
-        set -xe;
-        ./tools/gate/scripts/070-deploy-ranger-agent.sh
-      args:
-        chdir: "{{ zuul_osh_addons_relative_path | default(zuul.project.src_dir) }}"

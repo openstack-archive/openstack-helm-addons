@@ -19,17 +19,14 @@
         - openstack-helm-lint
         - osh-helm3-linter:
             voting: false
-        - osh-addons-ranger
         - osh-addons-mini-mirror
     gate:
       jobs:
         - openstack-helm-lint
-        - osh-addons-ranger
         - osh-addons-mini-mirror
     promote:
       jobs:
         - publish-openstack-helm-charts
     experimental:
       jobs:
-        - osh-addons-ranger-apparmor
         - osh-addons-mini-mirror-apparmor

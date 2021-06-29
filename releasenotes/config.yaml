@@ -6,8 +6,6 @@ sections:
   - [artifactory, artifactory Chart]
   - [mini-mirror, mini-mirror Chart]
   - [prometheus-bot, prometheus-bot Chart]
-  - [ranger-agent, ranger-agent Chart]
-  - [ranger, ranger Chart]
   - [features, New Features]
   - [issues, Known Issues]
   - [upgrade, Upgrade Notes]
