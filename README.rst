@@ -2,31 +2,13 @@
 Openstack-Helm-Addons
 =====================
 
-Mission
--------
+This project is no longer maintained.
 
-The goal of OpenStack-Helm-Addons is to provide charts for services to enhance
-or provide additional features for the charts in OpenStack-Helm.
+The contents of this repository are still available in the Git
+source code management system.  To see the contents of this
+repository before it reached its end of life, please check out the
+previous commit with "git checkout HEAD^1".
 
-For more information, please refer to the OpenStack-Helm repository_.
-
-.. _repository: https://github.com/openstack/openstack-helm
-
-Communication
--------------
-
-* Join us on `IRC <irc://chat.oftc.net/openstack-helm>`_:
-  #openstack-helm on oftc
-* Community `IRC Meetings
-  <http://eavesdrop.openstack.org/#OpenStack-Helm_Team_Meeting>`_:
-  [Every Tuesday @ 3PM UTC], #openstack-meeting-alt on oftc
-* Meeting Agenda Items: `Agenda
-  <https://etherpad.openstack.org/p/openstack-helm-meeting-agenda>`_
-* Join us on `Slack <https://kubernetes.slack.com/messages/C3WERB7DE/>`_
-  - #openstack-helm
-
-Contributing
-------------
-
-We welcome contributions. Check out `this <CONTRIBUTING.rst>`_ document if
-you would like to get involved.
+For any further questions, please email
+openstack-discuss@lists.openstack.org or join #openstack-dev on
+OFTC.
